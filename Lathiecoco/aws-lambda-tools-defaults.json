@@ -1,0 +1,21 @@
+
+{
+    "region" : "eu-west-3",
+    "profile" : "jt-aws",
+    "configuration" : "Release",
+    "framework"     : "net8.0",
+    "function-name" : "lathiecoco",
+    "function-description" : "",
+    "package-type"         : "Zip",
+    "function-handler"     : "Lathiecoco",
+    "function-memory-size" : 256,
+    "function-role"        : "arn:aws:iam::008971676099:role/lambda_exec_lathiecoco",
+    "function-timeout"     : 550,
+    "function-runtime"     : "dotnet8",
+    "function-architecture" : "x86_64",
+    "function-subnets"      : "",
+    "function-security-groups" : "",
+    "tracing-mode"             : "PassThrough",
+    "environment-variables"    : "\"ASPNETCORE_ENVIRONMENT\"=\"Development\"",
+    "image-tag"                : ""
+}

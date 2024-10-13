@@ -1,0 +1,577 @@
+﻿using apimoney.services;
+using Lathiecoco.dto;
+using Lathiecoco.models;
+using Lathiecoco.repository;
+using Microsoft.EntityFrameworkCore;
+
+namespace  Lathiecoco.services
+{
+    public class InvoiceAgentCustomerServ : InvoiceAgentRep
+    {
+        private readonly CatalogDbContext _CatalogDbContext;
+        private readonly CustomerWalletRep _customerWalleServ;
+        
+        private readonly FeesSendRep _feesSendServ;
+        private readonly PaymentModeRep _paymentModeServ;
+        public InvoiceAgentCustomerServ(CatalogDbContext CatalogDbContext,
+        CustomerWalletRep customerWalleServ,
+        FeesSendRep feesSendServ,
+        PaymentModeRep paymentModeServ)
+        {
+            _CatalogDbContext = CatalogDbContext;
+            _customerWalleServ = customerWalleServ;
+            _feesSendServ = feesSendServ;
+            _paymentModeServ = paymentModeServ;
+        }
+        public async Task<ResponseBody<InvoiceWalletAgent>> addInvoiceWallet(InvoiceWalletAgent ac)
+        {
+            ResponseBody<InvoiceWalletAgent> rp = new ResponseBody<InvoiceWalletAgent>();
+            try
+            {
+
+
+                await _CatalogDbContext.InvoiceWalletAgents.AddAsync(ac);
+                await _CatalogDbContext.SaveChangesAsync();
+                rp.Body = ac;
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<List<InvoiceWalletAgent>>> findAllInvoiceWallet(int page = 1, int limit = 10)
+        {
+            ResponseBody<List<InvoiceWalletAgent>> rp = new ResponseBody<List<InvoiceWalletAgent>>();
+            try
+            {
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.InvoiceWalletAgents != null)
+                {
+                    int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.InvoiceWalletAgents.Count() / limit);
+                    var ps = await _CatalogDbContext.InvoiceWalletAgents.Include(i => i.Agent).Include(i=>i.CustomerWallet).Skip(skip).Take(limit).OrderByDescending(c => c.CreatedDate).ToListAsync();
+                    //string jjj = "kkkkk";
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+
+                    }
+                    else
+                    {
+                        rp.Body = new List<InvoiceWalletAgent>();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<InvoiceWalletAgent>> deposit(BodyInvoiceWalletCashier ac)
+        {
+            CustomerWallet customer = null;
+            
+            CustomerWallet agent = null;
+            
+            FeeSend feeSend = null;
+            ResponseBody<InvoiceWalletAgent> rp = new ResponseBody<InvoiceWalletAgent>();
+            BodyPaymentModeCorridor bcc = new BodyPaymentModeCorridor();
+            PaymentMode paymentMode1 = new PaymentMode();
+            try
+            {
+                //rechercher sender can
+                BodyPhoneShDto bp = new BodyPhoneShDto();
+                bp.CountryIdentity = ac.PhoneIdentityCustomerWallet;
+                bp.Phone = ac.PhoneCustomerWallet;
+                ResponseBody<CustomerWallet> customerRp = await _customerWalleServ.findCustomerWalletContryidentityAndPhone(bp);
+                if (customerRp != null)
+                {
+                    if (!customerRp.IsError)
+                    {
+                        customer = customerRp.Body;
+
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = customerRp.Msg;
+                        return rp;
+                        
+                    }
+                }
+                
+                //rechercher Agent 
+
+                ResponseBody<CustomerWallet> caReps = await _customerWalleServ.findCustomerWalletById(ac.IdAgent);
+                if (caReps != null)
+                {
+                    if (!caReps.IsError)
+                    {
+                        Console.WriteLine("mmmm");
+                        agent = caReps.Body;
+
+                        //bcc.idCashier = cashier.FkIdAgency;
+                        if (agent.Profile != "AGENT")
+                        {
+                            rp.IsError = true;
+                            rp.Msg = "This operation is not allowed";
+                            return rp;
+                            //throw new Exception("This operation is not allowed");
+                        }
+
+                        if (agent.Accounting.Balance <= ac.AmountToSend)
+                        {
+                      
+                            rp.IsError = true;
+                            rp.Msg = "Cashier Low balance for this transaction";
+                            return rp;
+                        }
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = caReps.Msg;
+                        return rp;
+                       
+                    }
+                }
+                
+                //rechercher le mode de payement
+                ResponseBody<PaymentMode> paymentMode = await _paymentModeServ.findByPaymentMode("DP");
+                if (paymentMode != null)
+                {
+                    if (!paymentMode.IsError)
+                    {
+                        paymentMode1 = paymentMode.Body;
+                        bcc.idPaymentMode= paymentMode1.IdPaymentMode;
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = paymentMode.Msg;
+                        return rp;
+                    }
+                }
+                //rechercher fee_send idCorridor & idCahier
+
+
+                ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
+                if (feeSendBody != null)
+                {
+                    if (!feeSendBody.IsError)
+                    {
+                        feeSend = feeSendBody.Body;
+                    }
+                    else
+                    {
+                        throw new Exception();
+                        rp.IsError = true;
+                        rp.Msg = feeSendBody.Msg;
+                        return rp;
+                    }
+                }
+               
+
+                //end
+
+                InvoiceWalletAgent invoice = new InvoiceWalletAgent();
+                invoice.IdInvoiceWalletCashier= Ulid.NewUlid();
+                invoice.InvoiceCode = "D"+ GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                invoice.InvoiceCode2 = "";
+                invoice.PaymentMode = paymentMode1.Name.ToString();
+                invoice.FkIdPaymentMode=paymentMode1.IdPaymentMode;
+                invoice.FkIdFeeSend=feeSend.IdFeeSend;
+                invoice.InvoiceStatus = "P";
+                invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
+                invoice.FkIdAgent = agent.IdCustomerWallet;
+                invoice.AmountToSend = ac.AmountToSend;
+                invoice.CreatedDate=DateTime.Now;
+                invoice.UpdatedDate = DateTime.Now;
+
+                invoice.CustomerWallet = null;
+                invoice.Agent = null;
+               
+                decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                double amountToSend = (double)ac.AmountToSend;
+                
+                double amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
+                Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
+                //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
+                invoice.AmountToPaid = amountTopaid;
+                double amountToReceved = amountToSend;
+                
+                invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+                Console.WriteLine(amountToReceved);
+                
+                var transaction = _CatalogDbContext.Database.BeginTransaction();
+                try
+                {
+                    //inserer tansactions
+                    _CatalogDbContext.InvoiceWalletAgents.Add(invoice);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    //update accounting sender
+
+                    if (customer.Accounting != null)
+                    {
+                        Accounting senderAccounting = customer.Accounting;
+                      
+                        senderAccounting.Balance = senderAccounting.Balance + (amountToSend);
+
+                        _CatalogDbContext.Accountings.Update(senderAccounting);
+                        await _CatalogDbContext.SaveChangesAsync();
+
+                        AccountingOpWallet acw = new AccountingOpWallet();
+                        acw.IdAccountingOperation= Ulid.NewUlid();
+                        acw.FkIdAccounting = senderAccounting.IdAccounting;
+                        acw.Credited = amountTopaid;
+                        acw.DeBited = 0;
+                        acw.PaymentMode = paymentMode1.Name.ToString();
+                        acw.CreatedDate = DateTime.Now;
+                        acw.UpdatedDate = DateTime.Now;
+                        acw.FkIdInvoiceWalletAgent = invoice.IdInvoiceWalletCashier;
+                        acw.NewBalance = senderAccounting.Balance;
+                        await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                        await _CatalogDbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "No customer BALANCE";
+                        transaction.Rollback();
+                        return rp;
+
+                       
+                    }
+                    
+                    //update accounting Agent
+                   
+                    if (agent.Accounting != null)
+                    {
+                        Accounting recipientAccounting = agent.Accounting;
+                        if (recipientAccounting.Balance < amountTopaid)
+                        {
+                            transaction.Rollback();
+                            rp.Msg="Your Balance is low";
+                            rp.Body = null;
+                            rp.IsError=true;
+                            return rp;
+                        }
+                            
+                        recipientAccounting.Balance = recipientAccounting.Balance - amountTopaid;
+
+                        _CatalogDbContext.Accountings.Update(recipientAccounting);
+                        await _CatalogDbContext.SaveChangesAsync();
+                        AccountingOpWallet aOpC = new AccountingOpWallet();
+                        aOpC.IdAccountingOperation = Ulid.NewUlid();
+                        aOpC.FkIdAccounting = recipientAccounting.IdAccounting;
+                        aOpC.FkIdInvoiceWalletAgent = invoice.IdInvoiceWalletCashier;
+                        aOpC.Credited = 0;
+                        aOpC.DeBited = amountTopaid;
+                        aOpC.PaymentMode = paymentMode1.Name.ToString();
+                        aOpC.NewBalance = recipientAccounting.Balance;
+                        aOpC.CreatedDate=DateTime.Now;
+                        aOpC.UpdatedDate= DateTime.Now;
+                        _CatalogDbContext.AccountingOpWallets.Add(aOpC);
+                        await _CatalogDbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "No Sender BALANCE";
+                        transaction.Rollback();
+                        return rp;
+
+                    }
+                    
+                    transaction.Commit();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                    rp.IsError = true;
+                    rp.Msg = "error";
+                    return rp;
+                }
+
+                rp.Body = invoice;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                rp.IsError = true;
+                rp.Msg = "error";
+            }
+
+            //inserer operation accounting sender
+            //inserer operation accounting destinataire
+            return rp;
+        }
+
+        public async Task<ResponseBody<InvoiceWalletAgent>> withdraw(BodyInvoiceWalletCashier ac)
+        {
+            CustomerWallet customer = null;
+
+            CustomerWallet agent = null;
+
+            FeeSend feeSend = null;
+            ResponseBody<InvoiceWalletAgent> rp = new ResponseBody<InvoiceWalletAgent>();
+            
+            PaymentMode paymentMode1 = new PaymentMode();
+            try
+            {
+                //rechercher customer
+                BodyPhoneShDto bp = new BodyPhoneShDto();
+                bp.CountryIdentity = ac.PhoneIdentityCustomerWallet;
+                bp.Phone = ac.PhoneCustomerWallet;
+                ResponseBody<CustomerWallet> senderRep = await _customerWalleServ.findCustomerWalletContryidentityAndPhone(bp);
+                if (senderRep != null)
+                {
+                    if (!senderRep.IsError)
+                    {
+                        customer = senderRep.Body;
+                        if (customer.Accounting.Balance <= ac.AmountToSend)
+                        {
+                            throw new Exception("Low balance for this transaction");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(senderRep.Msg);
+                    }
+                }
+                
+                //rechercher cashier 
+
+                ResponseBody<CustomerWallet> caReps = await _customerWalleServ.findCustomerWalletById(ac.IdAgent);
+                if (caReps != null)
+                {
+                    if (!caReps.IsError)
+                    {
+                        Console.WriteLine("mmmm");
+                        agent = caReps.Body;
+                        if (agent.Profile != "AGENT")
+                        {
+                            throw new Exception("This operation is not allowed");
+                        }
+                       // bcc.idCashier = recipient.FkIdAgency;
+                        //.WriteLine("mmmm" + cashier.FkIdAgency);
+                    }
+                    else
+                    {
+                        throw new Exception(caReps.Msg);
+                    }
+                }
+               
+                //rechercher cashier
+
+              
+               
+                //rechercher le mode de payement
+                ResponseBody<PaymentMode> paymentMode = await _paymentModeServ.findByPaymentMode("WD");
+                if (paymentMode != null)
+                {
+                    if (!paymentMode.IsError)
+                    {
+                        paymentMode1 = paymentMode.Body;
+                       
+                    }
+                    else
+                    {
+                        throw new Exception(paymentMode.Msg);
+                    }
+                }
+                //rechercher fee_send idCorridor & 
+
+                ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
+                if (feeSendBody != null)
+                {
+                    if (!feeSendBody.IsError)
+                    {
+                        feeSend = feeSendBody.Body;
+                    }
+                    else
+                    {
+                        throw new Exception(feeSendBody.Msg);
+                    }
+                }
+                //Add fee_payee
+
+                //end
+
+                InvoiceWalletAgent invoice = new InvoiceWalletAgent();
+
+                double ConvertToUnixTimestamp(DateTime date)
+                {
+                    DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                    TimeSpan diff = date.ToUniversalTime() - origin;
+                    return Math.Floor(diff.TotalSeconds);
+                }
+                Console.WriteLine(customer.IdCustomerWallet + "----------------------------------------------" + customer.FirstName);
+                string dayToday = ConvertToUnixTimestamp(DateTime.Now).ToString();
+                invoice.InvoiceCode = "N" + dayToday + dayToday.Substring(1, 3);
+                invoice.InvoiceCode2 = "";
+                invoice.FkIdFeeSend = feeSend.IdFeeSend; 
+                invoice.FkIdPaymentMode =paymentMode1.IdPaymentMode;
+                invoice.PaymentMode = paymentMode1.Name.ToString();
+                invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
+                
+                invoice.AmountToSend = ac.AmountToSend;
+                invoice.InvoiceStatus = "P";
+
+                invoice.CustomerWallet = null;
+                
+                invoice.CreatedDate = DateTime.Now;
+                invoice.UpdatedDate = DateTime.Now;
+
+
+                //calculer fee amountToSend amountToPaid
+                float aa = 0.01f;
+                Console.WriteLine(aa + " " + 0.01 * 100);
+                Console.WriteLine(0.01f * 100);
+                decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                double amountToSend = (double)ac.AmountToSend;
+                
+                double amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
+                Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
+                //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
+                invoice.AmountToPaid = amountTopaid;
+                double amountToReceved = amountToSend;
+                
+                invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+
+                Console.WriteLine(amountToReceved);
+                var transaction = _CatalogDbContext.Database.BeginTransaction();
+              
+                    try
+                {
+                    //inserer tansactions
+                    _CatalogDbContext.InvoiceWalletAgents.Add(invoice);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    //update accounting sender
+
+                    if (customer.Accounting != null)
+                    {
+                        Accounting senderAccounting = customer.Accounting;
+                        if (senderAccounting.Balance < amountTopaid)
+                        {
+                            throw new Exception("Your Balance is low");
+                        }
+                        senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
+                        _CatalogDbContext.Accountings.Update(senderAccounting);
+                       
+                        await _CatalogDbContext.SaveChangesAsync();
+                        AccountingOpWallet acw = new AccountingOpWallet();
+                        acw.FkIdAccounting = senderAccounting.IdAccounting;
+                        acw.Credited = 0;
+                        acw.PaymentMode=paymentMode1.Name.ToString();
+                        acw.DeBited = amountToSend;
+                        acw.FkIdInvoiceWalletAgent = invoice.IdInvoiceWalletCashier;
+                        acw.NewBalance = senderAccounting.Balance;
+                        acw.CreatedDate = DateTime.Now;
+                        acw.UpdatedDate = DateTime.Now;
+                        
+                        
+                        await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                        await _CatalogDbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "No Sender BALANCE";
+                        transaction.Rollback();
+                        throw new Exception("No Sender BALANCE");
+                    }
+
+
+                    //update accounting agent
+                    
+                       
+                        if (agent.Accounting != null)
+                        {
+                            Accounting recipientAccounting = agent.Accounting;
+                            recipientAccounting.Balance = recipientAccounting.Balance + (amountToSend);
+                            _CatalogDbContext.Accountings.Update(recipientAccounting);
+                            await _CatalogDbContext.SaveChangesAsync();
+                            AccountingOpWallet aOpC = new AccountingOpWallet();
+                            aOpC.FkIdAccounting = recipientAccounting.IdAccounting;
+                            aOpC.FkIdInvoiceWalletAgent = invoice.IdInvoiceWalletCashier;
+                            aOpC.Credited = amountToSend;
+                            aOpC.PaymentMode=paymentMode1.Name.ToString();
+                            aOpC.DeBited = 0;
+                            aOpC.NewBalance = recipientAccounting.Balance;
+                            _CatalogDbContext.AccountingOpWallets.Add(aOpC);
+                            aOpC.CreatedDate = DateTime.Now;
+                            aOpC.UpdatedDate = DateTime.Now;
+                            await _CatalogDbContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            rp.IsError = true;
+                            rp.Msg = "No Recepient BALANCE";
+                            transaction.Rollback();
+                            throw new Exception("No Recepient BALANCE");
+
+                        }
+                    
+                   
+
+                    transaction.Commit();
+
+                }
+                catch (Exception ex)
+                {
+                    rp.IsError = true;
+                    rp.Msg = ex.ToString();
+                }
+
+
+
+
+                rp.Body = invoice;
+            }
+            catch (Exception ex)
+            {
+
+                rp.IsError = true;
+                rp.Msg = ex.ToString();
+            }
+
+            //inserer operation accounting sender
+            //inserer operation accounting destinataire
+            return rp;
+        }
+
+        public async Task<ResponseBody<InvoiceWalletAgent>> findWalletCashierById(Ulid idInvoice)
+        {
+            ResponseBody<InvoiceWalletAgent> rp = new ResponseBody<InvoiceWalletAgent>();
+            try
+            {
+
+
+                InvoiceWalletAgent ac=await _CatalogDbContext.InvoiceWalletAgents.Include(i => i.PaymentModeObj).Include(i=>i.Agent).Include(i => i.CustomerWallet).Where(i=>i.IdInvoiceWalletCashier==idInvoice).FirstOrDefaultAsync();
+                
+                rp.Body = ac;
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+    }
+}
