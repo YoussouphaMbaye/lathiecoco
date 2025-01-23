@@ -10,6 +10,8 @@ namespace Lathiecoco.models
         public string Name { get; set; }
         public string Description { get; set; }
         public bool status { get; set; }
+        public Ulid? FkIdStaff { get; set; }
+        public OwnerAgent? Staff { get; set; }
         [JsonIgnore]
         public ICollection<FeeSend>? FeeSends { get; set; }
         [JsonIgnore]

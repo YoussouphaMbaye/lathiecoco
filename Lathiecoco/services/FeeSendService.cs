@@ -99,6 +99,7 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
 
             }
@@ -124,6 +125,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Fee not found";
+                    rp.Code = 440;
                 }
                
 
@@ -131,6 +133,7 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
             return rp;

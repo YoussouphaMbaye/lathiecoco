@@ -7,6 +7,8 @@ namespace Lathiecoco.dto
         [Required]
         public Ulid Id { get; set; }
         [Required]
+        public Ulid FkIdStaff { get; set; }
+        [Required]
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }

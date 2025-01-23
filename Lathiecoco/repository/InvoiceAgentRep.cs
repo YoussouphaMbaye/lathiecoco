@@ -11,5 +11,8 @@ namespace  Lathiecoco.repository
         Task<ResponseBody<InvoiceWalletAgent>> deposit(BodyInvoiceWalletCashier ac);
         Task<ResponseBody<List<InvoiceWalletAgent>>> findAllInvoiceWallet(int page = 1, int limit = 10);
         Task<ResponseBody<InvoiceWalletAgent>> findWalletCashierById(Ulid idInvoice);
+        Task<ResponseBody<List<DepositStatisticByAgentDto>>> depositStatisticByAgentDto(DateTime begenDate, DateTime endDate,string status, Ulid? idAgent);
+        Task<ResponseBody<List<InvoiceWalletAgent>>> searcheInvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page, int limit);
+
     }
 }

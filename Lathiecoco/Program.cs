@@ -6,17 +6,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddCors(opt => opt.AddPolicy("CorsPolicy", c =>
 {
     c.WithOrigins("http://localhost:3000/",
-                                  "http://localhost:3000",
-                                  "https://main.d30cpdwxrbf5uc.amplifyapp.com"
-                                  )
-       .AllowAnyHeader()
-       .AllowAnyMethod();
+                    "http://localhost:3000",
+                    "https://main.d30cpdwxrbf5uc.amplifyapp.com"
+                    )
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials();
 }));
 
 
@@ -24,6 +26,7 @@ builder.Services.AddDbContext<CatalogDbContext>(Options => Options.UseSqlServer(
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<BilllerInvoiceRep, BillerInvoiceService>();
 builder.Services.AddScoped<AccountingRep, AccountingService>();
@@ -39,6 +42,10 @@ builder.Services.AddScoped<AccountingPrincipalRep, AccountingPrincipalServ>();
 builder.Services.AddScoped<AgentOwnerRep, AgentOwnerServ>();
 
 builder.Services.AddScoped<InvoiceStartupMasterRep, InvoiceStartupMasterServ>();
+builder.Services.AddScoped<UserLogRep, UserLogServ>();
+builder.Services.AddScoped<AgencyRep, AgencyServ>();
+builder.Services.AddScoped<AgencyUserRep, AgencyUserService>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie(
@@ -68,10 +75,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -80,6 +89,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+/**
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources/Images")),
+    RequestPath = new PathString("/Resources/Images")
+});
+**/
 app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
 

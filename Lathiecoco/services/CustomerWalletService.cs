@@ -1,8 +1,10 @@
-﻿using apimoney.services;
+﻿using Amazon;
+using apimoney.services;
 using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.repository;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace  Lathiecoco.services
@@ -15,47 +17,19 @@ namespace  Lathiecoco.services
             _CatalogDbContext = CatalogDbContext;
         }
 
-        public async Task<ResponseBody<CustomerWallet>> activateWallet(Ulid id)
+        public async Task<ResponseBody<CustomerWallet>> definePercentagePurchase(DefinePercentagePurchaseMasterDto dto)
         {
             ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
             try
             {
-                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == id).FirstOrDefaultAsync();
-                if (cus != null)
-                {
-                    
-                     cus.IsActive = !cus.IsActive;
-                     _CatalogDbContext.CustomerWallets.Update(cus);
-                     await _CatalogDbContext.SaveChangesAsync();
-                     rp.Body = cus;
-                     return rp;
-                    
-                }
-                else
-                {
-                    rp.IsError = true;
-                    rp.Msg = "Customer not found";
-                    return rp;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                rp.IsError = true;
-                rp.Msg = ex.Message;
-            }
-            return rp;
-        }
-        public async Task<ResponseBody<CustomerWallet>> blokeOrDeblokeWallet(Ulid id)
-        {
-            ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
-            try
-            {
-                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == id).FirstOrDefaultAsync();
+                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == dto.IdCustomer).FirstOrDefaultAsync();
                 if (cus != null)
                 {
 
-                    cus.IsBlocked = !cus.IsBlocked;
+                    cus.PercentagePurchase=dto.Percentage;
+                    cus.UpdatedDate = DateTime.Now;
+                    cus.FkIdAgencyUser=dto.IdAgencyUser;
+                    
                     _CatalogDbContext.CustomerWallets.Update(cus);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = cus;
@@ -66,6 +40,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Customer not found";
+                    rp.Code = 350;
                     return rp;
                 }
 
@@ -73,6 +48,114 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<CustomerWallet>> activateWallet(ActiveBlockDto dto)
+        {
+            ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
+            try
+            {
+                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == dto.IdUser).FirstOrDefaultAsync();
+                if (cus != null)
+                {
+                    
+                     cus.IsActive = !cus.IsActive;
+                     cus.FkIdStaff=dto.FkIdStaff;
+                     cus.UpdatedDate = DateTime.Now;
+                    _CatalogDbContext.CustomerWallets.Update(cus);
+                     await _CatalogDbContext.SaveChangesAsync();
+                     rp.Body = cus;
+                     return rp;
+                    
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Customer not found";
+                    rp.Code = 350;
+                    return rp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+        public async Task<ResponseBody<CustomerWallet>> CustomerToAgencyDto(CustomerToAgencyDto dto)
+        {
+            ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
+            try
+            {
+                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == dto.IdCustomerWallet).FirstOrDefaultAsync();
+                if (cus != null)
+                {
+
+                    
+                    cus.FkIdStaff = dto.IdStaff;
+                    cus.FkIdAgency= dto.IdAgency;
+                    cus.UpdatedDate = DateTime.Now;
+                    _CatalogDbContext.CustomerWallets.Update(cus);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = cus;
+                    return rp;
+
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Customer not found";
+                    rp.Code = 350;
+                    return rp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+        public async Task<ResponseBody<CustomerWallet>> blokeOrDeblokeWallet(ActiveBlockDto dto)
+        {
+            ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
+            try
+            {
+                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == dto.IdUser).FirstOrDefaultAsync();
+                if (cus != null)
+                {
+
+                    cus.IsBlocked = !cus.IsBlocked;
+                    cus.FkIdStaff = dto.FkIdStaff;
+                    cus.UpdatedDate=DateTime.Now;
+                    _CatalogDbContext.CustomerWallets.Update(cus);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = cus;
+                    return rp;
+
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Customer not found";
+                    rp.Code = 350;
+                    return rp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
             return rp;
@@ -120,18 +203,7 @@ namespace  Lathiecoco.services
                 var a = rdn.Next(1000, 9999);
                 c.PinTemp = a.ToString();
                 c.FirstName = cus.FirstName;
-                
-               
-               
-                double ConvertToUnixTimestamp(DateTime date)
-                {
-                    DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                    TimeSpan diff = date.ToUniversalTime() - origin;
-                    return Math.Floor(diff.TotalSeconds);
-                }
-               
-                string dayToday = ConvertToUnixTimestamp(DateTime.Now).ToString();
-                c.Code = "N" + dayToday;
+                c.Code = GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
 
                 c.CreatedDate=DateTime.Now;
                 c.UpdatedDate=DateTime.Now;
@@ -159,17 +231,18 @@ namespace  Lathiecoco.services
                 catch(Exception ex)
                 {
                     transaction.Rollback();
-                    rp.Msg= ex.ToString();
-                    rp.IsError = true;
-                    rp.Body = null;
+                    throw ex;
                 }
                
 
             }
             catch (Exception ex)
             {
-                rp.IsError = true;
+               
                 rp.Msg = ex.ToString();
+                rp.Code = 400;
+                rp.IsError = true;
+                rp.Body = null;
             }
             return rp;
         }
@@ -184,6 +257,7 @@ namespace  Lathiecoco.services
                 {
                     rp.Msg = "Customer Already Exist!";
                     rp.IsError = true;
+                    rp.Code = 350;
                     rp.Body = cusExist;
                     return rp;
                 }
@@ -231,17 +305,18 @@ namespace  Lathiecoco.services
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    rp.Msg = ex.ToString();
-                    rp.IsError = true;
-                    rp.Body = null;
+                    throw ex;
+                   
                 }
 
 
             }
             catch (Exception ex)
             {
-                rp.IsError = true;
                 rp.Msg = ex.ToString();
+                rp.IsError = true;
+                rp.Body = null;
+                rp.Code = 400;
             }
             return rp;
         }
@@ -275,12 +350,13 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
 
             }
             return rp;
         }
 
-        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile,Ulid? idAgency, int page = 1, int limit = 10)
         {
             ResponseBody<List<CustomerWallet>> rp = new ResponseBody<List<CustomerWallet>>();
             try
@@ -288,8 +364,10 @@ namespace  Lathiecoco.services
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.CustomerWallets != null)
                 {
-                    int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.CustomerWallets.Where(c=>c.Profile==profile).Count() / limit);
-                    var ps = await _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
+                    var req = idAgency == null ? _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile) :
+                        _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile&& c.FkIdAgency==idAgency);
+                    int pageCount = (int)Math.Ceiling((decimal) req.Count() / limit);
+                    var ps = await req.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
@@ -309,6 +387,90 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
+
+            }
+            return rp;
+        }
+        public async Task<ResponseBody<List<CustomerWallet>>> getCustomerWalletDateBetweenAndAgent(DateTime begenDate, DateTime endDate, Ulid? idAgent,int page=1,int limit=10)
+        {
+            ResponseBody<List<CustomerWallet>> rp = new ResponseBody<List<CustomerWallet>>();
+            try
+            {
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.CustomerWallets != null)
+                {
+                    var req = (idAgent != null) ?
+                         _CatalogDbContext.CustomerWallets
+                         .Include(i => i.Accounting)
+                       .Where(i => i.Profile == "AGENT")
+                       .Where(i => i.IdCustomerWallet == idAgent)
+                       .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+                        : 
+                        _CatalogDbContext.CustomerWallets
+                        .Include(i => i.Accounting)
+                       .Where(i => i.Profile == "AGENT")
+                       .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate);
+                    Console.WriteLine("Good");
+                    Console.WriteLine(req);
+                    int pageCount = (int)Math.Ceiling((decimal)req.Count() / limit);
+                    var ps = await req.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();//string jjj = "kkkkk";
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+
+                    }
+                    else
+                    {
+                        rp.Body = new List<CustomerWallet>();
+                    }
+
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+            }
+
+            return rp;
+
+
+        }
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllAgentsByAgency( Ulid? idAgency, int page = 1, int limit = 10)
+        {
+            ResponseBody<List<CustomerWallet>> rp = new ResponseBody<List<CustomerWallet>>();
+            try
+            {
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.CustomerWallets != null)
+                {
+                    var req =_CatalogDbContext.CustomerWallets.Where(c => c.Profile == "AGENT" && c.FkIdAgency == idAgency);
+                    int pageCount = (int)Math.Ceiling((decimal)req.Count() / limit);
+                    var ps = await req.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
+                    //string jjj = "kkkkk";
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+
+                    }
+                    else
+                    {
+                        rp.Body = new List<CustomerWallet>();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+                rp.Code = 400;
 
             }
             return rp;
@@ -319,7 +481,7 @@ namespace  Lathiecoco.services
             ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();
             try
             {
-                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Include(c=>c.Accounting).Where(c=>c.IdCustomerWallet==id).FirstOrDefaultAsync();
+                CustomerWallet cus = await _CatalogDbContext.CustomerWallets.Include(c=>c.Accounting).Include(c=>c.Staff).Where(c=>c.IdCustomerWallet==id).FirstOrDefaultAsync();
                 if (cus != null)
                 {
                     rp.Body = cus;
@@ -329,12 +491,14 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "User not found";
+                    rp.Code = 450;
                     return rp;
                 }
             }
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
             return rp;
@@ -355,6 +519,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = cus.Profile+" not found";
+                    rp.Code = 450;
                 }
 
 
@@ -382,6 +547,7 @@ namespace  Lathiecoco.services
                 else
                 {
                     rp.IsError = true;
+                    rp.Code = 450;
                     rp.Msg = "Phone or Identity not correct";
                 }
 
@@ -390,6 +556,7 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
             return rp;
@@ -408,11 +575,13 @@ namespace  Lathiecoco.services
                     if (cus.IsBlocked)
                     {
                         rp.IsError = true;
+                        rp.Code = 320;
                         rp.Msg = "Your account is blocked!";
                         return rp;
                     }
                     if (!cus.IsActive) {
                         rp.IsError = true;
+                        rp.Code = 322;
                         rp.Msg = "Your account is not active!";
                         return rp;
                     }
@@ -422,6 +591,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Phone or pin not correct";
+                    rp.Code = 332;
                     return rp;
                     
                 }
@@ -458,6 +628,7 @@ namespace  Lathiecoco.services
                 else
                 {
                     rp.IsError = true;
+                    rp.Code = 332;
                     rp.Msg = "Phone or pin not correct";
                     return rp;
                    
@@ -468,6 +639,7 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
             return rp;
@@ -512,6 +684,7 @@ namespace  Lathiecoco.services
                 else
                 {
                     rp.IsError = true;
+                    rp.Code = 332;
                     rp.Msg = "Customer with phone "+cus.PhoneIdentity+ " "+cus.Phone +" not found";
                     return rp;
                    
@@ -520,6 +693,7 @@ namespace  Lathiecoco.services
             }
             catch (Exception ex)
             {
+                rp.Code = 400;
                 rp.IsError = true;
                 rp.Msg = ex.Message;
             }
@@ -532,13 +706,15 @@ namespace  Lathiecoco.services
             try
             {
                 CustomerWallet cu = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == cus.Id ).FirstOrDefaultAsync();
-                if (cu != null)
+                if (cu != null) 
                 {
                     cu.MiddleName = cus.MiddleName;
                     cu.FirstName = cus.FirstName;
                     cu.LastName = cus.LastName;
                     cu.Profile = cus.Profile;
                     cu.Address = cus.Address;
+                    cu.FkIdStaff= cus.FkIdStaff;
+                    cu.UpdatedDate = DateTime.Now;
                     if (cus.Profile != "AGENT" && cus.Profile!="CUSTOMER")
                    
                     {
@@ -548,8 +724,6 @@ namespace  Lathiecoco.services
                         return rp;
                     }
 
-                    cu.UpdatedDate = DateTime.Now;
-
                     _CatalogDbContext.CustomerWallets.Update(cu);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = cu;
@@ -558,6 +732,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Customer not found";
+                    rp.Code = 450;
                     return rp;
 
                 }
@@ -567,6 +742,7 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
             }
             return rp;
         }
@@ -598,6 +774,7 @@ namespace  Lathiecoco.services
                     {
                         rp.IsError = true;
                         rp.Msg = "Phone or old pin not valide!";
+                        rp.Code = 332;
                         return rp;
                     }
 
@@ -605,8 +782,8 @@ namespace  Lathiecoco.services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
                     rp.IsError = true;
+                    rp.Code = 400;
                     rp.Msg = "error";
                 }
                 return rp;

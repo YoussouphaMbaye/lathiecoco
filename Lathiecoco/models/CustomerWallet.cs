@@ -22,12 +22,18 @@ namespace Lathiecoco.models
         public string? Address { get; set; }
         public Boolean IsBlocked { get; set; }=false;
         public Boolean IsActive { get; set; } = true;
-        public Ulid FkIdAccounting { get; set; }
         public string Code { get; set; }
-        
+        public Ulid? FkIdStaff { get; set; }
+        public OwnerAgent? Staff { get; set; }
+        public Ulid? FkIdAgencyUser { get; set; }
+        public AgencyUser? AgencyUser { get; set; }
+        public Ulid FkIdAccounting { get; set; }
         public Accounting? Accounting   { get; set; }
+        public float? PercentagePurchase { get; set; }
+        public Ulid? FkIdAgency { get; set; }
+        public Agency? Agency { get; set; }
 
-        
+
         [JsonIgnore]
         public ICollection<InvoiceWallet>? InvoiceWalletRecipeients { get; set; }
         [JsonIgnore]

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lathiecoco.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20241007195449_isactive_Field")]
-    partial class isactive_Field
+    [Migration("20241106212542_ageencyUser-customer")]
+    partial class ageencyUsercustomer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,6 +166,139 @@ namespace Lathiecoco.Migrations
                     b.ToTable("AccountingPrincipals");
                 });
 
+            modelBuilder.Entity("Lathiecoco.models.Agency", b =>
+                {
+                    b.Property<string>("IdAgency")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FkIdAccounting")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FkIdStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float?>("PercentagePurchase")
+                        .HasColumnType("real");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("IdAgency");
+
+                    b.HasIndex("FkIdAccounting")
+                        .IsUnique()
+                        .HasFilter("[FkIdAccounting] IS NOT NULL");
+
+                    b.HasIndex("FkIdStaff");
+
+                    b.HasIndex("phone")
+                        .IsUnique();
+
+                    b.ToTable("Agencies");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.AgencyUser", b =>
+                {
+                    b.Property<string>("IdAgencyUser")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FkIdAgency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FkIdStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFirstLogin")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LoginCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MiddleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Profil")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("IdAgencyUser");
+
+                    b.HasIndex("FkIdAgency");
+
+                    b.HasIndex("FkIdStaff");
+
+                    b.ToTable("AgencyUsers");
+                });
+
             modelBuilder.Entity("Lathiecoco.models.BillerInvoice", b =>
                 {
                     b.Property<string>("IdBillerInvoice")
@@ -204,6 +337,9 @@ namespace Lathiecoco.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("NumberOfKw")
+                        .HasColumnType("float");
+
                     b.Property<string>("PaymentMode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -237,7 +373,6 @@ namespace Lathiecoco.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Code")
@@ -248,33 +383,41 @@ namespace Lathiecoco.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FkIdAccounting")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<string>("FkIdAgency")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FkIdAgencyUser")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FkIdStaff")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsBlocked")
+                    b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MiddleName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float?>("PercentagePurchase")
+                        .HasColumnType("real");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PhoneBrand")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PinNumber")
@@ -282,7 +425,6 @@ namespace Lathiecoco.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PinTemp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Profile")
@@ -300,6 +442,12 @@ namespace Lathiecoco.Migrations
 
                     b.HasIndex("FkIdAccounting")
                         .IsUnique();
+
+                    b.HasIndex("FkIdAgency");
+
+                    b.HasIndex("FkIdAgencyUser");
+
+                    b.HasIndex("FkIdStaff");
 
                     b.HasIndex("phoneIdentity", "Phone")
                         .IsUnique();
@@ -324,6 +472,9 @@ namespace Lathiecoco.Migrations
                     b.Property<string>("FkIdPaymentMode")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("FkIdStaff")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<double>("MaxAmount")
                         .HasColumnType("float");
 
@@ -341,7 +492,11 @@ namespace Lathiecoco.Migrations
 
                     b.HasKey("IdFeeSend");
 
-                    b.HasIndex("FkIdPaymentMode");
+                    b.HasIndex("FkIdPaymentMode")
+                        .IsUnique()
+                        .HasFilter("[FkIdPaymentMode] IS NOT NULL");
+
+                    b.HasIndex("FkIdStaff");
 
                     b.ToTable("FeeSends");
                 });
@@ -354,17 +509,16 @@ namespace Lathiecoco.Migrations
                     b.Property<double>("AmountToPaid")
                         .HasColumnType("float");
 
-                    b.Property<double>("AmountToReceived")
-                        .HasColumnType("float");
-
                     b.Property<double>("AmountToSend")
                         .HasColumnType("float");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FkIdAgencyUser")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("FkIdAgent")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FkIdPaymentMode")
@@ -385,14 +539,25 @@ namespace Lathiecoco.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsMaster")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PaymentMode")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProofLink")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ValidateAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("IdInvoiceStartupMaster");
+
+                    b.HasIndex("FkIdAgencyUser");
 
                     b.HasIndex("FkIdAgent");
 
@@ -586,17 +751,20 @@ namespace Lathiecoco.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsBlocked")
+                    b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsFirstLogin")
+                    b.Property<bool>("IsFirstLogin")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
@@ -690,6 +858,9 @@ namespace Lathiecoco.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FkIdStaff")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -702,10 +873,46 @@ namespace Lathiecoco.Migrations
 
                     b.HasKey("IdPaymentMode");
 
+                    b.HasIndex("FkIdStaff");
+
                     b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("PaymentModes");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.UserLog", b =>
+                {
+                    b.Property<string>("IdUserLog")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FkIdStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("IPaddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdUserLog");
+
+                    b.HasIndex("FkIdStaff");
+
+                    b.ToTable("UserLogs");
                 });
 
             modelBuilder.Entity("Lathiecoco.models.AccountingOpPrincipal", b =>
@@ -760,6 +967,42 @@ namespace Lathiecoco.Migrations
                     b.Navigation("InvoiceWalletAgent");
                 });
 
+            modelBuilder.Entity("Lathiecoco.models.Agency", b =>
+                {
+                    b.HasOne("Lathiecoco.models.Accounting", "Accounting")
+                        .WithOne("Agency")
+                        .HasForeignKey("Lathiecoco.models.Agency", "FkIdAccounting");
+
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("Agencies")
+                        .HasForeignKey("FkIdStaff")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Accounting");
+
+                    b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.AgencyUser", b =>
+                {
+                    b.HasOne("Lathiecoco.models.Agency", "Agency")
+                        .WithMany("AgencyUsers")
+                        .HasForeignKey("FkIdAgency")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("AgencyUsers")
+                        .HasForeignKey("FkIdStaff")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("Lathiecoco.models.BillerInvoice", b =>
                 {
                     b.HasOne("Lathiecoco.models.CustomerWallet", "CustomerWallet")
@@ -795,7 +1038,27 @@ namespace Lathiecoco.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Lathiecoco.models.Agency", "Agency")
+                        .WithMany("CustomerWallets")
+                        .HasForeignKey("FkIdAgency")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Lathiecoco.models.AgencyUser", "AgencyUser")
+                        .WithMany("CustomerWallets")
+                        .HasForeignKey("FkIdAgencyUser")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("CustomerWallets")
+                        .HasForeignKey("FkIdStaff");
+
                     b.Navigation("Accounting");
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("AgencyUser");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("Lathiecoco.models.FeeSend", b =>
@@ -804,16 +1067,25 @@ namespace Lathiecoco.Migrations
                         .WithMany("FeeSends")
                         .HasForeignKey("FkIdPaymentMode");
 
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("FeeSends")
+                        .HasForeignKey("FkIdStaff");
+
                     b.Navigation("PaymentMode");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("Lathiecoco.models.InvoiceStartupMaster", b =>
                 {
+                    b.HasOne("Lathiecoco.models.AgencyUser", "AgencyUser")
+                        .WithMany("InvoiceStartupMasters")
+                        .HasForeignKey("FkIdAgencyUser")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Lathiecoco.models.CustomerWallet", "Agent")
                         .WithMany("InvoiceStartupMasters")
-                        .HasForeignKey("FkIdAgent")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FkIdAgent");
 
                     b.HasOne("Lathiecoco.models.PaymentMode", "PaymentModeObj")
                         .WithMany("InvoiceStartupMasters")
@@ -824,6 +1096,8 @@ namespace Lathiecoco.Migrations
                     b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
                         .WithMany("InvoiceStartupMasters")
                         .HasForeignKey("FkIdStaff");
+
+                    b.Navigation("AgencyUser");
 
                     b.Navigation("Agent");
 
@@ -905,9 +1179,31 @@ namespace Lathiecoco.Migrations
                     b.Navigation("Accounting");
                 });
 
+            modelBuilder.Entity("Lathiecoco.models.PaymentMode", b =>
+                {
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("PaymentModes")
+                        .HasForeignKey("FkIdStaff");
+
+                    b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.UserLog", b =>
+                {
+                    b.HasOne("Lathiecoco.models.OwnerAgent", "Staff")
+                        .WithMany("UserLogs")
+                        .HasForeignKey("FkIdStaff")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("Lathiecoco.models.Accounting", b =>
                 {
                     b.Navigation("AccountingOpWallets");
+
+                    b.Navigation("Agency");
 
                     b.Navigation("CustomerWallet");
 
@@ -917,6 +1213,20 @@ namespace Lathiecoco.Migrations
             modelBuilder.Entity("Lathiecoco.models.AccountingPrincipal", b =>
                 {
                     b.Navigation("AccountingOpPrincipals");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.Agency", b =>
+                {
+                    b.Navigation("AgencyUsers");
+
+                    b.Navigation("CustomerWallets");
+                });
+
+            modelBuilder.Entity("Lathiecoco.models.AgencyUser", b =>
+                {
+                    b.Navigation("CustomerWallets");
+
+                    b.Navigation("InvoiceStartupMasters");
                 });
 
             modelBuilder.Entity("Lathiecoco.models.BillerInvoice", b =>
@@ -967,7 +1277,19 @@ namespace Lathiecoco.Migrations
 
             modelBuilder.Entity("Lathiecoco.models.OwnerAgent", b =>
                 {
+                    b.Navigation("Agencies");
+
+                    b.Navigation("AgencyUsers");
+
+                    b.Navigation("CustomerWallets");
+
+                    b.Navigation("FeeSends");
+
                     b.Navigation("InvoiceStartupMasters");
+
+                    b.Navigation("PaymentModes");
+
+                    b.Navigation("UserLogs");
                 });
 
             modelBuilder.Entity("Lathiecoco.models.Partener", b =>

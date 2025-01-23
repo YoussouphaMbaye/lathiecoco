@@ -4,6 +4,9 @@ using Lathiecoco.models;
 using Lathiecoco.repository;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Data;
+using System.Numerics;
 using System.Reflection;
 
 namespace Lathiecoco.services
@@ -53,6 +56,7 @@ namespace Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
 
             }
@@ -75,6 +79,7 @@ namespace Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Biller "+ id +" not found";
+                    rp.Code = 460;
                 }
 
 
@@ -94,8 +99,6 @@ namespace Lathiecoco.services
             try
             {
                 //catch
-                if (biller.PayementType == biller.PayementType)
-                {
                     CustomerWallet customer = null;
                     FeeSend feeSend = null;
                     PaymentMode paymentMode1 = null;
@@ -107,7 +110,22 @@ namespace Lathiecoco.services
                         if (!cusRep.IsError)
                         {
                             customer = cusRep.Body;
-                            
+                        if (!customer.IsActive)
+                        {
+                            rp.IsError = true;
+                            rp.Body = null;
+                            rp.Msg = "You account is not active";
+                            rp.Code = 320;
+                            return rp;
+                        }
+                        if (customer.IsBlocked)
+                        {
+                            rp.IsError= true;
+                            rp.Body = null;
+                            rp.Code = 322;
+                            rp.Msg = "Your account is blocked";
+                            return rp;
+                        }
 
                         }
                         else
@@ -115,13 +133,15 @@ namespace Lathiecoco.services
                             rp.IsError= true;
                             rp.Msg = cusRep.Msg;
                             rp.Body = null;
-                            return rp;
+                            rp.Code = cusRep.Code;
+                        return rp;
                         }
                     }
                     else
                     {
                         rp.IsError= true;
                         rp.Body = null;
+                        rp.Code = cusRep.Code;
                         return rp;
                     }
                     
@@ -138,6 +158,7 @@ namespace Lathiecoco.services
                             rp.IsError = true;
                             rp.Msg = paymentModeRp.Msg;
                             rp.Body = null;
+                            rp.Code= paymentModeRp.Code;
                             return rp;
                         }
                     }
@@ -155,6 +176,7 @@ namespace Lathiecoco.services
                             rp.IsError = true;
                             rp.Msg = feeSendBody.Msg;
                             rp.Body = null;
+                            rp.Code= feeSendBody.Code;  
                             return rp;
                             
                         }
@@ -188,19 +210,32 @@ namespace Lathiecoco.services
                     Console.WriteLine(aa + " " + 0.01 * 100);
                     Console.WriteLine(0.01f * 100);
                     double amountTopaid = 0;
-                    double amountToSend = 0;
-                    if (feeSend.FixeCsFee > 0)
+                    double amountToSend = biller.AmountToPaid;
+                    if (feeSend.MinAmount < amountToSend && feeSend.MaxAmount > amountToSend)
                     {
-                        amountTopaid = ((double)feeSend.FixeCsFee) + amountToSend;
-                        invoice.FeesAmount = (double)feeSend.FixeCsFee;
-                    }
-                    else {
-                        decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
-                        amountToSend = (double)biller.AmountToPaid;
+                        
+                            if (feeSend.FixeCsFee > 0)
+                            {
+                                amountTopaid = ((double)feeSend.FixeCsFee) + amountToSend;
+                                invoice.FeesAmount = (double)feeSend.FixeCsFee;
+                            }
+                            else
+                            {
+                                decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                                amountToSend = (double)biller.AmountToPaid;
 
-                        amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
-                        invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+                                amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
+                                invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+                            }
+                    
+                    
+                    }else
+                    {
+                      rp.IsError = true;
+                      rp.Code = 305;
+                      return rp;
                     }
+                    
                     
                     //Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
                     //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
@@ -223,6 +258,7 @@ namespace Lathiecoco.services
                                 rp.Msg = "Your Balance is low";
                                 rp.IsError = true;
                                 rp.Body = null;
+                                rp.Code = 340;
                                 return rp;
                             }
                             senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
@@ -245,12 +281,11 @@ namespace Lathiecoco.services
                         {
                             rp.IsError = true;
                             rp.Msg = "No Sender BALANCE";
+                            rp.Code = 400;
                             transaction.Rollback();
                             return rp;
                         }
 
-
-                       
                         transaction.Commit();
 
                     }
@@ -259,36 +294,159 @@ namespace Lathiecoco.services
                         Console.WriteLine(ex.ToString());
                         rp.IsError = true;
                         rp.Msg = "error";
+                        rp.Code = 400;
                         return rp;
                     }
 
-
-
-
                     rp.Body = invoice;
-
-
-                }
-                else
-                {
-                    rp.IsError = true;
-                    rp.Msg = "Payment type not found";
-                    rp.Body = null;
-                    return rp;
-                }
-                
-
-
 
             }
             catch (Exception ex)
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
                 rp.Body = null;
             }
             return rp;
             
         }
+        public async Task<ResponseBody<List<BillerAmountByAgentDto>>> billerByAgentSumBiller(DateTime begenDate,DateTime endDate,Ulid? idAgent)
+        {
+            ResponseBody<List<BillerAmountByAgentDto>> rp = new ResponseBody<List<BillerAmountByAgentDto>>();
+            try
+            {
+                var groupedData = idAgent != null ? await _CatalogDbContext.BillerInvoices
+               .Include(i => i.CustomerWallet)
+               .Where(i => i.CustomerWallet.Profile == "AGENT")
+               .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+               .Where(i => i.FkIdCustomerWallet == idAgent)
+               .GroupBy(e => new { e.FkIdCustomerWallet })
+               .Select(g => new
+               {
+                   count = g.Count(),
+                   code = g.Max(c => c.CustomerWallet.Code),
+                   Phone = g.Max(c => c.CustomerWallet.Phone),
+                   TotalBillerAmount = g.Sum(e => e.AmountToPaid),
+                   LastName = g.Max(c => c.CustomerWallet.LastName),
+                   FirstName = g.Max(c => c.CustomerWallet.FirstName),
+                   MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
+               }).ToArrayAsync()
+               : await _CatalogDbContext.BillerInvoices
+                   .Include(i => i.CustomerWallet)
+                   .Where(i => i.CustomerWallet.Profile == "AGENT")
+                   .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+                   .GroupBy(e => new { e.FkIdCustomerWallet })
+                   .Select(g => new
+                   {
+                       count = g.Count(),
+                       code = g.Max(c => c.CustomerWallet.Code),
+                       Phone = g.Max(c => c.CustomerWallet.Phone),
+                       TotalBillerAmount = g.Sum(e => e.AmountToPaid),
+                       LastName = g.Max(c => c.CustomerWallet.LastName),
+                       FirstName = g.Max(c => c.CustomerWallet.FirstName),
+                       MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
+                   }).ToArrayAsync();
+                if (groupedData != null)
+                {
+                    //rp.Body = groupedData;
+                    List<BillerAmountByAgentDto> list= new List<BillerAmountByAgentDto>();
+                    foreach (var i in groupedData)
+                    {
+                        BillerAmountByAgentDto b= new BillerAmountByAgentDto();
+                        b.Count = i.count;
+                        b.code = i.code;
+                        b.Phone = i.Phone;
+                        b.LastName = i.LastName;
+                        b.FirstName = i.FirstName;
+                        b.MiddleName = i.MiddleName;
+                        b.TotalBillerAmount= i.TotalBillerAmount;
+                        list.Add(b);
+                    }
+                    rp.Body = list;
+                }
+                else
+                {
+                    rp.Body = new List<BillerAmountByAgentDto>();
+                }
+                foreach(var i in groupedData)
+                {
+                    Console.WriteLine(i);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+            }
+            
+            return rp;
+            
+
+        }
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, int page, int limit)
+        {
+            ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
+            try {
+                DateTime myDateTime = DateTime.Now;
+                string dateNow = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+                if(endDate!=null) {
+                    dateNow = ((DateTime)endDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                }
+
+                string query = $"Select * from BillerInvoices ";
+            
+                query += $"where CreatedDate<'{dateNow}' ";
+            
+                if (idPaymentMode != null)
+                {
+                    query += $"and FkIdPaymentMode='{idPaymentMode}' ";
+                }
+                if(code != null)
+                {
+                    query += $"and  InvoiceCode='{code}' ";
+                }
+                if (beginDate != null)
+                {
+                    string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    query += $"and  CreatedDate>'{beginDateTostring}' ";
+                }
+                query += $";";
+
+                Console.WriteLine(dateNow);
+                Console.WriteLine(query);
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.BillerInvoices != null)
+                {
+                    var totalItems = _CatalogDbContext.BillerInvoices.Count();
+                    int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
+                    var ps = await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).ToListAsync();
+                    //string jjj = "kkkkk";
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+                    }
+                    else
+                    {
+                        rp.Body = new List<BillerInvoice>();
+                    }
+            }
+            }
+            catch (Exception ex) {
+             Console.WriteLine(ex.ToString());
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+
+            return rp;
+
+        }
+
+        
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Lathiecoco.Migrations
 {
     /// <inheritdoc />
-    public partial class ulid : Migration
+    public partial class agncy01 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,6 +68,11 @@ namespace Lathiecoco.Migrations
                     MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LoginCount = table.Column<int>(type: "int", nullable: true),
                     Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Profil = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -82,59 +87,14 @@ namespace Lathiecoco.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentModes",
-                columns: table => new
-                {
-                    IdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    status = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentModes", x => x.IdPaymentMode);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CustomerWallets",
-                columns: table => new
-                {
-                    IdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    phoneIdentity = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PinNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PinTemp = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Profile = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneBrand = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerWallets", x => x.IdCustomerWallet);
-                    table.ForeignKey(
-                        name: "FK_CustomerWallets_Accountings_FkIdAccounting",
-                        column: x => x.FkIdAccounting,
-                        principalTable: "Accountings",
-                        principalColumn: "IdAccounting",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Parteners",
                 columns: table => new
                 {
                     IdPartener = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Logo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -152,6 +112,157 @@ namespace Lathiecoco.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Agencies",
+                columns: table => new
+                {
+                    IdAgency = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    isActive = table.Column<bool>(type: "bit", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agencies", x => x.IdAgency);
+                    table.ForeignKey(
+                        name: "FK_Agencies_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomerWallets",
+                columns: table => new
+                {
+                    IdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    phoneIdentity = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PinNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PinTemp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Profile = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneBrand = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerWallets", x => x.IdCustomerWallet);
+                    table.ForeignKey(
+                        name: "FK_CustomerWallets_Accountings_FkIdAccounting",
+                        column: x => x.FkIdAccounting,
+                        principalTable: "Accountings",
+                        principalColumn: "IdAccounting",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomerWallets_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentModes",
+                columns: table => new
+                {
+                    IdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<bool>(type: "bit", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentModes", x => x.IdPaymentMode);
+                    table.ForeignKey(
+                        name: "FK_PaymentModes_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLogs",
+                columns: table => new
+                {
+                    IdUserLog = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserAction = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IPaddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLogs", x => x.IdUserLog);
+                    table.ForeignKey(
+                        name: "FK_UserLogs_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AgencyUsers",
+                columns: table => new
+                {
+                    IdAgencyUser = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CodeOwnerAgent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LoginCount = table.Column<int>(type: "int", nullable: true),
+                    Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Profil = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FkIdAgency = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AgencyUsers", x => x.IdAgencyUser);
+                    table.ForeignKey(
+                        name: "FK_AgencyUsers_Agencies_FkIdAgency",
+                        column: x => x.FkIdAgency,
+                        principalTable: "Agencies",
+                        principalColumn: "IdAgency",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AgencyUsers_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FeeSends",
                 columns: table => new
                 {
@@ -163,12 +274,18 @@ namespace Lathiecoco.Migrations
                     PercentAgFee = table.Column<float>(type: "real", nullable: false),
                     PercentCsFee = table.Column<float>(type: "real", nullable: false),
                     FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FeeSends", x => x.IdFeeSend);
+                    table.ForeignKey(
+                        name: "FK_FeeSends_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent");
                     table.ForeignKey(
                         name: "FK_FeeSends_PaymentModes_FkIdPaymentMode",
                         column: x => x.FkIdPaymentMode,
@@ -185,10 +302,11 @@ namespace Lathiecoco.Migrations
                     InvoiceCode2 = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     InvoiceStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProofLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AmountToSend = table.Column<double>(type: "float", nullable: false),
                     AmountToPaid = table.Column<double>(type: "float", nullable: false),
-                    AmountToReceived = table.Column<double>(type: "float", nullable: false),
                     FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ValidateAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     FkIdAgent = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -227,6 +345,7 @@ namespace Lathiecoco.Migrations
                     ReloadBiller = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AmountToPaid = table.Column<double>(type: "float", nullable: false),
                     FeesAmount = table.Column<double>(type: "float", nullable: false),
+                    NumberOfKw = table.Column<double>(type: "float", nullable: true),
                     PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FkIdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     FkIdPartener = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -466,6 +585,27 @@ namespace Lathiecoco.Migrations
                 column: "FkIdInvoiceWalletAgent");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Agencies_FkIdStaff",
+                table: "Agencies",
+                column: "FkIdStaff");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agencies_phone",
+                table: "Agencies",
+                column: "phone",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AgencyUsers_FkIdAgency",
+                table: "AgencyUsers",
+                column: "FkIdAgency");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AgencyUsers_FkIdStaff",
+                table: "AgencyUsers",
+                column: "FkIdStaff");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BillerInvoices_FkIdCustomerWallet",
                 table: "BillerInvoices",
                 column: "FkIdCustomerWallet");
@@ -498,6 +638,11 @@ namespace Lathiecoco.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CustomerWallets_FkIdStaff",
+                table: "CustomerWallets",
+                column: "FkIdStaff");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CustomerWallets_phoneIdentity_Phone",
                 table: "CustomerWallets",
                 columns: new[] { "phoneIdentity", "Phone" },
@@ -506,7 +651,14 @@ namespace Lathiecoco.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_FeeSends_FkIdPaymentMode",
                 table: "FeeSends",
-                column: "FkIdPaymentMode");
+                column: "FkIdPaymentMode",
+                unique: true,
+                filter: "[FkIdPaymentMode] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeeSends_FkIdStaff",
+                table: "FeeSends",
+                column: "FkIdStaff");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InvoiceStartupMasters_FkIdAgent",
@@ -594,10 +746,20 @@ namespace Lathiecoco.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PaymentModes_FkIdStaff",
+                table: "PaymentModes",
+                column: "FkIdStaff");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PaymentModes_Name",
                 table: "PaymentModes",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLogs_FkIdStaff",
+                table: "UserLogs",
+                column: "FkIdStaff");
         }
 
         /// <inheritdoc />
@@ -610,7 +772,13 @@ namespace Lathiecoco.Migrations
                 name: "AccountingOpWallets");
 
             migrationBuilder.DropTable(
+                name: "AgencyUsers");
+
+            migrationBuilder.DropTable(
                 name: "MarchandComissionDalys");
+
+            migrationBuilder.DropTable(
+                name: "UserLogs");
 
             migrationBuilder.DropTable(
                 name: "AccountingPrincipals");
@@ -628,10 +796,10 @@ namespace Lathiecoco.Migrations
                 name: "InvoiceWallets");
 
             migrationBuilder.DropTable(
-                name: "Parteners");
+                name: "Agencies");
 
             migrationBuilder.DropTable(
-                name: "OwnerAgents");
+                name: "Parteners");
 
             migrationBuilder.DropTable(
                 name: "CustomerWallets");
@@ -644,6 +812,9 @@ namespace Lathiecoco.Migrations
 
             migrationBuilder.DropTable(
                 name: "PaymentModes");
+
+            migrationBuilder.DropTable(
+                name: "OwnerAgents");
         }
     }
 }

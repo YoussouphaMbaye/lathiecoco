@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace Lathiecoco.models
 {
@@ -16,11 +17,15 @@ namespace Lathiecoco.models
         public DbSet<InvoiceWalletAgent> InvoiceWalletAgents { get; set; }
         public DbSet<AccountingOpWallet> AccountingOpWallets { get; set; }
         public DbSet<PaymentMode> PaymentModes { get; set; }
-        
+        public DbSet<AgencyUser> AgencyUsers { get; set; }
+
+
         public DbSet<AccountingPrincipal> AccountingPrincipals { get; set; }
         public DbSet<OwnerAgent> OwnerAgents { get; set; }
         public DbSet<InvoiceStartupMaster> InvoiceStartupMasters { get; set; }
         public DbSet<Partener> Parteners { get; set; }
+        public DbSet<UserLog> UserLogs { get; set; }
+        public DbSet<Agency> Agencies { get; set; }
         public DbSet<BillerInvoice> BillerInvoices { get; set; }
         public DbSet<MarchandComissionDaly> MarchandComissionDalys {  get; set; }
 
@@ -38,8 +43,9 @@ namespace Lathiecoco.models
 
             //relations
             modelBuilder.Entity<Partener>().HasOne(c => c.Accounting).WithOne(a => a.Partener).HasForeignKey<Partener>(c => c.FkIdAccounting);
-
+            modelBuilder.Entity<Agency>().HasOne(c => c.Accounting).WithOne(a => a.Agency).HasForeignKey<Agency>(c => c.FkIdAccounting);
             modelBuilder.Entity<CustomerWallet>().HasOne(c => c.Accounting).WithOne(a => a.CustomerWallet).HasForeignKey<CustomerWallet>(c => c.FkIdAccounting);
+
             modelBuilder.Entity<Partener>().HasMany(c => c.BillerInvoices).WithOne(i => i.Partener).HasForeignKey(e => e.FkIdPartener);
             modelBuilder.Entity<CustomerWallet>().HasMany(c => c.BillerInvoices).WithOne(i => i.CustomerWallet).HasForeignKey(e => e.FkIdCustomerWallet);
 
@@ -50,10 +56,12 @@ namespace Lathiecoco.models
 
             //modelBuilder.Entity<Cashier>().HasMany(c => c.InvoiceWalletSenders).WithOne(i => i.CashierSender).HasForeignKey(e => e.FkIdCashierSender).OnDelete(DeleteBehavior.Restrict);
             //modelBuilder.Entity<Cashier>().HasMany(c => c.InvoiceWalletPayees).WithOne(i => i.CashierPayee).HasForeignKey(e => e.FkIdCashierPayee).OnDelete(DeleteBehavior.Restrict);
-
+            
             modelBuilder.Entity<CustomerWallet>().HasMany(c => c.InvoiceWalletAgentAgents).WithOne(i => i.Agent).HasForeignKey(e => e.FkIdAgent).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<CustomerWallet>().HasMany(c => c.InvoiceStartupMasters).WithOne(i => i.Agent).HasForeignKey(e => e.FkIdAgent);
             
+            modelBuilder.Entity<AgencyUser>().HasMany(c => c.CustomerWallets).WithOne(i => i.AgencyUser).HasForeignKey(e => e.FkIdAgencyUser).OnDelete(DeleteBehavior.Restrict);
+
             //modelBuilder.Entity<Agent>().HasMany(c => c.Maters).WithOne(i => i.Master).HasForeignKey(e => e.FkIdMaster).OnDelete(DeleteBehavior.Restrict);
             //modelBuilder.Entity<Agent>().HasMany(c => c.Agents).WithOne(i => i.Cashier).HasForeignKey(e => e.FkIdCashier).OnDelete(DeleteBehavior.Restrict);
 
@@ -79,6 +87,23 @@ namespace Lathiecoco.models
             modelBuilder.Entity<FeeSend>().HasMany(c => c.InvoiceWalletAgents).WithOne(i => i.FeeSend).HasForeignKey(e => e.FkIdFeeSend);
             
             modelBuilder.Entity<OwnerAgent>().HasMany(c => c.InvoiceStartupMasters).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff);
+            
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.CustomerWallets).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff);
+            
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.FeeSends).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff);
+
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.Agencies).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff).OnDelete(DeleteBehavior.Restrict); ;
+
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.AgencyUsers).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Agency>().HasMany(c => c.AgencyUsers).WithOne(i => i.Agency).HasForeignKey(e => e.FkIdAgency);
+
+            modelBuilder.Entity<Agency>().HasMany(c => c.CustomerWallets).WithOne(i => i.Agency).HasForeignKey(e => e.FkIdAgency).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AgencyUser>().HasMany(c => c.InvoiceStartupMasters).WithOne(i => i.AgencyUser).HasForeignKey(e => e.FkIdAgencyUser).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.PaymentModes).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff);
+            modelBuilder.Entity<OwnerAgent>().HasMany(c => c.UserLogs).WithOne(i => i.Staff).HasForeignKey(e => e.FkIdStaff);
 
             modelBuilder.Entity<PaymentMode>().HasMany(c => c.BillerInvoices).WithOne(i => i.PaymentModeObj).HasForeignKey(e => e.FkIdPaymentMode);
 
@@ -93,11 +118,13 @@ namespace Lathiecoco.models
             modelBuilder.Entity<InvoiceWallet>().HasIndex(i => new { i.InvoiceCode }).IsUnique(true);
             modelBuilder.Entity<InvoiceWalletAgent>().HasIndex(i => new { i.InvoiceCode }).IsUnique(true);
             modelBuilder.Entity<InvoiceStartupMaster>().HasIndex(i => new { i.InvoiceCode }).IsUnique(true);
+            modelBuilder.Entity<InvoiceStartupMaster>().HasIndex(i => new { i.InvoiceCode }).IsUnique(true);
 
             //modelBuilder.Entity<Agent>().HasIndex(a => new { a.CodeAgent }).IsUnique(true);
             modelBuilder.Entity<Partener>().HasIndex(a => new { a.Code }).IsUnique(true);
+            modelBuilder.Entity<Agency>().HasIndex(a => new { a.phone }).IsUnique(true);
             modelBuilder.Entity<BillerInvoice>().HasIndex(b => new { b.InvoiceCode }).IsUnique(true);
-            //modelBuilder.Entity<FeeSend>().HasIndex(c => new {  c.FkIdCorridor,c.FkIdPaymentMode }).IsUnique(true);
+            modelBuilder.Entity<FeeSend>().HasIndex(c => new { c.FkIdPaymentMode }).IsUnique(true);
             //modelBuilder.Entity<FeePayee>().HasIndex(c => new { c.FkIdPaymentMode, c.FkIdCorridor }).IsUnique(true);
 
 
@@ -131,7 +158,13 @@ namespace Lathiecoco.models
               .HasConversion(x => x.ToString(), x => Ulid.Parse(x));
             modelBuilder.Entity<PaymentMode>().Property(x => x.IdPaymentMode)
               .HasConversion(x => x.ToString(), x => Ulid.Parse(x));
-            
+            modelBuilder.Entity<UserLog>().Property(x => x.IdUserLog)
+              .HasConversion(x => x.ToString(), x => Ulid.Parse(x));
+            modelBuilder.Entity<Agency>().Property(x => x.IdAgency)
+              .HasConversion(x => x.ToString(), x => Ulid.Parse(x));
+            modelBuilder.Entity<AgencyUser>().Property(x => x.IdAgencyUser)
+              .HasConversion(x => x.ToString(), x => Ulid.Parse(x));
+
             //modelBuilder.Entity<Supplier>().HasOne(c => c.buyProduct).WithOne(b => b.supplier).HasForeignKey<BuyProduct>(b => b.FkIdSupplier);
 
         }

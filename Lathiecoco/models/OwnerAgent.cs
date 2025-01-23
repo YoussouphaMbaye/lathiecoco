@@ -24,10 +24,21 @@ namespace Lathiecoco.models
         public string Profil { get; set; }
         public string Address { get; set; }
         public string AgentType { get; set; }
-     
        
         [JsonIgnore]
         public ICollection<InvoiceStartupMaster>? InvoiceStartupMasters { get; set; }
+        [JsonIgnore]
+        public ICollection<CustomerWallet>? CustomerWallets { get; set; }
+        [JsonIgnore]
+        public ICollection<PaymentMode>? PaymentModes { get; set; }
+        [JsonIgnore]
+        public ICollection<FeeSend>? FeeSends { get; set; }
+        [JsonIgnore]
+        public ICollection<Agency>? Agencies { get; set; }
+        [JsonIgnore]
+        public ICollection<UserLog>? UserLogs { get; set; }
+        [JsonIgnore]
+        public ICollection<AgencyUser>? AgencyUsers { get; set; }
 
     }
 }

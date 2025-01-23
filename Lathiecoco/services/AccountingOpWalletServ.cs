@@ -19,13 +19,15 @@ namespace  Lathiecoco.services
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.AccountingOpWallets != null)
                 {
-                    int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.AccountingOpWallets.Count() / limit);
+                    int totalCount = _CatalogDbContext.AccountingOpWallets.Count();
+                    int pageCount = (int)Math.Ceiling((decimal)totalCount / limit);
                     var ps = await _CatalogDbContext.AccountingOpWallets.Skip(skip).Take(limit).OrderByDescending(c => c.CreatedDate).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
                         rp.Body = ps;
                         rp.CurrentPage = page;
+                        rp.TotalCount = totalCount;
                         rp.TotalPage = pageCount;
 
                     }
@@ -40,6 +42,7 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
 
             }
             return rp;
@@ -53,8 +56,14 @@ namespace  Lathiecoco.services
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.AccountingOpWallets != null)
                 {
-                    int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.AccountingOpWallets.Count() / limit);
-                    var ps = await _CatalogDbContext.AccountingOpWallets.Include(i=>i.BillerInvoice).Include(i => i.InvoiceStartupMaster).Include(i => i.InvoiceWalletAgent).Where(a=>a.FkIdAccounting==idAccounting).Skip(skip).Take(limit).OrderByDescending(c => c.CreatedDate).ToListAsync();
+                    var req = _CatalogDbContext.AccountingOpWallets.Where(a => a.FkIdAccounting == idAccounting);
+                    var totalCount = req.Count();
+                    int pageCount = (int)Math.Ceiling((decimal)totalCount / limit);
+                    var ps = await req.
+                        Include(i=>i.BillerInvoice.CustomerWallet).
+                        Include(i => i.InvoiceStartupMaster).
+                        Include(i => i.InvoiceWalletAgent.CustomerWallet).
+                        Include(i => i.InvoiceWalletAgent).Where(a=>a.FkIdAccounting==idAccounting).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
@@ -76,6 +85,7 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
 
             }
             return rp;

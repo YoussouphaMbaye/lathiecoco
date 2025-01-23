@@ -3,12 +3,11 @@ using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.repository;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace  Lathiecoco.services
 {
@@ -41,6 +40,7 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Body = null;
+                rp.Code = 400;
                 rp.Msg = ex.Message;
             }
               return rp;
@@ -56,6 +56,7 @@ namespace  Lathiecoco.services
                 {
                     rp.Msg = "Staff Already exist";
                     rp.IsError = true;
+                    rp.Code = 350;
                     return rp;
                 }
                 OwnerAgent ownerAgent = new OwnerAgent();
@@ -64,7 +65,7 @@ namespace  Lathiecoco.services
                 ownerAgent.MiddleName = oa.MiddleName;
                 ownerAgent.LastName = oa.LastName;
                 ownerAgent.Phone = oa.Phone;
-                ownerAgent.Address = oa.Address;
+                ownerAgent.Address = oa.Address; 
                 ownerAgent.Country = "Guinée";
                 ownerAgent.Email = oa.Email;
                 ownerAgent.Login=oa.Login;
@@ -72,6 +73,7 @@ namespace  Lathiecoco.services
                 ownerAgent.Profil=oa.Profil;
                 ownerAgent.Address=oa.Address;
                 ownerAgent.IsActive=true;
+                ownerAgent.IsFirstLogin=true;
                 ownerAgent.AgentType=oa.AgentType;
                 ownerAgent.CreatedDate=DateTime.Now;
                 ownerAgent.UpdatedDate=DateTime.Now;
@@ -83,8 +85,51 @@ namespace  Lathiecoco.services
             }
             catch (Exception ex)
             {
+                rp.Code = 400;
                 rp.IsError = true;
-                rp.Msg = "error";
+                rp.Msg = ex.Message.ToString();
+                Console.WriteLine(ex.ToString());
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<OwnerAgent>> updateOwnerAgent(BodyAgentOwnerUpdateDto oa,Ulid idOwnerAgent)
+        {
+
+            ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
+            try
+            {
+                OwnerAgent ownerAgent = await _CatalogDbContext.OwnerAgents.Where(x => x.IdOwnerAgent==idOwnerAgent).FirstOrDefaultAsync();
+                if (ownerAgent == null)
+                {
+                    rp.Msg = "Staff not found";
+                    rp.IsError = true;
+                    rp.Code = 404;
+                    return rp;
+                }
+                ownerAgent.FirstName = oa.FirstName.Trim().Replace(" ", ""); ;
+                ownerAgent.MiddleName = oa.MiddleName.Trim().Replace(" ", ""); ;
+                ownerAgent.LastName = oa.LastName.Trim().Replace(" ", ""); ;
+                ownerAgent.Phone = oa.Phone.Trim().Replace(" ", ""); ;
+                ownerAgent.Address = oa.Address;
+                ownerAgent.Email = oa.Email;
+                ownerAgent.Password = oa.Password.Trim().Replace(" ","");
+                ownerAgent.Profil = oa.Profil;
+                ownerAgent.Address = oa.Address;
+                ownerAgent.IsActive = true;
+                ownerAgent.IsFirstLogin = true;
+                ownerAgent.UpdatedDate = DateTime.Now;
+                
+                _CatalogDbContext.OwnerAgents.Update(ownerAgent);
+                await _CatalogDbContext.SaveChangesAsync();
+                rp.Body = ownerAgent;
+
+            }
+            catch (Exception ex)
+            {
+                rp.Code = 400;
+                rp.IsError = true;
+                rp.Msg = ex.Message.ToString();
                 Console.WriteLine(ex.ToString());
             }
             return rp;
@@ -119,6 +164,7 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+                rp.Code = 400;
 
             }
             return rp;
@@ -143,6 +189,7 @@ namespace  Lathiecoco.services
                     rp.IsError= true;
                     rp.Body = null;
                     rp.Msg = "Staff not found";
+                    rp.Code = 400;
                     return rp;
                 }
                 
@@ -151,7 +198,8 @@ namespace  Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
-                rp.Msg = "error";
+                rp.Msg = ex.Message.ToString();
+                rp.Code = 400;
             }
             return rp;
         }
@@ -168,12 +216,14 @@ namespace  Lathiecoco.services
                     {
                         rp.IsError = true;
                         rp.Msg = "Your account is blocked";
+                        rp.Code = 322;
                         return rp;
                     }
                     if (!user.IsActive)
                     {
                         rp.IsError = true;
                         rp.Msg = "Your account not active";
+                        rp.Code = 320;
                         return rp;
                     }
                     //if (BCrypt.Net.BCrypt.EnhancedVerify(us.password, user.Password))
@@ -214,7 +264,7 @@ namespace  Lathiecoco.services
                         _CatalogDbContext.OwnerAgents.Update(user);
                         await _CatalogDbContext.SaveChangesAsync();
 
-                        //HttpContext.Response.Cookies.Append("token", mtoken);
+                        //_ca.HttpContext.Response.Cookies.Append("token", mtoken);
                         rp.Body = user;
 
                     }
@@ -242,6 +292,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Msg = "Login or password incorrect";
+                    rp.Code = 330;
                     return rp;
                     //throw new Exception("Login or password incorrect");
                 }

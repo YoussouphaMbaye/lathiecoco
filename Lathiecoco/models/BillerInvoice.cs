@@ -13,6 +13,7 @@ namespace Lathiecoco.models
         public string ReloadBiller { get; set; }
         public double AmountToPaid { get; set; }
         public double FeesAmount { get; set; }
+        public double? NumberOfKw { get; set; }
         public string PaymentMode { get; set; }
         public Ulid? FkIdCustomerWallet { get; set; }
         public CustomerWallet? CustomerWallet { get; set; }

@@ -95,20 +95,28 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletById(id);
 
         }
-        [HttpGet("/customerWallet/activeOrDesactive")]
+        [HttpPost("/customerWallet/activeOrDesactive")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<CustomerWallet>> activeCustomerWallet(Ulid id)
+        public async Task<ResponseBody<CustomerWallet>> activeCustomerWallet(ActiveBlockDto dto)
         {
 
-            return await _custonerWalletService.activateWallet(id);
+            return await _custonerWalletService.activateWallet(dto);
 
         }
-        [HttpGet("/customerWallet/blockeOrDebloke")]
+        [HttpPost("/customerWallet/customerWalletToAgency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<CustomerWallet>> blockeOrBlocked(Ulid id)
+        public async Task<ResponseBody<CustomerWallet>> customerWalletToAgency(CustomerToAgencyDto dto)
         {
 
-            return await _custonerWalletService.blokeOrDeblokeWallet(id);
+            return await _custonerWalletService.CustomerToAgencyDto(dto);
+
+        }
+        [HttpPost("/customerWallet/blockeOrDebloke")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<CustomerWallet>> blockeOrBlocked(ActiveBlockDto dto)
+        {
+
+            return await _custonerWalletService.blokeOrDeblokeWallet(dto);
 
         }
         [HttpGet("/customerWallet/customerWithCode")]
@@ -119,23 +127,49 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletCode(code);
 
         }
+        [HttpGet("/customerWallet/getCustomerWalletDateBetweenAndAgent")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<List<CustomerWallet>>> getCustomerWalletDateBetweenAndAgent(DateTime begenDate, DateTime endDate, Ulid? idAgent, int page = 1, int limit = 10)
+
+        {
+
+            return await _custonerWalletService.getCustomerWalletDateBetweenAndAgent(begenDate,endDate,idAgent,page,limit);
+
+        }
+
         [HttpGet("/customerWallet/findAllCustomers")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomer(int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomer(Ulid? idAgency, int page = 1, int limit = 10)
         {
 
-            return await _custonerWalletService.findAllCustomerByprofile("CUSTOMER",page, limit);
+            return await _custonerWalletService.findAllCustomerByprofile("CUSTOMER", idAgency, page, limit);
 
         }
+
+        [HttpPost("/customerWallet/definePercentagePurchase")]
+        public async Task<ActionResult> definePercentagePurchase(DefinePercentagePurchaseMasterDto dto)
+        {
+            var res = await _custonerWalletService.definePercentagePurchase(dto);
+            return Ok(res);
+        }
+
         [HttpGet("/customerWallet/findAllAgents")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<List<CustomerWallet>>> findAllAgents(int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllAgents(Ulid? idAgency, int page = 1, int limit = 10)
         {
 
-            return await _custonerWalletService.findAllCustomerByprofile("AGENT", page, limit);
+            return await _custonerWalletService.findAllCustomerByprofile("AGENT", idAgency, page, limit);
 
         }
 
+        [HttpGet("/customerWallet/findAllAgentsByAgency")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllAgentsByAgency(Ulid idAgency, int page = 1, int limit = 10)
+        {
+
+            return await _custonerWalletService.findAllAgentsByAgency(idAgency, page, limit);
+
+        }
 
     }
 }

@@ -12,6 +12,8 @@ namespace Lathiecoco.models
         [JsonIgnore]
         public CustomerWallet? CustomerWallet { get; set; }
         [JsonIgnore]
+        public Agency? Agency { get; set; }
+        [JsonIgnore]
         public Partener? Partener { get; set; }
         [JsonIgnore]
         public ICollection<AccountingOpWallet>? AccountingOpWallets { get; set; }
