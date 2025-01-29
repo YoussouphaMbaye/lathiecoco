@@ -30,7 +30,7 @@ namespace  Lathiecoco.Controllers
 
             _invoiceWalletRepService = invoiceWalletService;
         }
-        [HttpPost("/invoiceWallet")]
+        [HttpPost("/invoice-wallet")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<InvoiceWallet>> PostInvoiceWallet([FromBody] InvoiceWallet ac)
         {

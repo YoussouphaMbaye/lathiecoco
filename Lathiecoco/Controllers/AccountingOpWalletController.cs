@@ -28,7 +28,7 @@ namespace  Lathiecoco.Controllers
 
             _accountingOpRepService = accountingOpRepService;
         }
-        [HttpGet("/accountingOpWllet/findAll")]
+        [HttpGet("/accounting-op-wallet/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWallet(int page = 1, int limit = 10)
         {
@@ -36,7 +36,7 @@ namespace  Lathiecoco.Controllers
             return await _accountingOpRepService.findAllAccountingOpWallet(page, limit);
 
         }
-        [HttpGet("/accountingOpWllet/withAccounting")]
+        [HttpGet("/accounting-op-Wallet/with-accounting")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWalletWithAccounting(Ulid idAccounting,int page = 1, int limit = 10)
         {

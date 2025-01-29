@@ -30,7 +30,7 @@ namespace  Lathiecoco.Controllers
 
             _invoiceWalletCashierService = invoiceWalletCashService;
         }
-        [HttpPost("/invoiceWalletAgent")]
+        [HttpPost("/invoice-wallet-agent")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<InvoiceWalletAgent>> PostInvoiceWalletCashier([FromBody] InvoiceWalletAgent ac)
         {
@@ -38,7 +38,7 @@ namespace  Lathiecoco.Controllers
             return await _invoiceWalletCashierService.addInvoiceWallet(ac);
 
         }
-        [HttpPost("/invoiceWalletAgent/withdraw")]
+        [HttpPost("/invoice-wallet-agent/withdraw")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<InvoiceWalletAgent>> withdraw([FromBody] BodyInvoiceWalletCashier ac)
         {
@@ -46,7 +46,7 @@ namespace  Lathiecoco.Controllers
             return await _invoiceWalletCashierService.withdraw(ac);
 
         }
-        [HttpPost("/invoiceWalletAgent/deposit")]
+        [HttpPost("/invoice-wallet-agent/deposit")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<InvoiceWalletAgent>> deposit([FromBody] BodyInvoiceWalletCashier ac)
         {
@@ -54,7 +54,7 @@ namespace  Lathiecoco.Controllers
             return await _invoiceWalletCashierService.deposit(ac);
 
         }
-        [HttpGet("/invoiceWalletAgent/findAll")]
+        [HttpGet("/invoice-wallet-agent/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<InvoiceWalletAgent>>> findAllAccounting(int page = 1, int limit = 10)
         {
@@ -62,14 +62,14 @@ namespace  Lathiecoco.Controllers
             return await _invoiceWalletCashierService.findAllInvoiceWallet(page, limit);
 
         }
-        [HttpGet("/invoiceWalletAgent/searche")]
+        [HttpGet("/invoice-wallet-agent/searche")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<InvoiceWalletAgent>>> searcheinvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page = 1, int limit = 10)
         {
             return await _invoiceWalletCashierService.searcheInvoiceWalletAgent(status, code, beginDate, endDate, page, limit)
 ;
         }
-        [HttpGet("/invoiceWalletAgent/findById")]
+        [HttpGet("/invoice-wallet-agent/find-by-id")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<InvoiceWalletAgent>> findById(Ulid id)
         {
@@ -77,7 +77,7 @@ namespace  Lathiecoco.Controllers
             return await _invoiceWalletCashierService.findWalletCashierById(id);
 
         }
-        [HttpGet("/invoiceWalletAgent/depositStatisticByAgentDto")]
+        [HttpGet("/invoice-wallet-agent/deposit-statistic-by-agent")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<DepositStatisticByAgentDto>>> depositStatisticByAgentDto(DateTime begenDate, DateTime endDate,string status, Ulid? idAgent)
         {

@@ -30,7 +30,7 @@ namespace  Lathiecoco.Controllers
             _custonerWalletService = custonerWalletService;
         }
        
-        [HttpPost("/customerWallet/PostCustomerWalletPhoneOnly")]
+        [HttpPost("/customer-wallet/post-customer-wallet-phone-only")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> PostCustomerWalletPhoneOnly([FromBody] BodyCustomerPhoneDto cu)
         {
@@ -38,7 +38,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.addCustomerWithAccountingPhoneOnly(cu);
 
         }
-        [HttpPost("/customerWallet/UpdateCustomerInfos")]
+        [HttpPost("/customer-wallet/update-customer-infos")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> UpdateCustomerInfos([FromBody] CustomerUpdateInfosDto cu)
         {
@@ -46,7 +46,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.updateCustomerInformations(cu);
 
         }
-        [HttpPost("/customerWallet/UpdateCustomerPin")]
+        [HttpPost("/customer-wallet/update-customer-pin")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> UpdateCustomerPin([FromBody] CustomerUpadatePinDto cu)
         {
@@ -54,7 +54,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.updateCustomerPin(cu);
 
         }
-        [HttpPost("/customerWallet/login")]
+        [HttpPost("/customer-wallet/login")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> customerWalletLogin([FromBody] BodyLoginDto cu)
         {
@@ -62,7 +62,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletPinContryidentityPhone(cu);
 
         }
-        [HttpPost("/customerWallet/confPinTemp")]
+        [HttpPost("/customer-wallet/conf-pin-temp")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> confPinTemp([FromBody] BodyConfPinTempDto cu)
         {
@@ -70,7 +70,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletPintempContryidentityPhone(cu);
 
         }
-        [HttpPost("/customerWallet/customerWalletWithPhoneAndIdentity")]
+        [HttpPost("/customer-wallet/customer-wallet-with-phone-and-identity")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> customerWalletWithPhoneAndIdentity([FromBody] BodyPhoneShDto cu)
         {
@@ -78,7 +78,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletContryidentityAndPhone(cu);
 
         }
-        [HttpPut("/customerWallet/updateByStaff")]
+        [HttpPut("/customer-wallet/update-by-staff")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> customerWalletUpdateByStaff([FromBody] CustomerUpdateDto cu)
         {
@@ -87,7 +87,7 @@ namespace  Lathiecoco.Controllers
 
         }
         
-        [HttpGet("/customerWallet/findById")]
+        [HttpGet("/customer-wallet/find-by-id")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> findById(Ulid id)
         {
@@ -95,7 +95,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletById(id);
 
         }
-        [HttpPost("/customerWallet/activeOrDesactive")]
+        [HttpPost("/customer-wallet/active-or-deactivate")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> activeCustomerWallet(ActiveBlockDto dto)
         {
@@ -103,7 +103,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.activateWallet(dto);
 
         }
-        [HttpPost("/customerWallet/customerWalletToAgency")]
+        [HttpPost("/customer-wallet/customer-wallet-to-agency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> customerWalletToAgency(CustomerToAgencyDto dto)
         {
@@ -111,7 +111,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.CustomerToAgencyDto(dto);
 
         }
-        [HttpPost("/customerWallet/blockeOrDebloke")]
+        [HttpPost("/customer-wallet/blocke-or-debloke")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> blockeOrBlocked(ActiveBlockDto dto)
         {
@@ -119,7 +119,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.blokeOrDeblokeWallet(dto);
 
         }
-        [HttpGet("/customerWallet/customerWithCode")]
+        [HttpGet("/customer-wallet/customer-with-code")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> customerWithCode(string code)
         {
@@ -127,7 +127,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.findCustomerWalletCode(code);
 
         }
-        [HttpGet("/customerWallet/getCustomerWalletDateBetweenAndAgent")]
+        [HttpGet("/customer-wallet/customer-wallet-date-between-and-agent")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<CustomerWallet>>> getCustomerWalletDateBetweenAndAgent(DateTime begenDate, DateTime endDate, Ulid? idAgent, int page = 1, int limit = 10)
 
@@ -137,7 +137,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
-        [HttpGet("/customerWallet/findAllCustomers")]
+        [HttpGet("/customer-wallet/find-all-customers")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomer(Ulid? idAgency, int page = 1, int limit = 10)
         {
@@ -146,14 +146,14 @@ namespace  Lathiecoco.Controllers
 
         }
 
-        [HttpPost("/customerWallet/definePercentagePurchase")]
+        [HttpPost("/customer-wallet/define-percentage-purchase")]
         public async Task<ActionResult> definePercentagePurchase(DefinePercentagePurchaseMasterDto dto)
         {
             var res = await _custonerWalletService.definePercentagePurchase(dto);
             return Ok(res);
         }
 
-        [HttpGet("/customerWallet/findAllAgents")]
+        [HttpGet("/customer-wallet/find-all-agents")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<CustomerWallet>>> findAllAgents(Ulid? idAgency, int page = 1, int limit = 10)
         {
@@ -162,7 +162,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
-        [HttpGet("/customerWallet/findAllAgentsByAgency")]
+        [HttpGet("/customer-wallet/find-all-agents-by-agency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<CustomerWallet>>> findAllAgentsByAgency(Ulid idAgency, int page = 1, int limit = 10)
         {

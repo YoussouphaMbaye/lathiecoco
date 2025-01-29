@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace  Lathiecoco.Controllers
@@ -37,7 +38,7 @@ namespace  Lathiecoco.Controllers
             _agentOwnerServ = agentOwnerServ;
             _contextAccessor = contextAccessor;
         }
-        [HttpPost("/agentOwner")]
+        [HttpPost("/agent-owner")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> PostAgentOwner([FromBody] BodyOwnerAgentDto oa)
         {
@@ -50,7 +51,7 @@ namespace  Lathiecoco.Controllers
 
 
         }
-        [HttpPut("/agentOwner")]
+        [HttpPut("/agent-owner")]
         public async Task<ActionResult> updateAgentOwner([FromBody] BodyAgentOwnerUpdateDto oa,Ulid idOwnerAgent)
         {
             if (!ModelState.IsValid)
@@ -63,7 +64,69 @@ namespace  Lathiecoco.Controllers
 
 
         }
-        [HttpPost("/agentOwner/login")]
+
+        [HttpPost("/agent-owner/refresh-token")]
+        public async Task<ActionResult> refreshToken()
+        {
+            ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
+            try
+            {
+
+                string refreshToken = _contextAccessor.HttpContext.Request.Cookies["tokenRefresh"];
+
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    rp.Code = 400;
+                    rp.IsError = true;
+                    rp.Msg = "No refresh Token!";
+
+                    return BadRequest(rp);
+                }
+
+                OwnerAgent user = await _catalogDbContext.OwnerAgents.FirstOrDefaultAsync(au => au.TokenRefresh == refreshToken);
+
+                if (user == null)
+                {
+                    rp.Code = 401;
+                    rp.IsError = true;
+                    rp.Msg = "Invalid refresh Token!";
+                    return Unauthorized(rp);
+                }
+
+                else if (user.ExpireDateTokenRefresh < DateTime.UtcNow)
+                {
+                    rp.Code = 401;
+                    rp.IsError = true;
+                    rp.Msg = "Token Expired!";
+                    return Unauthorized(rp);
+                }
+                //var token = await BuildToken(userInfo, new[] { RoleTypes.User });
+                var claims = new List<Claim>() {
+                          new Claim("Username", user.Login),
+                          new Claim("id",user.IdOwnerAgent.ToString()),
+                          new Claim(ClaimTypes.Role, user.Profil)
+
+                        };
+
+                rp.Msg = "Success";
+                var mtoken = getToken(claims);
+                var newRefreshToken = genrateRefreshToken();
+                await setRefreshToken(newRefreshToken, user);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append("token", mtoken);
+
+                return Ok(rp);
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+                return BadRequest(rp);
+            }
+
+
+        }
+        [HttpPost("/agent-owner/login")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> LoginAgentOwner([FromBody] LoginDto ldto)
         {
@@ -71,7 +134,6 @@ namespace  Lathiecoco.Controllers
             {
                 return BadRequest(ModelState);
             }
-
 
             string mtoken = "";
             ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
@@ -82,16 +144,16 @@ namespace  Lathiecoco.Controllers
                 {
                     if (user.IsBlocked)
                     {
+                        rp.Code = 322;
                         rp.IsError = true;
                         rp.Msg = "Your account is blocked";
-                        rp.Code = 322;
                         return Ok(rp);
                     }
                     if (!user.IsActive)
                     {
+                        rp.Code = 320;
                         rp.IsError = true;
                         rp.Msg = "Your account not active";
-                        rp.Code = 320;
                         return Ok(rp);
                     }
                     //if (BCrypt.Net.BCrypt.EnhancedVerify(us.password, user.Password))
@@ -105,23 +167,9 @@ namespace  Lathiecoco.Controllers
 
                         };
 
-
-                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
-
-                        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                        var expiration = DateTime.UtcNow.AddMinutes(5);
-                        JwtSecurityToken token = new JwtSecurityToken(
-                           issuer: null,
-                           audience: null,
-                           claims: claims,
-                           expires: expiration,
-                           signingCredentials: creds
-                        );
-
-                        Console.WriteLine("====================tttt======================");
-                        mtoken = new JwtSecurityTokenHandler().WriteToken(token);
-                        Console.WriteLine(mtoken);
+                        var newRefreshToken = genrateRefreshToken();
+                        await setRefreshToken(newRefreshToken, user);
+                        mtoken = getToken(claims);
 
                         if (user.LoginCount > 1)
                         {
@@ -159,9 +207,9 @@ namespace  Lathiecoco.Controllers
                 }
                 else
                 {
+                    rp.Code = 330;
                     rp.IsError = true;
                     rp.Msg = "Login or password incorrect";
-                    rp.Code = 330;
                     return Ok(rp);
                     //throw new Exception("Login or password incorrect");
                 }
@@ -174,14 +222,66 @@ namespace  Lathiecoco.Controllers
                 rp.Body = null;
 
             }
+
             return Ok(rp);
 
-            //var rep = await _agentOwnerServ.login(ldto);
-            //return Ok(rep);
+        }
+
+        [NonAction]
+        public string getToken(List<Claim> claims)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var expiration = DateTime.UtcNow.AddMinutes(5);
+            JwtSecurityToken token = new JwtSecurityToken(
+               issuer: null,
+               audience: null,
+               claims: claims,
+               expires: expiration,
+               signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
 
 
         }
-        [HttpGet("/ownerAgent/findAll")]
+
+        [NonAction]
+        public async Task setRefreshToken(string refreshToken, OwnerAgent user)
+        {
+            var newDate = DateTime.UtcNow.AddMinutes(60 * 24);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newDate,
+            };
+
+            _contextAccessor.HttpContext.Response.Cookies.Append("tokenRefresh", refreshToken, cookieOptions);
+
+            user.TokenRefresh = refreshToken;
+            user.ExpireDateTokenRefresh = newDate;
+            _catalogDbContext.OwnerAgents.Update(user);
+            await _catalogDbContext.SaveChangesAsync();
+
+
+        }
+
+        [NonAction]
+        public string genrateRefreshToken()
+
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
+
+        }
+
+        [HttpGet("/owner-agent/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<OwnerAgent>>> findAllAgentOwner(int page = 1, int limit = 10)
         {
@@ -189,7 +289,7 @@ namespace  Lathiecoco.Controllers
             return await _agentOwnerServ.findAllOwnerAgents(page, limit);
 
         }
-        [HttpGet("/ownerAgent/getStatistics")]
+        [HttpGet("/owner-agent/statistics")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<BodyNbCountDto>> getStatistics()
         {

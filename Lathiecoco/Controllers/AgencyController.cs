@@ -52,14 +52,14 @@ namespace Lathiecoco.controller
             return Ok(res);
         }
         
-        [HttpPost("/agencies/definePercentagePurchase")]
+        [HttpPost("/agencies/define-percentage-purchase")]
         public async Task<ActionResult> definePercentagePurchase(DefinePercentagePurchaseAgentDto dto)
         {
             var res = await _agencyService.definePercentagePurchase(dto);
             return Ok(res);
         }
         
-        [HttpGet("/agencies/AgencyById")]
+        [HttpGet("/agencies/agency-by-id")]
         public async Task<ActionResult> getAgencyById(Ulid id)
         {
             var res = await _agencyService.getAgencyById(id);

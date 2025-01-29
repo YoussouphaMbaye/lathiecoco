@@ -21,6 +21,8 @@ namespace Lathiecoco.models
         public string Password { get; set; }
         public string Profil { get; set; }
         public string Address { get; set; }
+        public string? TokenRefresh { get; set; }
+        public DateTime? ExpireDateTokenRefresh { get; set; }
         public Ulid FkIdStaff { get; set; }
         public OwnerAgent? Staff { get; set; }
         public Ulid FkIdAgency { get; set; }

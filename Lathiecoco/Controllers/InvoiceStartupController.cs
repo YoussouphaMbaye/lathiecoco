@@ -27,7 +27,7 @@ namespace  Lathiecoco.Controllers
 
             this._invoiceStartupMasterServ = invoiceStartupMasterServ;
         }
-        [HttpPost("/invoiceStartupMaster/initiateInvoiceStartupMasterServ")]
+        [HttpPost("/invoice-startup-master/initiate-invoice-startup-master")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> intiateMasterAgencyTransactions([FromBody] BodyInvoiceStartupMaster ma)
         {
@@ -35,7 +35,7 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
-        [HttpPost("/invoiceStartupMaster/initiateInvoiceStarupMasterByAgency")]
+        [HttpPost("/invoice-startup-master/initiate-invoice-startup-master-by-agency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> initiateInvoiceStarupMasterByAgency([FromBody] BodyInvoiceStartupMasterByAgent body)
         {
@@ -61,14 +61,14 @@ namespace  Lathiecoco.Controllers
 
             return Ok(res);
         }
-        [HttpGet("/invoiceStartupMaster/findAll")]
+        [HttpGet("/invoice-startup-master/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<List<ResponseBody<InvoiceStartupMaster>>>> findAll(int page = 1, int limit = 10)
         {
             var res = await _invoiceStartupMasterServ.findAllInvoiceStartupMasterAgency(page, limit);
             return Ok(res);
         }
-        [HttpPost("/invoiceStartupMaster/validateTransactions")]
+        [HttpPost("/invoice-startup-master/validate-transactions")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> validateTransactions(BodyValidInvoiceStartupMaster bodyValidInvoiceStartupMaster)
         {
@@ -76,7 +76,7 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
-        [HttpPost("/invoiceStartupMaster/validateInvoiceStartupMasterOfAgencyByStaff")]
+        [HttpPost("/invoice-startup-master/validate-invoice-startup-master-of-agency-by-staff")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> validateInvoiceStartupMasterOfAgency(BodyValidInvoiceStartupMaster bodyValidInvoiceStartupMaster)
         {
@@ -84,7 +84,7 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
-        [HttpPost("/invoiceStartupMaster/validateTransactionsByAgencyUser")]
+        [HttpPost("/invoice-startup-master/validate-transactions-by-agency-user")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> validateTransactionByAgencyUser(ValidateInvoiceStartupMasterDto dto)
         {
@@ -92,14 +92,14 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
-        [HttpGet("/invoiceStartupMaster/byStaff")]
+        [HttpGet("/invoice-startup-master/by-staff")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<List<ResponseBody<InvoiceStartupMaster>>>> byStaff(Ulid fkIdOwnerAgent,int page = 1, int limit = 10)
         {
             var res = await _invoiceStartupMasterServ.findInvoiceStartupByOwnerAgent(fkIdOwnerAgent,page,limit);
             return Ok(res);
         }
-        [HttpGet("/invoiceStartupMaster/byAgency")]
+        [HttpGet("/invoice-startup-master/by-agency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<List<ResponseBody<InvoiceStartupMaster>>>> byAgency(Ulid idAgency, int page = 1, int limit = 10)
         {
@@ -107,21 +107,21 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
-        [HttpGet("/invoiceStartupMaster/byId")]
+        [HttpGet("/invoice-startup-master/by-id")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<InvoiceStartupMaster>>> byId(Ulid id)
         {
             var res = await _invoiceStartupMasterServ.findInvoiceStarupMasterById(id);
             return Ok(res);
         }
-        [HttpGet("/invoiceStartupMaster/byMaster")]
+        [HttpGet("/invoice-startup-master/by-master")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<List<ResponseBody<InvoiceStartupMaster>>>> byMaster(Ulid fkIdMaster, int page = 1, int limit = 10)
         {
             var res = await _invoiceStartupMasterServ.findInvoiceStartupByMaster(fkIdMaster, page, limit);
             return Ok(res);
         }
-        [HttpGet("/invoiceStartupMaster/searche")]
+        [HttpGet("/invoice-startup-master/search")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<InvoiceStartupMaster>>> searcheInvoiceStartupMaster(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page = 1, int limit = 10)
         {
