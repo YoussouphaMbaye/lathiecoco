@@ -31,8 +31,8 @@ namespace Lathiecoco.services
                 ac.IdAccounting = Ulid.NewUlid();
                 ac.Currency = "GNF";
                 ac.Balance = 0;
-                ac.CreatedDate = DateTime.Now;
-                ac.UpdatedDate = DateTime.Now;
+                ac.CreatedDate = DateTime.UtcNow;
+                ac.UpdatedDate = DateTime.UtcNow;
 
                 await _CatalogDbContext.Accountings.AddAsync(ac);
                 await _CatalogDbContext.SaveChangesAsync();
@@ -44,11 +44,11 @@ namespace Lathiecoco.services
                 agency.name=ag.name.ToUpper();
                 agency.email=ag.email;
                 agency.phone=ag.phone;
-                string newcode =GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                string newcode =GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 agency.code= ag.name.ToUpper().Substring(0,3)+ newcode.Substring(newcode.Length-4);
                 //agency.login=ag.login;
-                agency.CreatedDate=DateTime.Now;
-                agency.UpdatedDate=DateTime.Now;
+                agency.CreatedDate=DateTime.UtcNow;
+                agency.UpdatedDate=DateTime.UtcNow;
                 agency. FkIdStaff=ag.fkIdStaff;
 
                 await _CatalogDbContext.Agencies.AddAsync(agency);
@@ -79,7 +79,7 @@ namespace Lathiecoco.services
                     agency.email = ag.email;
                     agency.phone = ag.phone.Trim().Replace(" ","");
                     agency.name = ag.name.ToUpper();
-                    agency.UpdatedDate = DateTime.Now;
+                    agency.UpdatedDate = DateTime.UtcNow;
                     _CatalogDbContext.Agencies.Update(agency);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = agency;
@@ -113,7 +113,7 @@ namespace Lathiecoco.services
                 {
 
                     ag.PercentagePurchase = dto.Percentage;
-                    ag.UpdatedDate = DateTime.Now;
+                    ag.UpdatedDate = DateTime.UtcNow;
                     ag.FkIdStaff=dto.IdStaff;
 
                     _CatalogDbContext.Agencies.Update(ag);

@@ -189,9 +189,9 @@ namespace Lathiecoco.services
                         TimeSpan diff = date.ToUniversalTime() - origin;
                         return Math.Floor(diff.TotalSeconds);
                     }
-                    string dayToday = ConvertToUnixTimestamp(DateTime.Now).ToString();
+                    string dayToday = ConvertToUnixTimestamp(DateTime.UtcNow).ToString();
                     invoice.IdBillerInvoice= Ulid.NewUlid();
-                    invoice.InvoiceCode = "F" + GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                    invoice.InvoiceCode = "F" + GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                     invoice.PaymentMode = paymentMode1.Name.ToString();
                     invoice.FkIdPaymentMode = paymentMode1.IdPaymentMode;
                     invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
@@ -202,8 +202,8 @@ namespace Lathiecoco.services
                     invoice.AmountToPaid = biller.AmountToPaid;
                     invoice.CustomerWallet = null;
                     invoice.FkIdFeeSend = feeSend.IdFeeSend;
-                    invoice.CreatedDate = DateTime.Now;
-                    invoice.UpdatedDate = DateTime.Now;
+                    invoice.CreatedDate = DateTime.UtcNow;
+                    invoice.UpdatedDate = DateTime.UtcNow;
 
                     //calculer fee amountToSend amountToPaid
                     float aa = 0.01f;
@@ -269,9 +269,9 @@ namespace Lathiecoco.services
                             acw.FkIdAccounting = senderAccounting.IdAccounting;
                             acw.Credited = 0;
                             acw.DeBited = amountTopaid;
-                            acw.CreatedDate = DateTime.Now;
+                            acw.CreatedDate = DateTime.UtcNow;
                             acw.PaymentMode = paymentMode1.Name;
-                            acw.UpdatedDate = DateTime.Now;
+                            acw.UpdatedDate = DateTime.UtcNow;
                             acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
                             acw.NewBalance = senderAccounting.Balance;
                             await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
@@ -389,7 +389,7 @@ namespace Lathiecoco.services
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
             try {
-                DateTime myDateTime = DateTime.Now;
+                DateTime myDateTime = DateTime.UtcNow;
                 string dateNow = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
                 if(endDate!=null) {

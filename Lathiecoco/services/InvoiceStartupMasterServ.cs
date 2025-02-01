@@ -341,19 +341,20 @@ namespace  Lathiecoco.services
                         //invoice.AmountToReceived = ism.AmountToSend;
                         //invoice.FkIdStaff = ism.FkIdStaff;
                         invoice.FkIdAgent = ism.FkIdMaster;
-                        invoice.CreatedDate = DateTime.Now;
-                        invoice.UpdatedDate = DateTime.Now;
+                        invoice.CreatedDate = DateTime.UtcNow;
+                        invoice.UpdatedDate = DateTime.UtcNow;
                         
-                        string dayToday =GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                        string dayToday =GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                         invoice.InvoiceCode = "M" + dayToday;
                         //searche paymentMode
-                        PaymentMode pm = await _CatalogDbContext.PaymentModes.Where(o => o.Name.ToString() == "SM").FirstOrDefaultAsync();
+                        PaymentMode pm = await _CatalogDbContext.PaymentModes.Where(o => o.Name == "AM").FirstOrDefaultAsync();
 
                         if (pm != null)
                         {
                             FeeSend feeSend =await _CatalogDbContext.FeeSends.Where(f=>f.FkIdPaymentMode==pm.IdPaymentMode).FirstOrDefaultAsync();
 
-                         
+                        if (feeSend != null)
+                        {
                             if (feeSend.MinAmount < ism.AmountToSend && feeSend.MaxAmount > ism.AmountToSend)
                             {
 
@@ -365,7 +366,14 @@ namespace  Lathiecoco.services
                                 rp.Code = 305;
                                 return rp;
                             }
-
+                        }
+                        else
+                        {
+                            rp.Msg = "fees not configured: " + pm.Name + "!"; ;
+                            rp.IsError = true;
+                            rp.Code = 602;
+                            return rp;
+                        }
                             
                             
                         
@@ -382,20 +390,28 @@ namespace  Lathiecoco.services
                         aOpCsh.DeBited = 0;
                         aOpCsh.PaymentMode = invoice.PaymentModeObj.Name.ToString();
                         aOpCsh.NewBalance = 0;
-                        aOpCsh.CreatedDate = DateTime.Now;
-                        aOpCsh.UpdatedDate = DateTime.Now;
+                        aOpCsh.CreatedDate = DateTime.UtcNow;
+                        aOpCsh.UpdatedDate = DateTime.UtcNow;
                         _CatalogDbContext.AccountingOpWallets.Add(aOpCsh);
                         await _CatalogDbContext.SaveChangesAsync();
                         transaction.Commit();
                     }
                         else
                         {
-                            throw new Exception("Payment mode MA not found");
+                            rp.Msg = "Payment mode MA not found!";
+                            rp.IsError = true;
+                            rp.Code = 600;
+                            return rp;
+                        
                         }
                     }
                     else
                     {
-                        throw new Exception("Master not found");
+                        rp.Msg = "Master not found!";
+                        rp.IsError = true;
+                        rp.Code = 601;
+                        return rp;
+                        
                     }
                 
 
@@ -424,7 +440,6 @@ namespace  Lathiecoco.services
                 AgencyUser master1 = await _CatalogDbContext.AgencyUsers.Include(a=>a.Agency).Include(a => a.Agency.Accounting).Where(c => c.IdAgencyUser == ism.FkIdAgencyUser).FirstOrDefaultAsync();
                 if (master1 != null)
                 {
-                   
 
                     if (!master1.IsActive)
                     {
@@ -438,7 +453,7 @@ namespace  Lathiecoco.services
                     {
                         rp.IsError = true;
                         rp.Body = null;
-                        rp.Msg = "Your account is blocked";
+                        rp.Msg = "Your account is blocked!";
                         return rp;
                     }
 
@@ -457,35 +472,44 @@ namespace  Lathiecoco.services
                         invoice.AmountToPaid = (double)((agency.PercentagePurchase * ism.AmountToSend) + ism.AmountToSend);
                     }
 
-
                     invoice.IdInvoiceStartupMaster = Ulid.NewUlid();
                     invoice.InvoiceStatus = "A";
                     invoice.AmountToSend = ism.AmountToSend;
                     //invoice.AmountToReceived = ism.AmountToSend;
                     //invoice.FkIdStaff = ism.FkIdStaff;
                     invoice.FkIdAgencyUser = ism.FkIdAgencyUser;
-                    invoice.CreatedDate = DateTime.Now;
-                    invoice.UpdatedDate = DateTime.Now;
+                    invoice.CreatedDate = DateTime.UtcNow;
+                    invoice.UpdatedDate = DateTime.UtcNow;
 
-                    string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                    string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                     invoice.InvoiceCode = "M" + dayToday;
                     //searche paymentMode
-                    PaymentMode pm = await _CatalogDbContext.PaymentModes.Where(o => o.Name.ToString() == "SM").FirstOrDefaultAsync();
+                    PaymentMode pm = await _CatalogDbContext.PaymentModes.Where(o => o.Name  == "SM").FirstOrDefaultAsync();
 
                     if (pm != null)
                     {
                         FeeSend feeSend = await _CatalogDbContext.FeeSends.Where(f => f.FkIdPaymentMode == pm.IdPaymentMode).FirstOrDefaultAsync();
 
-
-                        if (feeSend.MinAmount < ism.AmountToSend && feeSend.MaxAmount > ism.AmountToSend)
+                        if (feeSend != null)
                         {
 
+                            if (feeSend.MinAmount < ism.AmountToSend && feeSend.MaxAmount > ism.AmountToSend)
+                            {
+
+                            }
+                            else
+                            {
+                                rp.Msg = "Amount is not in defined interval!!";
+                                rp.IsError = true;
+                                rp.Code = 305;
+                                return rp;
+                            }
                         }
                         else
                         {
-                            rp.Msg = "Amount is not in defined interval!!";
+                            rp.Msg = "fees not configured: " + pm.Name +"!";
                             rp.IsError = true;
-                            rp.Code = 305;
+                            rp.Code = 602;
                             return rp;
                         }
                         invoice.FkIdPaymentMode = pm.IdPaymentMode;
@@ -505,20 +529,27 @@ namespace  Lathiecoco.services
                         aOpCsh.DeBited = 0;
                         aOpCsh.PaymentMode = invoice.PaymentModeObj.Name.ToString();
                         aOpCsh.NewBalance = 0;
-                        aOpCsh.CreatedDate = DateTime.Now;
-                        aOpCsh.UpdatedDate = DateTime.Now;
+                        aOpCsh.CreatedDate = DateTime.UtcNow;
+                        aOpCsh.UpdatedDate = DateTime.UtcNow;
                         _CatalogDbContext.AccountingOpWallets.Add(aOpCsh);
                         await _CatalogDbContext.SaveChangesAsync();
                         transaction.Commit();
                     }
                     else
                     {
-                        throw new Exception("Payment mode MA not found");
+                        rp.Msg = "Payment mode SM not found!";
+                        rp.IsError = true;
+                        rp.Code = 600;
+                        return rp;
                     }
                 }
                 else
                 {
-                    throw new Exception("Master not found");
+                    rp.Msg = "Master not found!";
+                    rp.IsError = true;
+                    rp.Code = 601;
+                    return rp;
+                  
                 }
 
 
@@ -570,7 +601,7 @@ namespace  Lathiecoco.services
             ResponseBody<List<InvoiceStartupMaster>> rp = new ResponseBody<List<InvoiceStartupMaster>>();
             try
             {
-                DateTime myDateTime = DateTime.Now;
+                DateTime myDateTime = DateTime.UtcNow;
                 string dateNow = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
                 if (endDate != null)
@@ -690,14 +721,14 @@ namespace  Lathiecoco.services
                         aOpCsh.DeBited = 0;
                         aOpCsh.NewBalance = MasterAccounting.Balance;
 
-                        aOpCsh.UpdatedDate = DateTime.Now;
+                        aOpCsh.UpdatedDate = DateTime.UtcNow;
                         _CatalogDbContext.AccountingOpWallets.Update(aOpCsh);
                         await _CatalogDbContext.SaveChangesAsync();
 
                         //Change status of transactions
                         invoice.InvoiceStatus = "P";
-                        invoice.ValidateAt = DateTime.Now;
-                        invoice.UpdatedDate = DateTime.Now;
+                        invoice.ValidateAt = DateTime.UtcNow;
+                        invoice.UpdatedDate = DateTime.UtcNow;
                         invoice.FkIdStaff = bodyValidInvoiceStartupMaster.FkIdStaff;
                         _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
                         await _CatalogDbContext.SaveChangesAsync();
@@ -789,14 +820,14 @@ namespace  Lathiecoco.services
                         aOpCsh.DeBited = 0;
                         aOpCsh.NewBalance = MasterAccounting.Balance;
 
-                        aOpCsh.UpdatedDate = DateTime.Now;
+                        aOpCsh.UpdatedDate = DateTime.UtcNow;
                         _CatalogDbContext.AccountingOpWallets.Update(aOpCsh);
                         await _CatalogDbContext.SaveChangesAsync();
 
                         //Change status of transactions
                         invoice.InvoiceStatus = "P";
-                        invoice.ValidateAt = DateTime.Now;
-                        invoice.UpdatedDate = DateTime.Now;
+                        invoice.ValidateAt = DateTime.UtcNow;
+                        invoice.UpdatedDate = DateTime.UtcNow;
                         invoice.FkIdStaff = bodyValidInvoiceStartupMaster.FkIdStaff;
                         _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
                         await _CatalogDbContext.SaveChangesAsync();
@@ -958,10 +989,10 @@ namespace  Lathiecoco.services
                         aOpMasterAccounting.NewBalance = MasterAccounting.Balance;
                         aOpMasterAccounting.PaymentMode = invoice.PaymentMode;
                         aOpMasterAccounting.DeBited = invoice.AmountToPaid;
-                        aOpMasterAccounting.CreatedDate= DateTime.Now;
+                        aOpMasterAccounting.CreatedDate= DateTime.UtcNow;
                         aOpMasterAccounting.Credited = 0;
 
-                        aOpMasterAccounting.UpdatedDate = DateTime.Now;
+                        aOpMasterAccounting.UpdatedDate = DateTime.UtcNow;
                         await _CatalogDbContext.AccountingOpWallets.AddAsync(aOpMasterAccounting);
                         await _CatalogDbContext.SaveChangesAsync();
 
@@ -971,7 +1002,7 @@ namespace  Lathiecoco.services
                         //aOpCsh.FkIdAccounting = AgentAccounting.IdAccounting;
                         aOpCsh.NewBalance = AgentAccounting.Balance;
                         aOpCsh.Credited = invoice.AmountToPaid;
-                        aOpCsh.UpdatedDate = DateTime.Now;
+                        aOpCsh.UpdatedDate = DateTime.UtcNow;
                         aOpCsh.DeBited = 0;
                         
                         _CatalogDbContext.AccountingOpWallets.Update(aOpCsh);
@@ -979,8 +1010,8 @@ namespace  Lathiecoco.services
 
                         //Change status of transactions
                         invoice.InvoiceStatus = "P";
-                        invoice.ValidateAt=DateTime.Now;
-                        invoice.UpdatedDate = DateTime.Now;
+                        invoice.ValidateAt=DateTime.UtcNow;
+                        invoice.UpdatedDate = DateTime.UtcNow;
                         invoice.FkIdAgencyUser = dto.IdAgencyUser;
                         _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
                         await _CatalogDbContext.SaveChangesAsync();

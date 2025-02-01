@@ -54,8 +54,8 @@ namespace Lathiecoco.services
                 AgencyUser.Address = oa.Address;
                 AgencyUser.IsActive = true;
                 AgencyUser.IsFirstLogin = true;
-                AgencyUser.CreatedDate = DateTime.Now;
-                AgencyUser.UpdatedDate = DateTime.Now;
+                AgencyUser.CreatedDate = DateTime.UtcNow;
+                AgencyUser.UpdatedDate = DateTime.UtcNow;
                 await _CatalogDbContext.AgencyUsers.AddAsync(AgencyUser);
                 await _CatalogDbContext.SaveChangesAsync();
                 rp.Body = AgencyUser;
@@ -81,7 +81,7 @@ namespace Lathiecoco.services
 
                     agu.IsActive = !agu.IsActive;
                     agu.FkIdStaff = dto.FkIdStaff;
-                    agu.UpdatedDate = DateTime.Now;
+                    agu.UpdatedDate = DateTime.UtcNow;
                     _CatalogDbContext.AgencyUsers.Update(agu);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = agu;
@@ -116,7 +116,7 @@ namespace Lathiecoco.services
 
                     agu.IsBlocked = !agu.IsBlocked;
                     agu.FkIdStaff = dto.FkIdStaff;
-                    agu.UpdatedDate = DateTime.Now;
+                    agu.UpdatedDate = DateTime.UtcNow;
                     _CatalogDbContext.AgencyUsers.Update(agu);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = agu;
@@ -168,7 +168,7 @@ namespace Lathiecoco.services
                 AgencyUser.Profil = oa.Profil;
                 AgencyUser.Address = oa.Address;
                 AgencyUser.IsActive = true;
-                AgencyUser.UpdatedDate = DateTime.Now;
+                AgencyUser.UpdatedDate = DateTime.UtcNow;
                 _CatalogDbContext.AgencyUsers.Update(AgencyUser);
                 await _CatalogDbContext.SaveChangesAsync();
                 rp.Body = AgencyUser;

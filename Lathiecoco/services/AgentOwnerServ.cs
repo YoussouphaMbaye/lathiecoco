@@ -75,9 +75,9 @@ namespace  Lathiecoco.services
                 ownerAgent.IsActive=true;
                 ownerAgent.IsFirstLogin=true;
                 ownerAgent.AgentType=oa.AgentType;
-                ownerAgent.CreatedDate=DateTime.Now;
-                ownerAgent.UpdatedDate=DateTime.Now;
-                ownerAgent.CodeOwnerAgent = "N" + GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                ownerAgent.CreatedDate=DateTime.UtcNow;
+                ownerAgent.UpdatedDate=DateTime.UtcNow;
+                ownerAgent.CodeOwnerAgent = "N" + GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 await _CatalogDbContext.OwnerAgents.AddAsync(ownerAgent);
                 await _CatalogDbContext.SaveChangesAsync();
                 rp.Body = ownerAgent;
@@ -118,7 +118,7 @@ namespace  Lathiecoco.services
                 ownerAgent.Address = oa.Address;
                 ownerAgent.IsActive = true;
                 ownerAgent.IsFirstLogin = true;
-                ownerAgent.UpdatedDate = DateTime.Now;
+                ownerAgent.UpdatedDate = DateTime.UtcNow;
                 
                 _CatalogDbContext.OwnerAgents.Update(ownerAgent);
                 await _CatalogDbContext.SaveChangesAsync();

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Lathiecoco.Migrations
 {
     /// <inheritdoc />
-    public partial class agncy01 : Migration
+    public partial class toPostgresQl : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,11 +15,11 @@ namespace Lathiecoco.Migrations
                 name: "AccountingPrincipals",
                 columns: table => new
                 {
-                    IdAccountingPrincipal = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Balance = table.Column<double>(type: "float", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAccountingPrincipal = table.Column<string>(type: "text", nullable: false),
+                    Balance = table.Column<double>(type: "double precision", nullable: false),
+                    Currency = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,11 +30,11 @@ namespace Lathiecoco.Migrations
                 name: "Accountings",
                 columns: table => new
                 {
-                    IdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Balance = table.Column<double>(type: "float", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAccounting = table.Column<string>(type: "text", nullable: false),
+                    Balance = table.Column<double>(type: "double precision", nullable: false),
+                    Currency = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,12 +45,12 @@ namespace Lathiecoco.Migrations
                 name: "MarchandComissionDalys",
                 columns: table => new
                 {
-                    IdMarchandComission = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    MinAmount = table.Column<double>(type: "float", nullable: false),
-                    MaxAmount = table.Column<double>(type: "float", nullable: false),
-                    Comission = table.Column<double>(type: "float", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdMarchandComission = table.Column<string>(type: "text", nullable: false),
+                    MinAmount = table.Column<double>(type: "double precision", nullable: false),
+                    MaxAmount = table.Column<double>(type: "double precision", nullable: false),
+                    Comission = table.Column<double>(type: "double precision", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,25 +61,27 @@ namespace Lathiecoco.Migrations
                 name: "OwnerAgents",
                 columns: table => new
                 {
-                    IdOwnerAgent = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CodeOwnerAgent = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LoginCount = table.Column<int>(type: "int", nullable: true),
-                    Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Profil = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AgentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdOwnerAgent = table.Column<string>(type: "text", nullable: false),
+                    CodeOwnerAgent = table.Column<string>(type: "text", nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    MiddleName = table.Column<string>(type: "text", nullable: false),
+                    Phone = table.Column<string>(type: "text", nullable: false),
+                    Country = table.Column<string>(type: "text", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "boolean", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    LoginCount = table.Column<int>(type: "integer", nullable: true),
+                    Login = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    TokenRefresh = table.Column<string>(type: "text", nullable: true),
+                    ExpireDateTokenRefresh = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Profil = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    AgentType = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,15 +92,15 @@ namespace Lathiecoco.Migrations
                 name: "Parteners",
                 columns: table => new
                 {
-                    IdPartener = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Logo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdPartener = table.Column<string>(type: "text", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Logo = table.Column<string>(type: "text", nullable: false),
+                    FkIdAccounting = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -115,19 +117,26 @@ namespace Lathiecoco.Migrations
                 name: "Agencies",
                 columns: table => new
                 {
-                    IdAgency = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    isActive = table.Column<bool>(type: "bit", nullable: false),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAgency = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false),
+                    phone = table.Column<string>(type: "text", nullable: false),
+                    code = table.Column<string>(type: "text", nullable: false),
+                    isActive = table.Column<bool>(type: "boolean", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: false),
+                    PercentagePurchase = table.Column<float>(type: "real", nullable: true),
+                    FkIdAccounting = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Agencies", x => x.IdAgency);
+                    table.ForeignKey(
+                        name: "FK_Agencies_Accountings_FkIdAccounting",
+                        column: x => x.FkIdAccounting,
+                        principalTable: "Accountings",
+                        principalColumn: "IdAccounting");
                     table.ForeignKey(
                         name: "FK_Agencies_OwnerAgents_FkIdStaff",
                         column: x => x.FkIdStaff,
@@ -137,55 +146,16 @@ namespace Lathiecoco.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerWallets",
-                columns: table => new
-                {
-                    IdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    phoneIdentity = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PinNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PinTemp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Profile = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneBrand = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerWallets", x => x.IdCustomerWallet);
-                    table.ForeignKey(
-                        name: "FK_CustomerWallets_Accountings_FkIdAccounting",
-                        column: x => x.FkIdAccounting,
-                        principalTable: "Accountings",
-                        principalColumn: "IdAccounting",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CustomerWallets_OwnerAgents_FkIdStaff",
-                        column: x => x.FkIdStaff,
-                        principalTable: "OwnerAgents",
-                        principalColumn: "IdOwnerAgent");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PaymentModes",
                 columns: table => new
                 {
-                    IdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    status = table.Column<bool>(type: "bit", nullable: false),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdPaymentMode = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<bool>(type: "boolean", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -201,13 +171,13 @@ namespace Lathiecoco.Migrations
                 name: "UserLogs",
                 columns: table => new
                 {
-                    IdUserLog = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserAction = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IPaddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdUserLog = table.Column<string>(type: "text", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: false),
+                    UserAction = table.Column<string>(type: "text", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    IPaddress = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -224,26 +194,27 @@ namespace Lathiecoco.Migrations
                 name: "AgencyUsers",
                 columns: table => new
                 {
-                    IdAgencyUser = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CodeOwnerAgent = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsBlocked = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LoginCount = table.Column<int>(type: "int", nullable: true),
-                    Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Profil = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdAgency = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAgencyUser = table.Column<string>(type: "text", nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    MiddleName = table.Column<string>(type: "text", nullable: false),
+                    Phone = table.Column<string>(type: "text", nullable: false),
+                    Country = table.Column<string>(type: "text", nullable: false),
+                    IsBlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "boolean", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    LoginCount = table.Column<int>(type: "integer", nullable: true),
+                    Login = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Profil = table.Column<string>(type: "text", nullable: false),
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    TokenRefresh = table.Column<string>(type: "text", nullable: true),
+                    ExpireDateTokenRefresh = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: false),
+                    FkIdAgency = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -266,17 +237,17 @@ namespace Lathiecoco.Migrations
                 name: "FeeSends",
                 columns: table => new
                 {
-                    IdFeeSend = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    MinAmount = table.Column<double>(type: "float", nullable: false),
-                    MaxAmount = table.Column<double>(type: "float", nullable: false),
+                    IdFeeSend = table.Column<string>(type: "text", nullable: false),
+                    MinAmount = table.Column<double>(type: "double precision", nullable: false),
+                    MaxAmount = table.Column<double>(type: "double precision", nullable: false),
                     FixeAgFee = table.Column<float>(type: "real", nullable: false),
                     FixeCsFee = table.Column<float>(type: "real", nullable: false),
                     PercentAgFee = table.Column<float>(type: "real", nullable: false),
                     PercentCsFee = table.Column<float>(type: "real", nullable: false),
-                    FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FkIdPaymentMode = table.Column<string>(type: "text", nullable: true),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -294,65 +265,78 @@ namespace Lathiecoco.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InvoiceStartupMasters",
+                name: "CustomerWallets",
                 columns: table => new
                 {
-                    IdInvoiceStartupMaster = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode2 = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    InvoiceStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProofLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AmountToSend = table.Column<double>(type: "float", nullable: false),
-                    AmountToPaid = table.Column<double>(type: "float", nullable: false),
-                    FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ValidateAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FkIdStaff = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdAgent = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdCustomerWallet = table.Column<string>(type: "text", nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    Phone = table.Column<string>(type: "text", nullable: false),
+                    phoneIdentity = table.Column<string>(type: "text", nullable: false),
+                    PinNumber = table.Column<string>(type: "text", nullable: false),
+                    PinTemp = table.Column<string>(type: "text", nullable: true),
+                    Profile = table.Column<string>(type: "text", nullable: false),
+                    PhoneBrand = table.Column<string>(type: "text", nullable: true),
+                    Address = table.Column<string>(type: "text", nullable: true),
+                    IsBlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: true),
+                    FkIdAgencyUser = table.Column<string>(type: "text", nullable: true),
+                    FkIdAccounting = table.Column<string>(type: "text", nullable: false),
+                    PercentagePurchase = table.Column<float>(type: "real", nullable: true),
+                    FkIdAgency = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InvoiceStartupMasters", x => x.IdInvoiceStartupMaster);
+                    table.PrimaryKey("PK_CustomerWallets", x => x.IdCustomerWallet);
                     table.ForeignKey(
-                        name: "FK_InvoiceStartupMasters_CustomerWallets_FkIdAgent",
-                        column: x => x.FkIdAgent,
-                        principalTable: "CustomerWallets",
-                        principalColumn: "IdCustomerWallet",
+                        name: "FK_CustomerWallets_Accountings_FkIdAccounting",
+                        column: x => x.FkIdAccounting,
+                        principalTable: "Accountings",
+                        principalColumn: "IdAccounting",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_InvoiceStartupMasters_OwnerAgents_FkIdStaff",
+                        name: "FK_CustomerWallets_Agencies_FkIdAgency",
+                        column: x => x.FkIdAgency,
+                        principalTable: "Agencies",
+                        principalColumn: "IdAgency",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CustomerWallets_AgencyUsers_FkIdAgencyUser",
+                        column: x => x.FkIdAgencyUser,
+                        principalTable: "AgencyUsers",
+                        principalColumn: "IdAgencyUser",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CustomerWallets_OwnerAgents_FkIdStaff",
                         column: x => x.FkIdStaff,
                         principalTable: "OwnerAgents",
                         principalColumn: "IdOwnerAgent");
-                    table.ForeignKey(
-                        name: "FK_InvoiceStartupMasters_PaymentModes_FkIdPaymentMode",
-                        column: x => x.FkIdPaymentMode,
-                        principalTable: "PaymentModes",
-                        principalColumn: "IdPaymentMode",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "BillerInvoices",
                 columns: table => new
                 {
-                    IdBillerInvoice = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BillerReference = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ReloadBiller = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AmountToPaid = table.Column<double>(type: "float", nullable: false),
-                    FeesAmount = table.Column<double>(type: "float", nullable: false),
-                    NumberOfKw = table.Column<double>(type: "float", nullable: true),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdPartener = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdFeeSend = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdBillerInvoice = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode = table.Column<string>(type: "text", nullable: false),
+                    InvoiceStatus = table.Column<string>(type: "text", nullable: false),
+                    BillerReference = table.Column<string>(type: "text", nullable: false),
+                    ReloadBiller = table.Column<string>(type: "text", nullable: false),
+                    AmountToPaid = table.Column<double>(type: "double precision", nullable: false),
+                    FeesAmount = table.Column<double>(type: "double precision", nullable: false),
+                    NumberOfKw = table.Column<double>(type: "double precision", nullable: true),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    FkIdCustomerWallet = table.Column<string>(type: "text", nullable: true),
+                    FkIdPartener = table.Column<string>(type: "text", nullable: true),
+                    FkIdPaymentMode = table.Column<string>(type: "text", nullable: true),
+                    FkIdFeeSend = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -380,23 +364,71 @@ namespace Lathiecoco.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "InvoiceStartupMasters",
+                columns: table => new
+                {
+                    IdInvoiceStartupMaster = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode2 = table.Column<string>(type: "text", nullable: true),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    IsMaster = table.Column<bool>(type: "boolean", nullable: false),
+                    InvoiceStatus = table.Column<string>(type: "text", nullable: false),
+                    ProofLink = table.Column<string>(type: "text", nullable: true),
+                    AmountToSend = table.Column<double>(type: "double precision", nullable: false),
+                    AmountToPaid = table.Column<double>(type: "double precision", nullable: false),
+                    FkIdPaymentMode = table.Column<string>(type: "text", nullable: false),
+                    ValidateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FkIdStaff = table.Column<string>(type: "text", nullable: true),
+                    FkIdAgent = table.Column<string>(type: "text", nullable: true),
+                    FkIdAgencyUser = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InvoiceStartupMasters", x => x.IdInvoiceStartupMaster);
+                    table.ForeignKey(
+                        name: "FK_InvoiceStartupMasters_AgencyUsers_FkIdAgencyUser",
+                        column: x => x.FkIdAgencyUser,
+                        principalTable: "AgencyUsers",
+                        principalColumn: "IdAgencyUser",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_InvoiceStartupMasters_CustomerWallets_FkIdAgent",
+                        column: x => x.FkIdAgent,
+                        principalTable: "CustomerWallets",
+                        principalColumn: "IdCustomerWallet");
+                    table.ForeignKey(
+                        name: "FK_InvoiceStartupMasters_OwnerAgents_FkIdStaff",
+                        column: x => x.FkIdStaff,
+                        principalTable: "OwnerAgents",
+                        principalColumn: "IdOwnerAgent");
+                    table.ForeignKey(
+                        name: "FK_InvoiceStartupMasters_PaymentModes_FkIdPaymentMode",
+                        column: x => x.FkIdPaymentMode,
+                        principalTable: "PaymentModes",
+                        principalColumn: "IdPaymentMode",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "InvoiceWalletAgents",
                 columns: table => new
                 {
-                    IdInvoiceWalletCashier = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode2 = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdAgent = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdCustomerWallet = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AmountToSend = table.Column<double>(type: "float", nullable: false),
-                    AmountToPaid = table.Column<double>(type: "float", nullable: false),
-                    FeesAmount = table.Column<double>(type: "float", nullable: false),
-                    FkIdFeeSend = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdInvoiceWalletCashier = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode2 = table.Column<string>(type: "text", nullable: true),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    FkIdAgent = table.Column<string>(type: "text", nullable: false),
+                    FkIdCustomerWallet = table.Column<string>(type: "text", nullable: false),
+                    InvoiceStatus = table.Column<string>(type: "text", nullable: false),
+                    AmountToSend = table.Column<double>(type: "double precision", nullable: false),
+                    AmountToPaid = table.Column<double>(type: "double precision", nullable: false),
+                    FeesAmount = table.Column<double>(type: "double precision", nullable: false),
+                    FkIdFeeSend = table.Column<string>(type: "text", nullable: true),
+                    FkIdPaymentMode = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -429,20 +461,20 @@ namespace Lathiecoco.Migrations
                 name: "InvoiceWallets",
                 columns: table => new
                 {
-                    IdInvoiceWallet = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceCode2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdSender = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdRecipient = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    InvoiceStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AmountToSend = table.Column<double>(type: "float", nullable: false),
-                    AmountToPaid = table.Column<double>(type: "float", nullable: false),
-                    FeesAmount = table.Column<double>(type: "float", nullable: false),
-                    FkIdFeeSend = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdPaymentMode = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdInvoiceWallet = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode = table.Column<string>(type: "text", nullable: false),
+                    InvoiceCode2 = table.Column<string>(type: "text", nullable: false),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    FkIdSender = table.Column<string>(type: "text", nullable: false),
+                    FkIdRecipient = table.Column<string>(type: "text", nullable: false),
+                    InvoiceStatus = table.Column<string>(type: "text", nullable: false),
+                    AmountToSend = table.Column<double>(type: "double precision", nullable: false),
+                    AmountToPaid = table.Column<double>(type: "double precision", nullable: false),
+                    FeesAmount = table.Column<double>(type: "double precision", nullable: false),
+                    FkIdFeeSend = table.Column<string>(type: "text", nullable: true),
+                    FkIdPaymentMode = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -475,15 +507,15 @@ namespace Lathiecoco.Migrations
                 name: "AccountingOpPrincipals",
                 columns: table => new
                 {
-                    IdAccountingOpPrincipal = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Credited = table.Column<double>(type: "float", nullable: false),
-                    DeBited = table.Column<double>(type: "float", nullable: false),
-                    NewBalance = table.Column<double>(type: "float", nullable: false),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdInvoiceStartupMaster = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAccountingOpPrincipal = table.Column<string>(type: "text", nullable: false),
+                    Credited = table.Column<double>(type: "double precision", nullable: false),
+                    DeBited = table.Column<double>(type: "double precision", nullable: false),
+                    NewBalance = table.Column<double>(type: "double precision", nullable: false),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    FkIdAccounting = table.Column<string>(type: "text", nullable: false),
+                    FkIdInvoiceStartupMaster = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -495,7 +527,7 @@ namespace Lathiecoco.Migrations
                         principalColumn: "IdAccountingPrincipal",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AccountingOpPrincipals_InvoiceStartupMasters_FkIdInvoiceStartupMaster",
+                        name: "FK_AccountingOpPrincipals_InvoiceStartupMasters_FkIdInvoiceSta~",
                         column: x => x.FkIdInvoiceStartupMaster,
                         principalTable: "InvoiceStartupMasters",
                         principalColumn: "IdInvoiceStartupMaster");
@@ -505,18 +537,18 @@ namespace Lathiecoco.Migrations
                 name: "AccountingOpWallets",
                 columns: table => new
                 {
-                    IdAccountingOperation = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Credited = table.Column<double>(type: "float", nullable: false),
-                    DeBited = table.Column<double>(type: "float", nullable: false),
-                    NewBalance = table.Column<double>(type: "float", nullable: false),
-                    PaymentMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FkIdAccounting = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FkIdInvoice = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdBillerInvoice = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdInvoiceWalletAgent = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    FkIdInvoiceStartupMaster = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdAccountingOperation = table.Column<string>(type: "text", nullable: false),
+                    Credited = table.Column<double>(type: "double precision", nullable: false),
+                    DeBited = table.Column<double>(type: "double precision", nullable: false),
+                    NewBalance = table.Column<double>(type: "double precision", nullable: false),
+                    PaymentMode = table.Column<string>(type: "text", nullable: false),
+                    FkIdAccounting = table.Column<string>(type: "text", nullable: false),
+                    FkIdInvoice = table.Column<string>(type: "text", nullable: true),
+                    FkIdBillerInvoice = table.Column<string>(type: "text", nullable: true),
+                    FkIdInvoiceWalletAgent = table.Column<string>(type: "text", nullable: true),
+                    FkIdInvoiceStartupMaster = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -533,12 +565,12 @@ namespace Lathiecoco.Migrations
                         principalTable: "BillerInvoices",
                         principalColumn: "IdBillerInvoice");
                     table.ForeignKey(
-                        name: "FK_AccountingOpWallets_InvoiceStartupMasters_FkIdInvoiceStartupMaster",
+                        name: "FK_AccountingOpWallets_InvoiceStartupMasters_FkIdInvoiceStartu~",
                         column: x => x.FkIdInvoiceStartupMaster,
                         principalTable: "InvoiceStartupMasters",
                         principalColumn: "IdInvoiceStartupMaster");
                     table.ForeignKey(
-                        name: "FK_AccountingOpWallets_InvoiceWalletAgents_FkIdInvoiceWalletAgent",
+                        name: "FK_AccountingOpWallets_InvoiceWalletAgents_FkIdInvoiceWalletAg~",
                         column: x => x.FkIdInvoiceWalletAgent,
                         principalTable: "InvoiceWalletAgents",
                         principalColumn: "IdInvoiceWalletCashier");
@@ -583,6 +615,12 @@ namespace Lathiecoco.Migrations
                 name: "IX_AccountingOpWallets_FkIdInvoiceWalletAgent",
                 table: "AccountingOpWallets",
                 column: "FkIdInvoiceWalletAgent");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agencies_FkIdAccounting",
+                table: "Agencies",
+                column: "FkIdAccounting",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Agencies_FkIdStaff",
@@ -638,6 +676,16 @@ namespace Lathiecoco.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CustomerWallets_FkIdAgency",
+                table: "CustomerWallets",
+                column: "FkIdAgency");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomerWallets_FkIdAgencyUser",
+                table: "CustomerWallets",
+                column: "FkIdAgencyUser");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CustomerWallets_FkIdStaff",
                 table: "CustomerWallets",
                 column: "FkIdStaff");
@@ -652,13 +700,17 @@ namespace Lathiecoco.Migrations
                 name: "IX_FeeSends_FkIdPaymentMode",
                 table: "FeeSends",
                 column: "FkIdPaymentMode",
-                unique: true,
-                filter: "[FkIdPaymentMode] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_FeeSends_FkIdStaff",
                 table: "FeeSends",
                 column: "FkIdStaff");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InvoiceStartupMasters_FkIdAgencyUser",
+                table: "InvoiceStartupMasters",
+                column: "FkIdAgencyUser");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InvoiceStartupMasters_FkIdAgent",
@@ -772,9 +824,6 @@ namespace Lathiecoco.Migrations
                 name: "AccountingOpWallets");
 
             migrationBuilder.DropTable(
-                name: "AgencyUsers");
-
-            migrationBuilder.DropTable(
                 name: "MarchandComissionDalys");
 
             migrationBuilder.DropTable(
@@ -796,9 +845,6 @@ namespace Lathiecoco.Migrations
                 name: "InvoiceWallets");
 
             migrationBuilder.DropTable(
-                name: "Agencies");
-
-            migrationBuilder.DropTable(
                 name: "Parteners");
 
             migrationBuilder.DropTable(
@@ -808,10 +854,16 @@ namespace Lathiecoco.Migrations
                 name: "FeeSends");
 
             migrationBuilder.DropTable(
-                name: "Accountings");
+                name: "AgencyUsers");
 
             migrationBuilder.DropTable(
                 name: "PaymentModes");
+
+            migrationBuilder.DropTable(
+                name: "Agencies");
+
+            migrationBuilder.DropTable(
+                name: "Accountings");
 
             migrationBuilder.DropTable(
                 name: "OwnerAgents");

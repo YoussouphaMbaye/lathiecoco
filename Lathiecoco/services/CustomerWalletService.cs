@@ -27,7 +27,7 @@ namespace  Lathiecoco.services
                 {
 
                     cus.PercentagePurchase=dto.Percentage;
-                    cus.UpdatedDate = DateTime.Now;
+                    cus.UpdatedDate = DateTime.UtcNow;
                     cus.FkIdAgencyUser=dto.IdAgencyUser;
                     
                     _CatalogDbContext.CustomerWallets.Update(cus);
@@ -65,7 +65,7 @@ namespace  Lathiecoco.services
                     
                      cus.IsActive = !cus.IsActive;
                      cus.FkIdStaff=dto.FkIdStaff;
-                     cus.UpdatedDate = DateTime.Now;
+                     cus.UpdatedDate = DateTime.UtcNow;
                     _CatalogDbContext.CustomerWallets.Update(cus);
                      await _CatalogDbContext.SaveChangesAsync();
                      rp.Body = cus;
@@ -101,7 +101,7 @@ namespace  Lathiecoco.services
                     
                     cus.FkIdStaff = dto.IdStaff;
                     cus.FkIdAgency= dto.IdAgency;
-                    cus.UpdatedDate = DateTime.Now;
+                    cus.UpdatedDate = DateTime.UtcNow;
                     _CatalogDbContext.CustomerWallets.Update(cus);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = cus;
@@ -136,7 +136,7 @@ namespace  Lathiecoco.services
 
                     cus.IsBlocked = !cus.IsBlocked;
                     cus.FkIdStaff = dto.FkIdStaff;
-                    cus.UpdatedDate=DateTime.Now;
+                    cus.UpdatedDate=DateTime.UtcNow;
                     _CatalogDbContext.CustomerWallets.Update(cus);
                     await _CatalogDbContext.SaveChangesAsync();
                     rp.Body = cus;
@@ -203,18 +203,18 @@ namespace  Lathiecoco.services
                 var a = rdn.Next(1000, 9999);
                 c.PinTemp = a.ToString();
                 c.FirstName = cus.FirstName;
-                c.Code = GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                c.Code = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
 
-                c.CreatedDate=DateTime.Now;
-                c.UpdatedDate=DateTime.Now;
+                c.CreatedDate=DateTime.UtcNow;
+                c.UpdatedDate=DateTime.UtcNow;
               
                 
                 Accounting ac = new Accounting();
                 //ac.Currency = cp.Country.CurrencyName;
                 ac.IdAccounting= Ulid.NewUlid();
                 ac.Balance = 0;
-                ac.CreatedDate=DateTime.Now;
-                ac.UpdatedDate=DateTime.Now;
+                ac.CreatedDate=DateTime.UtcNow;
+                ac.UpdatedDate=DateTime.UtcNow;
                 ac.Currency = "GNF";
                 var transaction = _CatalogDbContext.Database.BeginTransaction();
                 try
@@ -279,17 +279,17 @@ namespace  Lathiecoco.services
                 var a = rdn.Next(1000, 9999);
                 //c.PinTemp = a.ToString();
                 c.PinTemp = "1234";
-                string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.Now);
+                string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 c.Code = "C" + dayToday;
-                c.CreatedDate = DateTime.Now;
-                c.UpdatedDate = DateTime.Now;
+                c.CreatedDate = DateTime.UtcNow;
+                c.UpdatedDate = DateTime.UtcNow;
 
                 Accounting ac = new Accounting();
                 ac.IdAccounting = Ulid.NewUlid();
                 ac.Currency = "GNF";
                 ac.Balance = 0;
-                ac.CreatedDate = DateTime.Now;
-                ac.UpdatedDate = DateTime.Now;
+                ac.CreatedDate = DateTime.UtcNow;
+                ac.UpdatedDate = DateTime.UtcNow;
                 var transaction = _CatalogDbContext.Database.BeginTransaction();
                 try
                 {
@@ -617,7 +617,7 @@ namespace  Lathiecoco.services
                 {
                     
                     cus.IsActive = true;
-                    cus.UpdatedDate = DateTime.Now;
+                    cus.UpdatedDate = DateTime.UtcNow;
 
                     _CatalogDbContext.CustomerWallets.Update(cus);
                     await _CatalogDbContext.SaveChangesAsync();
@@ -675,7 +675,7 @@ namespace  Lathiecoco.services
                         return rp;
                     }
                     
-                    cu.UpdatedDate=DateTime.Now;
+                    cu.UpdatedDate=DateTime.UtcNow;
                    
                     _CatalogDbContext.CustomerWallets.Update(cu);
                     await _CatalogDbContext.SaveChangesAsync();
@@ -714,7 +714,7 @@ namespace  Lathiecoco.services
                     cu.Profile = cus.Profile;
                     cu.Address = cus.Address;
                     cu.FkIdStaff= cus.FkIdStaff;
-                    cu.UpdatedDate = DateTime.Now;
+                    cu.UpdatedDate = DateTime.UtcNow;
                     if (cus.Profile != "AGENT" && cus.Profile!="CUSTOMER")
                    
                     {

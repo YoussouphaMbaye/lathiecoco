@@ -192,7 +192,7 @@ namespace  Lathiecoco.services
                     TimeSpan diff = date.ToUniversalTime() - origin;
                     return Math.Floor(diff.TotalSeconds);
                 }
-                string dayToday = ConvertToUnixTimestamp(DateTime.Now).ToString();
+                string dayToday = ConvertToUnixTimestamp(DateTime.UtcNow).ToString();
                 invoice.IdInvoiceWallet= Ulid.NewUlid();
                 invoice.InvoiceCode = "T"+dayToday+dayToday.Substring(1,3);
                 invoice.InvoiceCode2 = "";
@@ -211,8 +211,8 @@ namespace  Lathiecoco.services
                 //invoice.CashierSender = null;
                 //invoice.CashierPayee = null;
                 invoice.FkIdFeeSend=feeSend.IdFeeSend;
-                invoice.CreatedDate=DateTime.Now;
-                invoice.UpdatedDate=DateTime.Now;
+                invoice.CreatedDate=DateTime.UtcNow;
+                invoice.UpdatedDate=DateTime.UtcNow;
                 
 
                 //calculer fee amountToSend amountToPaid
@@ -252,9 +252,9 @@ namespace  Lathiecoco.services
                         acw.IdAccountingOperation= Ulid.NewUlid();
                         acw.Credited = 0;
                         acw.DeBited = amountTopaid;
-                        acw.CreatedDate = DateTime.Now;
+                        acw.CreatedDate = DateTime.UtcNow;
                         acw.PaymentMode=paymentMode1.Name.ToString();
-                        acw.UpdatedDate= DateTime.Now;
+                        acw.UpdatedDate= DateTime.UtcNow;
                         acw.FkIdInvoice = invoice.IdInvoiceWallet;
                         acw.NewBalance = senderAccounting.Balance;
                        await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
@@ -283,8 +283,8 @@ namespace  Lathiecoco.services
                         acw.FkIdInvoice = invoice.IdInvoiceWallet;
                         acw.NewBalance = recipientAccounting.Balance;
                         acw.PaymentMode = paymentMode1.Name.ToString();
-                        acw.CreatedDate = DateTime.Now;
-                        acw.UpdatedDate = DateTime.Now;
+                        acw.CreatedDate = DateTime.UtcNow;
+                        acw.UpdatedDate = DateTime.UtcNow;
                         _CatalogDbContext.Update(recipientAccounting);
                         await _CatalogDbContext.SaveChangesAsync();
                         await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);

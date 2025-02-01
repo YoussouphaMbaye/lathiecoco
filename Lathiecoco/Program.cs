@@ -22,7 +22,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("CorsPolicy", c =>
 }));
 
 
-builder.Services.AddDbContext<CatalogDbContext>(Options => Options.UseSqlServer(builder.Configuration.GetConnectionString("apic")));
+builder.Services.AddDbContext<CatalogDbContext>(Options => Options.UseNpgsql(builder.Configuration.GetConnectionString("apic")));
 
 builder.Services.AddControllers();
 

@@ -23,8 +23,8 @@ namespace Lathiecoco.services
                 UserLog userLog = new UserLog();
                 userLog.IdUserLog = Ulid.NewUlid();
                 userLog.FkIdStaff=dto.FkIdStaff;
-                userLog.CreatedDate=DateTime.Now;
-                userLog.UpdatedDate = DateTime.Now;
+                userLog.CreatedDate=DateTime.UtcNow;
+                userLog.UpdatedDate = DateTime.UtcNow;
                 userLog.IPaddress=dto.IPaddress;
                 userLog.UserAction=dto.UserAction;
                 userLog.Code=dto.Code;

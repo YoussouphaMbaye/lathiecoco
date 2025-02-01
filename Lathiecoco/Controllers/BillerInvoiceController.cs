@@ -33,7 +33,7 @@ namespace Lathiecoco.Controllers
             _billerInvoiceServ = billerInvoiceServ;
         }
         [HttpGet("/biller-invoice")]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
+        [Authorize( Roles = "ADMIN,USER")]
         public async Task<ResponseBody<List<BillerInvoice>>> findAllbillerInvoice(int page = 1, int limit = 10)
         {
             //_contextAccessor.HttpContext.Response.Cookies.Append("token", "mtoken");
