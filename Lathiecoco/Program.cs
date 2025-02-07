@@ -14,7 +14,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("CorsPolicy", c =>
 {
     c.WithOrigins("http://localhost:3000/",
                     "http://localhost:3000",
-                    "http://ec2-3-120-178-26.eu-central-1.compute.amazonaws.com"
+                    "http://ec2-3-120-178-26.eu-central-1.compute.amazonaws.com:3000"
                     )
     .AllowAnyHeader()
     .AllowAnyMethod()
