@@ -6,6 +6,7 @@ namespace  Lathiecoco.repository
     public interface AgencyUserRep
     {
         Task<ResponseBody<AgencyUser>> login(LoginDto bd);
+        Task<ResponseBody<AgencyUser>> updatePassword(ChangePasswordDto cp);
         Task<ResponseBody<AgencyUser>> findAgencyUsertById(Ulid Id);
         Task<ResponseBody<AgencyUser>> addAgencyUser(BodyAgencyUserDto oa);
         Task<ResponseBody<AgencyUser>> blockOrDeblockAgencyUser(ActiveBlockDto dto);

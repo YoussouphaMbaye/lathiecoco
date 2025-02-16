@@ -20,6 +20,7 @@ namespace Lathiecoco.models
         public string? Email { get; set; } 
         public int? LoginCount { get; set; } = 0;
         public string Login { get; set; }
+        [JsonIgnore]
         public string Password { get; set; }
         public string? TokenRefresh { get; set; }
         public DateTime? ExpireDateTokenRefresh { get; set; }

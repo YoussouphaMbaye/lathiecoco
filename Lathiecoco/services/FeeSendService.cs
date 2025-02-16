@@ -138,5 +138,39 @@ namespace  Lathiecoco.services
             }
             return rp;
         }
+
+        public async Task<ResponseBody<FeeSend>> updateLimitFeesSend(FeeLimitUpdateDto feeLimitUpdateDto)
+        {
+            ResponseBody<FeeSend> rp = new ResponseBody<FeeSend>();
+            try
+            {
+
+                FeeSend fee= await _CatalogDbContext.FeeSends.Where(f=>f.IdFeeSend==feeLimitUpdateDto.feeId).FirstOrDefaultAsync();
+                if (fee != null)
+                {
+                    fee.MaxAmount = feeLimitUpdateDto.maxAmount;
+                    fee.MinAmount = feeLimitUpdateDto.minAmount;
+                    fee.FkIdStaff = feeLimitUpdateDto.fkIdStaff;
+                    _CatalogDbContext.Update(fee);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    rp.Body = fee;
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Code = 102;
+                    rp.Msg = "Fee not found!";
+                    return rp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.ToString();
+            }
+            return rp;
+        }
     }
 }

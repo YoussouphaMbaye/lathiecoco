@@ -51,6 +51,18 @@ namespace  Lathiecoco.Controllers
 
 
         }
+        [HttpPost("/agent-owner/change-password")]
+        public async Task<ActionResult> updatePassword(ChangePasswordDto cp)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var res = await _agentOwnerServ.updatePassword(cp);
+            return Ok(res);
+        }
+
         [HttpPut("/agent-owner")]
         public async Task<ActionResult> updateAgentOwner([FromBody] BodyAgentOwnerUpdateDto oa,Ulid idOwnerAgent)
         {
@@ -62,6 +74,35 @@ namespace  Lathiecoco.Controllers
             var rep = await _agentOwnerServ.updateOwnerAgent(oa, idOwnerAgent);
             return Ok(rep);
 
+
+        }
+
+        [HttpPut("/agent-owner/activate-or-deactivate")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ActionResult> activateOrDeactive(ActiveBlockDto oa)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var rep = await _agentOwnerServ.activateOrDeactiveOwnerAgent(oa);
+            return Ok(rep);
+
+        }
+
+        [HttpPut("/agent-owner/block-or-deblock")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ActionResult> blockOrDeblock(ActiveBlockDto oa)
+
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var rep = await _agentOwnerServ.blockOrDeblockOwnerAgent(oa);
+            return Ok(rep);
 
         }
 

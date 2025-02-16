@@ -93,6 +93,49 @@ namespace  Lathiecoco.services
             return rp;
         }
 
+        public async Task<ResponseBody<OwnerAgent>> updatePassword(ChangePasswordDto cp)
+        {
+            ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
+            try
+            {
+                OwnerAgent st = await _CatalogDbContext.OwnerAgents.FindAsync(cp.Id);
+                if (st != null)
+                {
+                    if (st.Password == cp.OldPassword.Trim().Replace(" ", ""))
+                    {
+                        st.Password = cp.NewPassword.Trim().Replace(" ", "");
+                        st.UpdatedDate = DateTime.UtcNow;
+                        //agency.fkIdStaff = ag.fkIdStaff;
+                        st.IsFirstLogin = false;
+                        _CatalogDbContext.OwnerAgents.Update(st);
+                        await _CatalogDbContext.SaveChangesAsync();
+                        
+                    }
+                    else
+                    {
+                        rp.Msg = "Old password not match!";
+                        rp.IsError = true;
+                        rp.Code = 010;
+                    }
+                }
+                else
+                {
+                    rp.Msg = "OwnerAgent not found!";
+                    rp.IsError = true;
+                    rp.Code = 103;
+                }
+
+                rp.Body = st;
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
         public async Task<ResponseBody<OwnerAgent>> updateOwnerAgent(BodyAgentOwnerUpdateDto oa,Ulid idOwnerAgent)
         {
 
@@ -102,7 +145,7 @@ namespace  Lathiecoco.services
                 OwnerAgent ownerAgent = await _CatalogDbContext.OwnerAgents.Where(x => x.IdOwnerAgent==idOwnerAgent).FirstOrDefaultAsync();
                 if (ownerAgent == null)
                 {
-                    rp.Msg = "Staff not found";
+                    rp.Msg = "Staff not found!";
                     rp.IsError = true;
                     rp.Code = 404;
                     return rp;
@@ -307,6 +350,78 @@ namespace  Lathiecoco.services
             }
             return rp;
 
+        }
+
+        public async Task<ResponseBody<OwnerAgent>> blockOrDeblockOwnerAgent(ActiveBlockDto dto)
+        {
+            ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
+            try
+            {
+                OwnerAgent agu = await _CatalogDbContext.OwnerAgents.Where(a => a.IdOwnerAgent == dto.IdUser).FirstOrDefaultAsync();
+            if (agu != null)
+            {
+
+                agu.IsBlocked = !agu.IsBlocked;
+                //agu.FkIdStaff = dto.FkIdStaff;
+                agu.UpdatedDate = DateTime.UtcNow;
+                _CatalogDbContext.OwnerAgents.Update(agu);
+                await _CatalogDbContext.SaveChangesAsync();
+                rp.Body = agu;
+                return rp;
+
+            }
+            else
+            {
+                rp.IsError = true;
+                rp.Msg = "Agency user not found";
+                rp.Code = 350;
+                return rp;
+            }
+
+        }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<OwnerAgent>> activateOrDeactiveOwnerAgent(ActiveBlockDto dto)
+        {
+            ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
+            try
+            {
+                OwnerAgent agu = await _CatalogDbContext.OwnerAgents.Where(a => a.IdOwnerAgent == dto.IdUser).FirstOrDefaultAsync();
+                if (agu != null)
+                {
+
+                    agu.IsActive = !agu.IsActive;
+                    //agu.FkIdStaff = dto.FkIdStaff;
+                    agu.UpdatedDate = DateTime.UtcNow;
+                    _CatalogDbContext.OwnerAgents.Update(agu);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = agu;
+                    return rp;
+
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Agency user not found";
+                    rp.Code = 350;
+                    return rp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+            return rp;
         }
     }
    

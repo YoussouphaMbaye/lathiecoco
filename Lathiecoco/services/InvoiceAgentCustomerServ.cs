@@ -208,15 +208,15 @@ namespace  Lathiecoco.services
                                 decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
                                 amountToSend = (double)ac.AmountToSend;
 
-                                amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
-                                invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+                                amountTopaid = ((double)Math.Ceiling(feeForSendPercent * (decimal)amountToSend)) + amountToSend;
+                                invoice.FeesAmount = (double)Math.Ceiling((feeForSendPercent * (decimal)amountToSend));
                             }
 
 
                         }
                         else
                         {
-                            rp.Msg = "Amoun in not in defined interval!!";
+                            rp.Msg = "Amount in not in defined interval!!";
                             rp.IsError = true;
                             rp.Code = 305;
                             return rp;

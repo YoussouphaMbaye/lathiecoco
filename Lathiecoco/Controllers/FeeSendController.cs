@@ -29,7 +29,7 @@ namespace  Lathiecoco.Controllers
 
             _feeSendRepService = feeSendRepService;
         }
-        [HttpPost("/feeSend")]
+        [HttpPost("/fee-send")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<FeeSend>> PostFeeSend([FromBody] FeeSend ac)
         {
@@ -37,7 +37,15 @@ namespace  Lathiecoco.Controllers
             return await _feeSendRepService.addFeesSend(ac);
 
         }
-        [HttpGet("/feeSend/findWithPaymentMode")]
+        [HttpPost("/fee-send/limit-update")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<FeeSend>> limitUpdate([FromBody] FeeLimitUpdateDto feeLimitUpdateDto)
+        {
+
+            return await _feeSendRepService.updateLimitFeesSend(feeLimitUpdateDto);
+
+        }
+        [HttpGet("/fee-send/find-with-payment-mode")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<FeeSend>> findWithPaymentMode(Ulid id)
         {
@@ -46,7 +54,7 @@ namespace  Lathiecoco.Controllers
 
         }
        
-        [HttpGet("/feeSend/findAll")]
+        [HttpGet("/fee-send/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<FeeSend>>> findAllFeesSend(int page = 1, int limit = 10)
         {
@@ -54,5 +62,6 @@ namespace  Lathiecoco.Controllers
             return await _feeSendRepService.findAllFeeSend(page, limit);
 
         }
+
     }
 }

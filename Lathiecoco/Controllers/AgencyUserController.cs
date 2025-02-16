@@ -53,6 +53,18 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [HttpPost("/agency-user/change-password")]
+        public async Task<ActionResult> updatePassword(ChangePasswordDto cp)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var res = await _agencyUserServ.updatePassword(cp);
+            return Ok(res);
+        }
+
         [HttpPut("/agency-user")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> PutAgentOwner([FromBody] BodyAgencyUserUpdateDto oa, Ulid idAgencyUser)

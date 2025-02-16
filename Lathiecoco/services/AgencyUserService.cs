@@ -41,17 +41,16 @@ namespace Lathiecoco.services
                 AgencyUser.IdAgencyUser = Ulid.NewUlid();
                 AgencyUser.FkIdStaff = oa.FkidStaff;
                 AgencyUser.FkIdAgency = oa.FkidAgency;
-                AgencyUser.FirstName = oa.FirstName;
-                AgencyUser.MiddleName = oa.MiddleName;
-                AgencyUser.LastName = oa.LastName;
-                AgencyUser.Phone = oa.Phone;
-                AgencyUser.Address = oa.Address;
+                AgencyUser.FirstName = oa.FirstName.Trim().Replace(" ", "");
+                AgencyUser.MiddleName = oa.MiddleName.Trim().Replace(" ", "");
+                AgencyUser.LastName = oa.LastName.Trim().Replace(" ", "");
+                AgencyUser.Phone = oa.Phone.Trim().Replace(" ", "");
+                AgencyUser.Address = oa.Address.Trim().Replace(" ", "");
                 AgencyUser.Country = "Guinée";
-                AgencyUser.Email = oa.Email;
-                AgencyUser.Login = oa.Login;
-                AgencyUser.Password = oa.Password;
-                AgencyUser.Profil = oa.Profil;
-                AgencyUser.Address = oa.Address;
+                AgencyUser.Email = oa.Email.Trim().Replace(" ", "");
+                AgencyUser.Login = oa.Login.Trim().Replace(" ", "");
+                AgencyUser.Password = oa.Password.Trim().Replace(" ", "");
+                AgencyUser.Profil = oa.Profil.Trim().Replace(" ", "");
                 AgencyUser.IsActive = true;
                 AgencyUser.IsFirstLogin = true;
                 AgencyUser.CreatedDate = DateTime.UtcNow;
@@ -70,6 +69,50 @@ namespace Lathiecoco.services
             }
             return rp;
         }
+
+        public async Task<ResponseBody<AgencyUser>> updatePassword(ChangePasswordDto cp)
+        {
+            ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
+            try
+            {
+                AgencyUser st = await _CatalogDbContext.AgencyUsers.FindAsync(cp.Id);
+                if (st != null)
+                {
+                    if (st.Password == cp.OldPassword.Trim().Replace(" ", ""))
+                    {
+                        st.Password = cp.NewPassword.Trim().Replace(" ", "");
+                        st.UpdatedDate = DateTime.UtcNow;
+                        //agency.fkIdStaff = ag.fkIdStaff;
+                        st.IsFirstLogin = false;
+                        _CatalogDbContext.AgencyUsers.Update(st);
+                        await _CatalogDbContext.SaveChangesAsync();
+
+                    }
+                    else
+                    {
+                        rp.Msg = "Old password not match!";
+                        rp.IsError = true;
+                        rp.Code = 010;
+                    }
+                }
+                else
+                {
+                    rp.Msg = "user not found!";
+                    rp.IsError = true;
+                    rp.Code = 103;
+                }
+
+                rp.Body = st;
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
         public async Task<ResponseBody<AgencyUser>> activateOrDeactiveAgencyUser(ActiveBlockDto dto)
         {
             ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
@@ -150,7 +193,7 @@ namespace Lathiecoco.services
                 AgencyUser AgencyUser = await _CatalogDbContext.AgencyUsers.Where(x => x.IdAgencyUser == idAgencyUser).FirstOrDefaultAsync();
                 if (AgencyUser == null)
                 {
-                    rp.Msg = "User not found";
+                    rp.Msg = "User not found!";
                     rp.IsError = true;
                     rp.Code = 400;
                     return rp;
@@ -158,15 +201,14 @@ namespace Lathiecoco.services
 
                 AgencyUser.FkIdStaff = oa.FkidStaff;
                 AgencyUser.FkIdAgency = oa.FkidAgency;
-                AgencyUser.FirstName = oa.FirstName;
-                AgencyUser.MiddleName = oa.MiddleName;
-                AgencyUser.LastName = oa.LastName;
-                AgencyUser.Phone = oa.Phone;
-                AgencyUser.Address = oa.Address;
-                AgencyUser.Email = oa.Email;
-                AgencyUser.Password = oa.Password;
-                AgencyUser.Profil = oa.Profil;
-                AgencyUser.Address = oa.Address;
+                AgencyUser.FirstName = oa.FirstName.Trim().Replace(" ", "");
+                AgencyUser.MiddleName = oa.MiddleName.Trim().Replace(" ", "");
+                AgencyUser.LastName = oa.LastName.Trim().Replace(" ", "");
+                AgencyUser.Phone = oa.Phone.Trim().Replace(" ", "");
+                AgencyUser.Address = oa.Address.Trim().Replace(" ", "");
+                AgencyUser.Email = oa.Email.Trim().Replace(" ", "");
+                AgencyUser.Password = oa.Password.Trim().Replace(" ", "");
+                AgencyUser.Profil = oa.Profil.Trim().Replace(" ", "");
                 AgencyUser.IsActive = true;
                 AgencyUser.UpdatedDate = DateTime.UtcNow;
                 _CatalogDbContext.AgencyUsers.Update(AgencyUser);

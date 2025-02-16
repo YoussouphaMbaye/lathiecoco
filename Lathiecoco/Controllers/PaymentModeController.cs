@@ -32,7 +32,7 @@ namespace  Lathiecoco.Controllers
 
             _paymentModeServ = paymentModeServ;
         }
-        [HttpPost("/PaymentMode")]
+        [HttpPost("/paymentMode")]
         
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult< ResponseBody<PaymentMode>>> PostCashier([FromBody] PaymentMode py)
@@ -41,13 +41,13 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
 
         }
-        [HttpGet("/PaymentMode/test")]
+        [HttpGet("/paymentMode/test")]
         public IEnumerable<String> tester()
         {
             return new List<String>() { "1", "2", "3" };
         }
        
-        [HttpGet("/PaymentMode/findAll")]
+        [HttpGet("/paymentMode/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<List<PaymentMode>>>> findAllAccounting(int page = 1, int limit = 10)
         {

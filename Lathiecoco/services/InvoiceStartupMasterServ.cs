@@ -331,7 +331,7 @@ namespace  Lathiecoco.services
                     }
                     else
                     {
-                        invoice.AmountToPaid = (double)((master1.PercentagePurchase * ism.AmountToSend)+ ism.AmountToSend);
+                        invoice.AmountToPaid = ((double)Math.Ceiling((decimal)(master1.PercentagePurchase * ism.AmountToSend))+ ism.AmountToSend);
                     }
 
                         invoice.IdInvoiceStartupMaster= Ulid.NewUlid();
@@ -469,7 +469,7 @@ namespace  Lathiecoco.services
                     }
                     else
                     {
-                        invoice.AmountToPaid = (double)((agency.PercentagePurchase * ism.AmountToSend) + ism.AmountToSend);
+                        invoice.AmountToPaid = ((double)Math.Ceiling(((decimal)(agency.PercentagePurchase * ism.AmountToSend))) + ism.AmountToSend);
                     }
 
                     invoice.IdInvoiceStartupMaster = Ulid.NewUlid();

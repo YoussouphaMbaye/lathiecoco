@@ -18,6 +18,7 @@ namespace Lathiecoco.models
         public string? Email { get; set; }
         public int? LoginCount { get; set; } = 0;
         public string Login { get; set; }
+        [JsonIgnore]
         public string Password { get; set; }
         public string Profil { get; set; }
         public string Address { get; set; }
