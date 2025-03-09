@@ -64,9 +64,9 @@ namespace  Lathiecoco.Controllers
         }
         [HttpGet("/invoice-wallet-agent/searche")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<List<InvoiceWalletAgent>>> searcheinvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<InvoiceWalletAgent>>> searcheinvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate, String? phoneAgent, String? phoneCustomer, int page = 1, int limit = 10)
         {
-            return await _invoiceWalletCashierService.searcheInvoiceWalletAgent(status, code, beginDate, endDate, page, limit)
+            return await _invoiceWalletCashierService.searcheInvoiceWalletAgent(status, code, beginDate, endDate, phoneAgent, phoneCustomer, page, limit)
 ;
         }
         [HttpGet("/invoice-wallet-agent/find-by-id")]

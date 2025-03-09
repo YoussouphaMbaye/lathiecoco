@@ -111,7 +111,7 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.CustomerToAgencyDto(dto);
 
         }
-        [HttpPost("/customer-wallet/blocke-or-debloke")]
+        [HttpPost("/customer-wallet/block-or-deblock")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> blockeOrBlocked(ActiveBlockDto dto)
         {

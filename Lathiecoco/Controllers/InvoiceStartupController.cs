@@ -123,9 +123,9 @@ namespace  Lathiecoco.Controllers
         }
         [HttpGet("/invoice-startup-master/search")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<List<InvoiceStartupMaster>>> searcheInvoiceStartupMaster(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<InvoiceStartupMaster>>> searcheInvoiceStartupMaster(string? status, string? code, DateTime? beginDate, DateTime? endDate, String? agenceCode, String? staffEmail, int page = 1, int limit = 10)
         {
-            return await _invoiceStartupMasterServ.searcheInvoiceStartupMaster(status, code, beginDate, endDate, page, limit)
+            return await _invoiceStartupMasterServ.searcheInvoiceStartupMaster(status, code, beginDate, endDate, agenceCode, staffEmail, page, limit)
 ;
         }
     }

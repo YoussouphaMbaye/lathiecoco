@@ -385,7 +385,7 @@ namespace Lathiecoco.services
             
 
         }
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, int page, int limit)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, int page, int limit)
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
             try {
@@ -396,33 +396,47 @@ namespace Lathiecoco.services
                     dateNow = ((DateTime)endDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
                 }
 
-                string query = $"Select * from BillerInvoices ";
+                string query = $"Select * FROM \"BillerInvoices\" ";
             
-                query += $"where CreatedDate<'{dateNow}' ";
+                query += $"where  \"CreatedDate\" <'{dateNow}' ";
             
                 if (idPaymentMode != null)
                 {
-                    query += $"and FkIdPaymentMode='{idPaymentMode}' ";
+                    query += $"and \"FkIdPaymentMode\" = '{idPaymentMode}' ";
                 }
                 if(code != null)
                 {
-                    query += $"and  InvoiceCode='{code}' ";
+                    query += $"and  \"InvoiceCode\" = '{code}' ";
                 }
                 if (beginDate != null)
                 {
                     string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    query += $"and  CreatedDate>'{beginDateTostring}' ";
+                    query += $"and \"CreatedDate\" > '{beginDateTostring}' ";
                 }
-                query += $";";
+                //query += $";";
 
                 Console.WriteLine(dateNow);
+                Console.WriteLine("----------------------------------------->");
                 Console.WriteLine(query);
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
-                    var totalItems = _CatalogDbContext.BillerInvoices.Count();
+                    var totalItems = 
+                    phone != null ? _CatalogDbContext.BillerInvoices.FromSqlRaw(query)
+                        .Where(b => b.CustomerWallet.Phone == phone).Count()
+                        : _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Count();
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
-                    var ps = await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).ToListAsync();
+                    if (phone != null)
+                    {
+                        phone = phone.Trim().Replace(" ", "");
+                        ;
+                    }
+                    var ps = phone!=null? await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
+                        .Where(b => b.CustomerWallet.Phone == phone).ToListAsync()
+                        :await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
+                        .ToListAsync();
+                    
+                    
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
