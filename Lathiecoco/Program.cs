@@ -1,10 +1,16 @@
 using Lathiecoco.models;
 using Lathiecoco.repository;
 using Lathiecoco.services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Lathiecoco.repository.Conlog;
+using Lathiecoco.services.Conlog;
+using Lathiecoco.repository.Orange;
+using Lathiecoco.services.Orange;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +34,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<EDGrep,EdgServices>();
+builder.Services.AddScoped<paymentNotificationsRep, PaymentNotificationService>();
+builder.Services.AddScoped<OrangeRep, TransactionPerforms>();
 builder.Services.AddScoped<BilllerInvoiceRep, BillerInvoiceService>();
 builder.Services.AddScoped<AccountingRep, AccountingService>();
 builder.Services.AddScoped<CustomerWalletRep, CustomerWalletService>();
@@ -45,6 +54,7 @@ builder.Services.AddScoped<InvoiceStartupMasterRep, InvoiceStartupMasterServ>();
 builder.Services.AddScoped<UserLogRep, UserLogServ>();
 builder.Services.AddScoped<AgencyRep, AgencyServ>();
 builder.Services.AddScoped<AgencyUserRep, AgencyUserService>();
+
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,9 +81,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     }
+
     );
 
-
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -98,6 +109,7 @@ app.UseStaticFiles(new StaticFileOptions()
 **/
 app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
