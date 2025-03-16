@@ -2,6 +2,7 @@
 using Lathiecoco.models;
 using Lathiecoco.repository;
 using Lathiecoco.services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -40,9 +41,10 @@ namespace  Lathiecoco.Controllers
             _contextAccessor = contextAccessor;
         }
 
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPost("/agency-user")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ActionResult> PostAgentOwner([FromBody] BodyAgencyUserDto oa)
+        public async Task<ActionResult> addAgencyUser([FromBody] BodyAgencyUserDto oa)
         {
             if(!ModelState.IsValid) { 
                 return BadRequest(ModelState);
@@ -53,6 +55,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("/agency-user/change-password")]
         public async Task<ActionResult> updatePassword(ChangePasswordDto cp)
         {
@@ -65,6 +68,7 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPut("/agency-user")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> PutAgentOwner([FromBody] BodyAgencyUserUpdateDto oa, Ulid idAgencyUser)
@@ -78,7 +82,8 @@ namespace  Lathiecoco.Controllers
             return Ok(rep);
 
         }
-        
+
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPut("/agency-user/activate-or-deactivate")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> activateOrDeactive(ActiveBlockDto oa)
@@ -93,6 +98,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPut("/agency-user/block-or-deblock")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> blockOrDeblock(ActiveBlockDto oa)
@@ -107,6 +113,7 @@ namespace  Lathiecoco.Controllers
             return Ok(rep);
 
         }
+
         [HttpPost("/agency-user/refresh-token")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> refreshToken()
@@ -183,7 +190,7 @@ namespace  Lathiecoco.Controllers
             ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
             try
             {
-                AgencyUser user = await _catalogDbContext.AgencyUsers.Where(s => s.Login == ldto.username).FirstOrDefaultAsync();
+                AgencyUser user = await _catalogDbContext.AgencyUsers.Where(s => s.Login == ldto.username).Include(x=>x.Agency).FirstOrDefaultAsync();
                 if (user != null)
                 {
                     if (user.IsBlocked)
@@ -201,7 +208,7 @@ namespace  Lathiecoco.Controllers
                         return Ok(rp);
                     }
                     //if (BCrypt.Net.BCrypt.EnhancedVerify(us.password, user.Password))
-                    if (ldto.password == user.Password)
+                    if (BCrypt.Net.BCrypt.EnhancedVerify(ldto.password,user.Password))
                     {
                         //var token = await BuildToken(userInfo, new[] { RoleTypes.User });
                         var claims = new List<Claim>() {
@@ -330,6 +337,7 @@ namespace  Lathiecoco.Controllers
         }
 
         [HttpGet("/agency-user/find-all")]
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AgencyUser>>> findAllAgentOwner(int page = 1, int limit = 10)
         {
@@ -338,6 +346,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpGet("/agency-user/find-all-by-agency")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AgencyUser>>> findAllByAgency(Ulid IdAgency, int page = 1, int limit = 10)

@@ -12,8 +12,9 @@ namespace  Lathiecoco.repository
         Task<ResponseBody<CustomerWallet>> updateCustomerInformations(CustomerUpdateInfosDto cus);
         Task<ResponseBody<CustomerWallet>> updateCustomerInformationsWithoutPinNumber(CustomerUpdateDto cus);
         Task<ResponseBody<CustomerWallet>> updateCustomerPin(CustomerUpadatePinDto cus);
+        Task<ResponseBody<String>> updateCustomerPinNumberByStaff(UpdateCustomerByStaffDto cus);
         Task<ResponseBody<CustomerWallet>> addCustomerWithAccountingPhoneOnly(BodyCustomerPhoneDto cus);
-        Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile, Ulid? idAgency, int page = 1, int limit = 10);
+        Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile, Ulid? idAgency, String? phone, int page = 1, int limit = 10);
         Task<ResponseBody<List<CustomerWallet>>> findAllCustomer(int page = 1, int limit = 10);
         Task<ResponseBody<List<CustomerWallet>>> findAllAgentsByAgency(Ulid? idAgency, int page = 1, int limit = 10);
         Task<ResponseBody<CustomerWallet>> findCustomerWalletContryidentityAndPhone(BodyPhoneShDto bd);

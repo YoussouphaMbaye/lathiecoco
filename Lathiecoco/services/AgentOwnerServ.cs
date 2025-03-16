@@ -51,7 +51,7 @@ namespace  Lathiecoco.services
             ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
             try
             {
-                OwnerAgent oaObj=await _CatalogDbContext.OwnerAgents.Where(x => x.Login == oa.Login).FirstOrDefaultAsync();
+                OwnerAgent oaObj=await _CatalogDbContext.OwnerAgents.Where(x => x.Login == oa.Login || x.Email==oa.Email).FirstOrDefaultAsync();
                 if(oaObj != null)
                 {
                     rp.Msg = "Staff Already exist";
@@ -61,20 +61,20 @@ namespace  Lathiecoco.services
                 }
                 OwnerAgent ownerAgent = new OwnerAgent();
                 ownerAgent.IdOwnerAgent=Ulid.NewUlid();
-                ownerAgent.FirstName = oa.FirstName;
-                ownerAgent.MiddleName = oa.MiddleName;
-                ownerAgent.LastName = oa.LastName;
-                ownerAgent.Phone = oa.Phone;
-                ownerAgent.Address = oa.Address; 
+                ownerAgent.FirstName = oa.FirstName.Trim().Replace(" ", "");
+                ownerAgent.MiddleName = oa.MiddleName.Trim().Replace(" ", "");
+                ownerAgent.LastName = oa.LastName.Trim().Replace(" ", "");
+                ownerAgent.Phone = oa.Phone.Trim().Replace(" ", "");
+                ownerAgent.Address = oa.Address.Trim().Replace(" ", ""); 
                 ownerAgent.Country = "Guinée";
-                ownerAgent.Email = oa.Email;
-                ownerAgent.Login=oa.Login;
-                ownerAgent.Password=oa.Password;
-                ownerAgent.Profil=oa.Profil;
-                ownerAgent.Address=oa.Address;
+                ownerAgent.Email = oa.Email.Trim().Replace(" ", "");
+                ownerAgent.Login=oa.Login.Trim().Replace(" ", "");
+                ownerAgent.Password= BCrypt.Net.BCrypt.EnhancedHashPassword(oa.Password.Trim().Replace(" ", ""), 15);
+                ownerAgent.Profil=oa.Profil.Trim().Replace(" ", "");
+                ownerAgent.Address=oa.Address.Trim().Replace(" ", "");
                 ownerAgent.IsActive=true;
                 ownerAgent.IsFirstLogin=true;
-                ownerAgent.AgentType=oa.AgentType;
+                ownerAgent.AgentType=oa.AgentType.Trim().Replace(" ", "");
                 ownerAgent.CreatedDate=DateTime.UtcNow;
                 ownerAgent.UpdatedDate=DateTime.UtcNow;
                 ownerAgent.CodeOwnerAgent = "N" + GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
@@ -103,7 +103,7 @@ namespace  Lathiecoco.services
                 {
                     if (st.Password == cp.OldPassword.Trim().Replace(" ", ""))
                     {
-                        st.Password = cp.NewPassword.Trim().Replace(" ", "");
+                        st.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(cp.NewPassword.Trim().Replace(" ", ""), 15);
                         st.UpdatedDate = DateTime.UtcNow;
                         //agency.fkIdStaff = ag.fkIdStaff;
                         st.IsFirstLogin = false;
@@ -156,7 +156,7 @@ namespace  Lathiecoco.services
                 ownerAgent.Phone = oa.Phone.Trim().Replace(" ", ""); ;
                 ownerAgent.Address = oa.Address;
                 ownerAgent.Email = oa.Email;
-                ownerAgent.Password = oa.Password.Trim().Replace(" ","");
+                ownerAgent.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(oa.Password.Trim().Replace(" ",""));
                 ownerAgent.Profil = oa.Profil;
                 ownerAgent.Address = oa.Address;
                 ownerAgent.IsActive = true;
@@ -176,6 +176,54 @@ namespace  Lathiecoco.services
                 Console.WriteLine(ex.ToString());
             }
             return rp;
+        }
+
+        public async Task<ResponseBody<List<OwnerAgent>>> ownerAgentSearch(string? email, string? phone, int page = 1, int limit = 10)
+        {
+            string sql = "select * from \"OwnerAgents\" where \"IsActive\"=true";
+
+
+            if (email != null)
+            {
+                sql += " and \"Email\" LIKE '%" + email + "%'";
+            }
+            if (phone != null)
+            {
+                sql += " and \"Phone\" LIKE '%" + phone + "%'";
+            }
+            //sql += ";";
+            Console.WriteLine(sql);
+            ResponseBody<List<OwnerAgent>> rp = new ResponseBody<List<OwnerAgent>>();
+            try
+            {
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.OwnerAgents != null)
+                {
+                    int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.OwnerAgents.FromSqlRaw(sql).Count() / limit);
+
+                    var ps = await _CatalogDbContext.OwnerAgents.FromSqlRaw(sql).OrderByDescending(c => c.UpdatedDate).Skip(skip).Take(limit).ToListAsync();
+
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+
+                    }
+                    else
+                    {
+                        rp.Body = new List<OwnerAgent>();
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+
         }
 
         public async Task<ResponseBody<List<OwnerAgent>>> findAllOwnerAgents(int page = 1, int limit = 10)

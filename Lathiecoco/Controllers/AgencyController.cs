@@ -1,7 +1,7 @@
 ﻿using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.repository;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -32,12 +32,16 @@ namespace Lathiecoco.controller
 
             _agencyService = agencyService;
         }
+
+        [Authorize(Roles = "ADMIN")]
         [HttpPost("/agency")]
         public async Task<ActionResult> postAgent(AgencyDto ag)
         {
             var res = await _agencyService.addAgency(ag);
             return Ok(res);
         }
+
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPut("/agency")]
         public async Task<ActionResult> putAgent(AgencyPutDto ag,Ulid idAgency)
         {
@@ -45,20 +49,24 @@ namespace Lathiecoco.controller
             return Ok(res);
         }
 
+
+        [Authorize]
         [HttpGet("/agencies")]
         public async Task<ActionResult> findAll(int page = 1, int limit = 10)
         {
             var res = await _agencyService.findAgencies(page, limit);
             return Ok(res);
         }
-        
+
+        [Authorize(Roles = "ADMIN,COMPTABLE")]
         [HttpPost("/agencies/define-percentage-purchase")]
         public async Task<ActionResult> definePercentagePurchase(DefinePercentagePurchaseAgentDto dto)
         {
             var res = await _agencyService.definePercentagePurchase(dto);
             return Ok(res);
         }
-        
+
+        [Authorize]
         [HttpGet("/agencies/agency-by-id")]
         public async Task<ActionResult> getAgencyById(Ulid id)
         {
@@ -66,6 +74,7 @@ namespace Lathiecoco.controller
             return Ok(res);
         }
 
+        [Authorize]
         [HttpGet("/agencies/searche")]
         public async Task<ActionResult> searche(string? email, string? code, string? phone, int page = 1, int limit = 10)
         {

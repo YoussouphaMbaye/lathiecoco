@@ -378,6 +378,7 @@ namespace Lathiecoco.services
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Msg=ex.Message;
                 rp.Code = 400;
             }
             

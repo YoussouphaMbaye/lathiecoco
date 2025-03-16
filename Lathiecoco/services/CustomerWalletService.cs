@@ -277,7 +277,7 @@ namespace  Lathiecoco.services
                 
                 Random rdn = new Random();
                 var a = rdn.Next(1000, 9999);
-                //c.PinTemp = a.ToString();
+                //SMS c.PinTemp = a.ToString();
                 c.PinTemp = "1234";
                 string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 c.Code = "C" + dayToday;
@@ -356,16 +356,30 @@ namespace  Lathiecoco.services
             return rp;
         }
 
-        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile,Ulid? idAgency, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<CustomerWallet>>> findAllCustomerByprofile(string profile,Ulid? idAgency,String? phone, int page = 1, int limit = 10)
         {
             ResponseBody<List<CustomerWallet>> rp = new ResponseBody<List<CustomerWallet>>();
             try
             {
+                if(phone != null)
+                {
+                    phone = phone.Trim().Replace(" ","");
+                }
+
+                if (profile != null)
+                {
+                    profile = profile.Trim().Replace(" ", "");
+                }
+
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.CustomerWallets != null)
                 {
-                    var req = idAgency == null ? _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile) :
-                        _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile&& c.FkIdAgency==idAgency);
+                    var req = (idAgency != null && phone==null) ? _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile && c.FkIdAgency == idAgency):
+                        (idAgency != null && phone != null)? _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile && c.FkIdAgency == idAgency && c.Phone.Contains(phone)) :
+                        (idAgency == null && phone != null)? _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile && c.Phone.Contains(phone)) :
+                        _CatalogDbContext.CustomerWallets.Where(c => c.Profile == profile) 
+                        ;
+
                     int pageCount = (int)Math.Ceiling((decimal) req.Count() / limit);
                     var ps = await req.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
@@ -570,9 +584,17 @@ namespace  Lathiecoco.services
             {
 
 
-                CustomerWallet cus= await _CatalogDbContext.CustomerWallets.Where(c=>c.phoneIdentity==bd.CountryIdentity && c.Phone==bd.Phone && c.PinNumber==bd.pinNumber).FirstOrDefaultAsync();
+                CustomerWallet cus= await _CatalogDbContext.CustomerWallets.Where(c=>c.phoneIdentity==bd.CountryIdentity && c.Phone==bd.Phone).FirstOrDefaultAsync();
                 if (cus != null)
                 {
+                    if (!BCrypt.Net.BCrypt.EnhancedVerify(cus.PinNumber,bd.pinNumber))
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "Phone or pin not correct";
+                        rp.Code = 332;
+                        return rp;
+                    }
+
                     if (cus.IsBlocked)
                     {
                         rp.IsError = true;
@@ -654,13 +676,13 @@ namespace  Lathiecoco.services
                 CustomerWallet cu=await _CatalogDbContext.CustomerWallets.Where(c=>c.phoneIdentity==cus.PhoneIdentity && c.Phone==cus.Phone).FirstOrDefaultAsync();
                 if (cu != null)
                 {
-                    cu.MiddleName=cus.MiddleName;
-                    cu.FirstName=cus.FirstName;
-                    cu.LastName=cus.LastName;
-                    cu.Profile = cus.Profile;
-                    cu.PinNumber=cus.PinNumber;
-                    cu.Address=cus.Address;
-                    cu.PhoneBrand=cus.PhoneBrand;
+                    cu.MiddleName=cus.MiddleName.Trim().Replace(" ","");
+                    cu.FirstName=cus.FirstName.Trim().Replace(" ", "");
+                    cu.LastName=cus.LastName.Trim().Replace(" ", "");
+                    cu.Profile = cus.Profile.Trim().Replace(" ", "");
+                    cu.PinNumber= BCrypt.Net.BCrypt.EnhancedHashPassword(cus.PinNumber.Trim().Replace(" ", ""));
+                    cu.Address=cus.Address.Trim().Replace(" ", "");
+                    cu.PhoneBrand=cus.PhoneBrand.Trim().Replace(" ", "");
                   if (cus.Profile =="AGENT")
                     {
                         cu.IsActive = false;
@@ -689,6 +711,46 @@ namespace  Lathiecoco.services
                     rp.Msg = "Customer with phone "+cus.PhoneIdentity+ " "+cus.Phone +" not found";
                     return rp;
                    
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.Code = 400;
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<String>> updateCustomerPinNumberByStaff(UpdateCustomerByStaffDto cus)
+        {
+            ResponseBody<String> rp = new ResponseBody<String>();
+            try
+            {
+                CustomerWallet cu = await _CatalogDbContext.CustomerWallets.Where(c => c.phoneIdentity == cus.PhoneIdentity && c.Phone == cus.PhoneNumber).FirstOrDefaultAsync();
+                
+                if (cu != null)
+                {
+                    Random rdn = new Random();
+                    var a = rdn.Next(1000, 9999);
+                    cu.PinNumber = BCrypt.Net.BCrypt.EnhancedHashPassword(a.ToString());
+                   
+                   //SMS send
+                    cu.FkIdStaff = cus.IdStaff;
+                    cu.UpdatedDate = DateTime.UtcNow;
+
+                    _CatalogDbContext.CustomerWallets.Update(cu);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = a.ToString();
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Code = 332;
+                    rp.Msg = "Customer with phone " + cus.PhoneIdentity + " " + cus.PhoneIdentity + " not found";
+                    return rp;
+
                 }
 
             }
@@ -757,7 +819,7 @@ namespace  Lathiecoco.services
                     CustomerWallet cu = await _CatalogDbContext.CustomerWallets.Where(c => c.Phone == cus.Phone && c.phoneIdentity==cus.PhoneCountryIdentity).FirstOrDefaultAsync();
                     if (cu != null)
                     {
-                    if (cu.PinNumber != cus.OldPinNumber)
+                    if (cu.PinNumber != cus.OldPinNumber.Trim().Replace(" ",""))
                     {
                         rp.IsError = true;
                         rp.Msg = "Phone or old pin not valide!";
@@ -765,7 +827,7 @@ namespace  Lathiecoco.services
                         return rp;
                     }
                         
-                        cu.PinNumber = cus.NewPinNumber;
+                        cu.PinNumber = BCrypt.Net.BCrypt.EnhancedHashPassword(cus.NewPinNumber.Trim().Replace(" ",""));
 
                         _CatalogDbContext.CustomerWallets.Update(cu);
                         await _CatalogDbContext.SaveChangesAsync();

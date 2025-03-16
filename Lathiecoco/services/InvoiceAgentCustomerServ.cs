@@ -385,6 +385,12 @@ namespace  Lathiecoco.services
                 
             }
 
+            if (code != null)
+            {
+                code = code.Trim().Replace(" ", "");
+
+            }
+
             try
             {
                 DateTime myDateTime = DateTime.UtcNow;

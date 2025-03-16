@@ -2,11 +2,13 @@
 using Lathiecoco.models;
 using Lathiecoco.repository;
 using Lathiecoco.services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Numerics;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,6 +40,8 @@ namespace  Lathiecoco.Controllers
             _agentOwnerServ = agentOwnerServ;
             _contextAccessor = contextAccessor;
         }
+
+        [Authorize(Roles = "SUPADMIN")]
         [HttpPost("/agent-owner")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> PostAgentOwner([FromBody] BodyOwnerAgentDto oa)
@@ -51,6 +55,8 @@ namespace  Lathiecoco.Controllers
 
 
         }
+
+        [Authorize]
         [HttpPost("/agent-owner/change-password")]
         public async Task<ActionResult> updatePassword(ChangePasswordDto cp)
         {
@@ -63,6 +69,7 @@ namespace  Lathiecoco.Controllers
             return Ok(res);
         }
 
+        [Authorize(Roles = "SUPADMIN")]
         [HttpPut("/agent-owner")]
         public async Task<ActionResult> updateAgentOwner([FromBody] BodyAgentOwnerUpdateDto oa,Ulid idOwnerAgent)
         {
@@ -77,6 +84,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize(Roles = "SUPADMIN")]
         [HttpPut("/agent-owner/activate-or-deactivate")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> activateOrDeactive(ActiveBlockDto oa)
@@ -91,6 +99,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize(Roles = "SUPADMIN")]
         [HttpPut("/agent-owner/block-or-deblock")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> blockOrDeblock(ActiveBlockDto oa)
@@ -167,6 +176,7 @@ namespace  Lathiecoco.Controllers
 
 
         }
+        
         [HttpPost("/agent-owner/login")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> LoginAgentOwner([FromBody] LoginDto ldto)
@@ -198,7 +208,7 @@ namespace  Lathiecoco.Controllers
                         return Ok(rp);
                     }
                     //if (BCrypt.Net.BCrypt.EnhancedVerify(us.password, user.Password))
-                    if (ldto.password == user.Password)
+                    if (BCrypt.Net.BCrypt.EnhancedVerify(ldto.password, user.Password))
                     {
                         //var token = await BuildToken(userInfo, new[] { RoleTypes.User });
                         var claims = new List<Claim>() {
@@ -222,7 +232,14 @@ namespace  Lathiecoco.Controllers
                         _catalogDbContext.OwnerAgents.Update(user);
                         await _catalogDbContext.SaveChangesAsync();
 
-                        _contextAccessor.HttpContext.Response.Cookies.Append("token", mtoken);
+                        var newDate = DateTime.UtcNow.AddMinutes(60 * 24);
+                        var cookieOptions = new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Expires = newDate,
+                        };
+
+                        _contextAccessor.HttpContext.Response.Cookies.Append("token", mtoken, cookieOptions);
                         rp.Body = user;
 
                     }
@@ -275,7 +292,7 @@ namespace  Lathiecoco.Controllers
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var expiration = DateTime.UtcNow.AddMinutes(5);
+            var expiration = DateTime.UtcNow.AddMinutes(10);
             JwtSecurityToken token = new JwtSecurityToken(
                issuer: null,
                audience: null,
@@ -285,7 +302,6 @@ namespace  Lathiecoco.Controllers
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-
 
         }
 
@@ -322,6 +338,7 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize(Roles = "SUPADMIN")]
         [HttpGet("/owner-agent/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<OwnerAgent>>> findAllAgentOwner(int page = 1, int limit = 10)
@@ -330,6 +347,18 @@ namespace  Lathiecoco.Controllers
             return await _agentOwnerServ.findAllOwnerAgents(page, limit);
 
         }
+
+        [Authorize(Roles = "SUPADMIN")]
+        [HttpGet("/owner-agent/search")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<List<OwnerAgent>>> agentOwnerSearch(string? email, string? phone, int page = 1, int limit = 10)
+        {
+
+            return await _agentOwnerServ.ownerAgentSearch(email, phone, page, limit);
+
+        }
+
+        [Authorize]
         [HttpGet("/owner-agent/statistics")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<BodyNbCountDto>> getStatistics()

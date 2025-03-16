@@ -650,21 +650,116 @@ namespace  Lathiecoco.services
                 {
                     var totalItems =
                     (agenceCode != null && staffEmail != null) ?
-                            _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => i.AgencyUser.Agency.code == agenceCode && i.Staff.Email == staffEmail).Count() :
+                            _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => (i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode) && i.Staff.Email == staffEmail).Count() :
                              (agenceCode != null && staffEmail == null) ?
-                             _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => i.AgencyUser.Agency.code == agenceCode).Count() :
+                             _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).Count() :
                              (agenceCode == null && staffEmail != null) ?
                              _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => i.Staff.Email == staffEmail).Count() :
                             _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Count();
 
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
                     var ps = (agenceCode!=null && staffEmail !=null)?
-                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i=>i.AgencyUser.Agency.code==agenceCode && i.Staff.Email==staffEmail).ToListAsync():
+                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i=>(i.AgencyUser.Agency.code==agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode) && i.Staff.Email==staffEmail).ToListAsync():
                              (agenceCode != null && staffEmail == null) ?
-                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.AgencyUser.Agency.code == agenceCode).ToListAsync():
+                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).ToListAsync():
                              (agenceCode == null && staffEmail != null) ?
                              await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.Staff.Email == staffEmail).ToListAsync() :
                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i=>i.AgencyUser).Include(i => i.AgencyUser.Agency).ToListAsync();
+                    //string jjj = "kkkkk";
+                    if (ps != null && ps.Count() > 0)
+                    {
+                        rp.Body = ps;
+                        rp.CurrentPage = page;
+                        rp.TotalPage = pageCount;
+                    }
+                    else
+                    {
+                        rp.Body = new List<InvoiceStartupMaster>();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                rp.IsError = true;
+                rp.Code = 400;
+                rp.Msg = ex.Message;
+            }
+
+            return rp;
+
+        }
+
+        public async Task<ResponseBody<List<InvoiceStartupMaster>>> searcheInvoiceStartupMasterByAgency(string? status, string? code, DateTime? beginDate, DateTime? endDate, String agenceCode, String? paymentMethod, int page, int limit)
+        {
+            ResponseBody<List<InvoiceStartupMaster>> rp = new ResponseBody<List<InvoiceStartupMaster>>();
+            try
+            {
+                if (status != null)
+                {
+                    status = status.Trim().Replace(" ", "");
+                }
+
+                if (code != null)
+                {
+                    code = code.Trim().Replace(" ", "");
+                }
+
+                if (agenceCode != null)
+                {
+                    agenceCode = agenceCode.Trim().Replace(" ", "");
+                }
+
+                if (paymentMethod != null)
+                {
+                    paymentMethod = paymentMethod.Trim().Replace(" ", "");
+                }
+
+                DateTime myDateTime = DateTime.UtcNow;
+                string dateNow = myDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+                if (endDate != null)
+                {
+                    dateNow = ((DateTime)endDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                }
+
+                string query = $"Select * from \"InvoiceStartupMasters\" ";
+
+                query += $"where \"CreatedDate\" <'{dateNow}' ";
+
+                if (status != null)
+                {
+                    query += $"and \"InvoiceStatus\" ='{status}' ";
+                }
+                if (code != null)
+                {
+                    query += $"and  \"InvoiceCode\" ='{code}' ";
+                }
+                if (paymentMethod != null)
+                {
+                    query += $"and  \"PaymentMode\" ='{paymentMethod}' ";
+                }
+                if (beginDate != null)
+                {
+                    string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    query += $"and  \"CreatedDate\" >'{beginDateTostring}' ";
+                }
+                //query += $";";
+
+                Console.WriteLine(dateNow);
+                Console.WriteLine(query);
+                int skip = (page - 1) * (int)limit;
+                if (_CatalogDbContext.BillerInvoices != null)
+                {
+                    var totalItems =
+                    (agenceCode != null) ?
+                            _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code== agenceCode).Count() :
+                              _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Count();
+
+                    int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
+                    var ps = (agenceCode != null) ?
+                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Include(i=> i.Agent).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).ToListAsync() :
+                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
