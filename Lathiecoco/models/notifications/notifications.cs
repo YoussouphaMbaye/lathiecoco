@@ -8,7 +8,7 @@
     }
 
     public class TransactionData
-    {   
+    {
         public string? type { get; set; }
         public string? peerId { get; set; }
         public string? peerIdType { get; set; }
