@@ -101,7 +101,7 @@ namespace  Lathiecoco.services
                 OwnerAgent st = await _CatalogDbContext.OwnerAgents.FindAsync(cp.Id);
                 if (st != null)
                 {
-                    if (st.Password == cp.OldPassword.Trim().Replace(" ", ""))
+                    if (BCrypt.Net.BCrypt.EnhancedVerify(cp.OldPassword, st.Password))
                     {
                         st.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(cp.NewPassword.Trim().Replace(" ", ""), 15);
                         st.UpdatedDate = DateTime.UtcNow;
