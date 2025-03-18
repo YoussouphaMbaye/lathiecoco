@@ -1,6 +1,7 @@
 ﻿using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,16 +30,18 @@ namespace Lathiecoco.Controllers
 
             _userLogServ = userLogServ;
         }
+
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpGet("/userLogs/findWithUser")]
-        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ResponseBody<List<UserLog>>> findWithUser(Ulid? fkIdStaff, DateTime beginDate, DateTime endDate, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<UserLog>>> findWithUser(String? email, DateTime beginDate, DateTime endDate, int page = 1, int limit = 10)
         {
 
-            return await _userLogServ.findUserLogByStaff(fkIdStaff, beginDate, endDate, page, limit);
+            return await _userLogServ.findUserLogByStaff(email, beginDate, endDate, page, limit);
 
         }
+
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPost("/userLogs/addUserLogs")]
-        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<UserLog>> addUserLogs(AddUserLogDto dto)
         {
 

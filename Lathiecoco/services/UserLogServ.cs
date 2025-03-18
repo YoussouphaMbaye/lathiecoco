@@ -83,15 +83,28 @@ namespace Lathiecoco.services
         }
     
 
-        public async Task<ResponseBody<List<UserLog>>> findUserLogByStaff(Ulid? fkIdStaff,DateTime beginDate, DateTime endDate, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<UserLog>>> findUserLogByStaff(String? email,DateTime beginDate, DateTime endDate, int page = 1, int limit = 10)
         {
             ResponseBody<List<UserLog>> rp = new ResponseBody<List<UserLog>>();
             try
             {
+                Ulid idDefault = Ulid.NewUlid();
+                Ulid fkIdStaff = idDefault;
+
+                if(email != null)
+                {
+                    OwnerAgent ownerAgent = await _CatalogDbContext.OwnerAgents.Where(o => o.Email == email).FirstAsync();
+
+                    if (ownerAgent != null) {
+                        fkIdStaff = ownerAgent.IdOwnerAgent;
+                    }
+
+                }
+
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.UserLogs != null)
                 {
-                    var req = fkIdStaff!=null? _CatalogDbContext.UserLogs
+                    var req = fkIdStaff!= idDefault ? _CatalogDbContext.UserLogs
                         .Where(x => x.FkIdStaff == fkIdStaff)
                         .Include(x => x.Staff)
                         .Where(x => x.CreatedDate > beginDate && x.CreatedDate < endDate)

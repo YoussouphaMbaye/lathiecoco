@@ -1,6 +1,7 @@
 ﻿using Lathiecoco.models;
 using Lathiecoco.models;
 using Lathiecoco.repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,8 @@ namespace  Lathiecoco.Controllers
 
             _accountingOpRepService = accountingOpRepService;
         }
+
+        [Authorize]
         [HttpGet("/accounting-op-wallet/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWallet(int page = 1, int limit = 10)
@@ -36,6 +39,8 @@ namespace  Lathiecoco.Controllers
             return await _accountingOpRepService.findAllAccountingOpWallet(page, limit);
 
         }
+
+        [Authorize]
         [HttpGet("/accounting-op-Wallet/with-accounting")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWalletWithAccounting(Ulid idAccounting,int page = 1, int limit = 10)

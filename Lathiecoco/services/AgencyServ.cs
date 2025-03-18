@@ -19,7 +19,7 @@ namespace Lathiecoco.services
             var transaction = _CatalogDbContext.Database.BeginTransaction();
             try
             {
-                Agency ag1=await _CatalogDbContext.Agencies.Where(a=>a.phone==ag.phone).FirstOrDefaultAsync();
+                Agency ag1=await _CatalogDbContext.Agencies.Where(a=>a.phone==ag.phone || a.email==ag.email).FirstOrDefaultAsync();
                 
                 if (ag1!=null) {
                     rp.IsError = true;
@@ -168,19 +168,19 @@ namespace Lathiecoco.services
         }
          public async Task<ResponseBody<List<Agency>>> agencySearch(string? email, string? code, string? phone, int page = 1, int limit = 10)
         {
-            string sql = "select * from Agencies where isActive=1";
+            string sql = "select * from \"Agencies\" where \"isActive\"=true";
 
             if (code != null)
             {
-                sql += " and code LIKE '%" + code + "%'";
+                sql += " and \"code\" LIKE '%" + code + "%'";
             }
             if (email != null)
             {
-                sql += " and email LIKE '%" + email + "%'";
+                sql += " and \"email\" LIKE '%" + email + "%'";
             }
             if (phone != null)
             {
-                sql += " and phone LIKE '%" + phone + "%'";
+                sql += " and \"phone\" LIKE '%" + phone + "%'";
             }
             //sql += ";";
             Console.WriteLine(sql);

@@ -369,9 +369,28 @@ namespace  Lathiecoco.services
             //inserer operation accounting destinataire
             return rp;
         }
-        public async Task<ResponseBody<List<InvoiceWalletAgent>>> searcheInvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate, int page, int limit)
+        public async Task<ResponseBody<List<InvoiceWalletAgent>>> searcheInvoiceWalletAgent(string? status, string? code, DateTime? beginDate, DateTime? endDate,String? phoneAgent, String? phoneCustomer, int page, int limit)
         {
             ResponseBody<List<InvoiceWalletAgent>> rp = new ResponseBody<List<InvoiceWalletAgent>>();
+            
+            if (phoneAgent != null)
+            {
+                phoneAgent = phoneAgent.Trim().Replace(" ", "");
+                
+            }
+
+            if (phoneCustomer != null)
+            {
+                phoneCustomer = phoneCustomer.Trim().Replace(" ", "");
+                
+            }
+
+            if (code != null)
+            {
+                code = code.Trim().Replace(" ", "");
+
+            }
+
             try
             {
                 DateTime myDateTime = DateTime.UtcNow;
@@ -382,33 +401,41 @@ namespace  Lathiecoco.services
                     dateNow = ((DateTime)endDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
                 }
 
-                string query = $"Select * from InvoiceWalletAgents ";
+                string query = $"Select * from \"InvoiceWalletAgents\" ";
 
-                query += $"where CreatedDate<'{dateNow}' ";
+                query += $"where  \"CreatedDate\" <'{dateNow}' ";
 
                 if (status != null)
                 {
-                    query += $"and InvoiceStatus='{status}' ";
+                    query += $"and \"InvoiceStatus\" ='{status}' ";
                 }
                 if (code != null)
                 {
-                    query += $"and  InvoiceCode='{code}' ";
+                    query += $"and  \"InvoiceCode\" ='{code}' ";
                 }
                 if (beginDate != null)
                 {
                     string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    query += $"and  CreatedDate>'{beginDateTostring}' ";
+                    query += $"and  \"CreatedDate\" >'{beginDateTostring}' ";
                 }
-                query += $";";
+                //query += $";";
 
                 Console.WriteLine(dateNow);
                 Console.WriteLine(query);
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
-                    var totalItems = _CatalogDbContext.BillerInvoices.Count();
+                    var totalItems = 
+                    (phoneAgent != null && phoneCustomer == null) ? _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Where(i => i.Agent.Phone == phoneAgent).Count() :
+                    (phoneAgent != null && phoneCustomer != null) ? _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Where(i => i.Agent.Phone == phoneAgent && i.CustomerWallet.Phone == phoneCustomer).Count() :
+                    (phoneAgent == null && phoneCustomer != null) ? _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Where(i => i.CustomerWallet.Phone == phoneCustomer).Count() :
+                    _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Count();
+
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
-                    var ps = await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).ToListAsync();
+                    var ps = (phoneAgent != null && phoneCustomer==null)?await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i=>i.Agent.Phone==phoneAgent).ToListAsync():
+                        (phoneAgent != null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.Agent.Phone == phoneAgent && i.CustomerWallet.Phone==phoneCustomer).ToListAsync():
+                        (phoneAgent == null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.CustomerWallet.Phone == phoneCustomer).ToListAsync():
+                        await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {

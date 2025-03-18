@@ -33,7 +33,7 @@ namespace Lathiecoco.Controllers
             _billerInvoiceServ = billerInvoiceServ;
         }
         [HttpGet("/biller-invoice")]
-        [Authorize( Roles = "ADMIN,USER")]
+        [Authorize]
         public async Task<ResponseBody<List<BillerInvoice>>> findAllbillerInvoice(int page = 1, int limit = 10)
         {
             //_contextAccessor.HttpContext.Response.Cookies.Append("token", "mtoken");
@@ -41,16 +41,17 @@ namespace Lathiecoco.Controllers
 
         }
         [HttpGet("/biller-invoice/searche")]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, int page = 1, int limit = 10)
+        [Authorize]
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, int page = 1, int limit = 10)
 
         {
 
-            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate, page, limit )
+            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate,phone, page, limit )
 ;
 
         }
 
+        [Authorize]
         [HttpPost("/biller-invoice")]
         //[Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ResponseBody<BillerInvoice>> addbillerInvoice(BodyBillerDto biller)
@@ -59,6 +60,8 @@ namespace Lathiecoco.Controllers
             return await _billerInvoiceServ.insertBillerInvoice(biller);
 
         }
+
+        [Authorize]
         [HttpGet("/biller-invoice/find-by-id")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<BillerInvoice>> billerById(Ulid id)
@@ -67,8 +70,8 @@ namespace Lathiecoco.Controllers
             return await _billerInvoiceServ.findBillerInvoiceById(id);
 
         }
+        [Authorize(Roles = "ADMIN,COMPTABLE,SUPADMIN")]
         [HttpGet("/biller-invoice/biller-by-agent-Sum-biller-amount")]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN,COMPTABLE")]
         public async Task<ActionResult> billerByAgentSumBiller(DateTime begenDate, DateTime endDate, Ulid? idAgent)
         {
 

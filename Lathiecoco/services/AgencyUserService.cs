@@ -28,7 +28,7 @@ namespace Lathiecoco.services
             ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
             try
             {
-                AgencyUser oaObj = await _CatalogDbContext.AgencyUsers.Where(x => x.Login == oa.Login).FirstOrDefaultAsync();
+                AgencyUser oaObj = await _CatalogDbContext.AgencyUsers.Where(x => x.Login == oa.Login || x.Email==oa.Email).FirstOrDefaultAsync();
                 if (oaObj != null)
                 {
                     rp.Msg = "User Already exist";
@@ -49,7 +49,7 @@ namespace Lathiecoco.services
                 AgencyUser.Country = "Guinée";
                 AgencyUser.Email = oa.Email.Trim().Replace(" ", "");
                 AgencyUser.Login = oa.Login.Trim().Replace(" ", "");
-                AgencyUser.Password = oa.Password.Trim().Replace(" ", "");
+                AgencyUser.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(oa.Password.Trim().Replace(" ", ""), 15);
                 AgencyUser.Profil = oa.Profil.Trim().Replace(" ", "");
                 AgencyUser.IsActive = true;
                 AgencyUser.IsFirstLogin = true;
@@ -78,9 +78,12 @@ namespace Lathiecoco.services
                 AgencyUser st = await _CatalogDbContext.AgencyUsers.FindAsync(cp.Id);
                 if (st != null)
                 {
-                    if (st.Password == cp.OldPassword.Trim().Replace(" ", ""))
+
+                    if (BCrypt.Net.BCrypt.EnhancedVerify(cp.OldPassword,st.Password))
                     {
-                        st.Password = cp.NewPassword.Trim().Replace(" ", "");
+                       
+                        st.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(cp.NewPassword.Trim().Replace(" ", ""), 15);
+                        
                         st.UpdatedDate = DateTime.UtcNow;
                         //agency.fkIdStaff = ag.fkIdStaff;
                         st.IsFirstLogin = false;
@@ -90,9 +93,9 @@ namespace Lathiecoco.services
                     }
                     else
                     {
-                        rp.Msg = "Old password not match!";
+                        rp.Msg = "Error!";
                         rp.IsError = true;
-                        rp.Code = 010;
+                        rp.Code = 330;
                     }
                 }
                 else
@@ -109,6 +112,7 @@ namespace Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+
             }
             return rp;
         }
@@ -207,7 +211,7 @@ namespace Lathiecoco.services
                 AgencyUser.Phone = oa.Phone.Trim().Replace(" ", "");
                 AgencyUser.Address = oa.Address.Trim().Replace(" ", "");
                 AgencyUser.Email = oa.Email.Trim().Replace(" ", "");
-                AgencyUser.Password = oa.Password.Trim().Replace(" ", "");
+                AgencyUser.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(oa.Password.Trim().Replace(" ", ""), 15); ;
                 AgencyUser.Profil = oa.Profil.Trim().Replace(" ", "");
                 AgencyUser.IsActive = true;
                 AgencyUser.UpdatedDate = DateTime.UtcNow;
@@ -319,7 +323,7 @@ namespace Lathiecoco.services
                         return rp;
                     }
                     //if (BCrypt.Net.BCrypt.EnhancedVerify(us.password, user.Password))
-                    if (bd.password == user.Password)
+                    if (BCrypt.Net.BCrypt.EnhancedVerify( bd.password, user.Password))
                     {
                         //var token = await BuildToken(userInfo, new[] { RoleTypes.User });
                         var claims = new List<Claim>() {

@@ -14,5 +14,7 @@ namespace  Lathiecoco.repository
         Task<ResponseBody<OwnerAgent>> activateOrDeactiveOwnerAgent(ActiveBlockDto dto);
         Task<ResponseBody<List<OwnerAgent>>> findAllOwnerAgents(int page = 1, int limit = 10);
         Task<ResponseBody<OwnerAgent>> updateOwnerAgent(BodyAgentOwnerUpdateDto oa, Ulid idOwnerAgent);
+        Task<ResponseBody<List<OwnerAgent>>> ownerAgentSearch(string? email, string? phone, int page = 1, int limit = 10);
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Lathiecoco.models;
 using Lathiecoco.repository;
 using Lathiecoco.services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -32,21 +33,25 @@ namespace  Lathiecoco.Controllers
 
             _paymentModeServ = paymentModeServ;
         }
+
+        [Authorize(Roles = "SUPADMIN")]
         [HttpPost("/paymentMode")]
         
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ActionResult< ResponseBody<PaymentMode>>> PostCashier([FromBody] PaymentMode py)
+        public async Task<ActionResult< ResponseBody<PaymentMode>>> addPaymentMode([FromBody] PaymentMode py)
         {
             var res = await _paymentModeServ.addPaymentMode(py);
             return Ok(res);
 
         }
+
         [HttpGet("/paymentMode/test")]
         public IEnumerable<String> tester()
         {
             return new List<String>() { "1", "2", "3" };
         }
-       
+
+        [Authorize(Roles = "SUPADMIN")]
         [HttpGet("/paymentMode/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<List<PaymentMode>>>> findAllAccounting(int page = 1, int limit = 10)
