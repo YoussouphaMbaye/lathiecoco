@@ -49,5 +49,15 @@ namespace  Lathiecoco.Controllers
             return await _accountingOpRepService.findAllAccountingOpWalletWithAccounting(idAccounting, page, limit );
 
         }
+
+        [Authorize]
+        [HttpGet("/accounting-op-Wallet/with-accounting/search")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWalletWithAccountingSearch(Ulid idAccounting, string? PaymentMethod, DateTime? beginDate, DateTime? endDate, int page=1, int limit=10)
+        {
+
+            return await _accountingOpRepService.searcheInvoiceWalletAgent(idAccounting, PaymentMethod, beginDate, endDate, page, limit);
+
+        }
     }
 }

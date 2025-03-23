@@ -40,7 +40,7 @@ namespace Lathiecoco.Controllers
 
         }
 
-        [Authorize(Roles = "ADMIN,SUPADMIN")]
+        //[Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPost("/userLogs/addUserLogs")]
         public async Task<ResponseBody<UserLog>> addUserLogs(AddUserLogDto dto)
         {

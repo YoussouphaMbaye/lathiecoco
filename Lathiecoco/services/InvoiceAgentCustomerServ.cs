@@ -420,8 +420,6 @@ namespace  Lathiecoco.services
                 }
                 //query += $";";
 
-                Console.WriteLine(dateNow);
-                Console.WriteLine(query);
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
@@ -432,10 +430,10 @@ namespace  Lathiecoco.services
                     _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Count();
 
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
-                    var ps = (phoneAgent != null && phoneCustomer==null)?await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i=>i.Agent.Phone==phoneAgent).ToListAsync():
-                        (phoneAgent != null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.Agent.Phone == phoneAgent && i.CustomerWallet.Phone==phoneCustomer).ToListAsync():
-                        (phoneAgent == null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.CustomerWallet.Phone == phoneCustomer).ToListAsync():
-                        await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).ToListAsync();
+                    var ps = (phoneAgent != null && phoneCustomer==null)?await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i=>i.Agent.Phone==phoneAgent).OrderByDescending(x=>x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
+                        (phoneAgent != null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.Agent.Phone == phoneAgent && i.CustomerWallet.Phone==phoneCustomer).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
+                        (phoneAgent == null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.CustomerWallet.Phone == phoneCustomer).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
+                        await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
@@ -467,6 +465,8 @@ namespace  Lathiecoco.services
             {
                 var groupedData = idAgent != null ? await _CatalogDbContext.InvoiceWalletAgents
                .Include(i => i.CustomerWallet)
+               .Include(i => i.Agent)
+               .Include(i => i.Agent.Agency)
                .Where(i => i.InvoiceStatus == status)
                .Where(i => i.Agent.Profile == "AGENT")
                .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
@@ -481,9 +481,11 @@ namespace  Lathiecoco.services
                    LastName = g.Max(c => c.Agent.LastName),
                    FirstName = g.Max(c => c.Agent.FirstName),
                    MiddleName = g.Max(c => c.Agent.MiddleName),
+                   Agency= g.Max(c => c.Agent.Agency.code),
                }).ToArrayAsync()
                : await _CatalogDbContext.InvoiceWalletAgents
                    .Include(i => i.Agent)
+                   .Include(i => i.Agent.Agency)
                    .Where(i => i.InvoiceStatus == status)
                    .Where(i => i.Agent.Profile == "AGENT")
                    .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
@@ -497,6 +499,7 @@ namespace  Lathiecoco.services
                        LastName = g.Max(c => c.Agent.LastName),
                        FirstName = g.Max(c => c.Agent.FirstName),
                        MiddleName = g.Max(c => c.Agent.MiddleName),
+                       Agency = g.Max(c => c.Agent.Agency.code),
                    }).ToArrayAsync();
                 if (groupedData != null)
                 {
@@ -512,6 +515,7 @@ namespace  Lathiecoco.services
                         b.FirstName = i.FirstName;
                         b.MiddleName = i.MiddleName;
                         b.TotalAmount = i.TotalAmount;
+                        b.Agency = i.Agency;
                         list.Add(b);
                     }
                     rp.Body = list;

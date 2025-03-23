@@ -318,6 +318,7 @@ namespace Lathiecoco.services
             {
                 var groupedData = idAgent != null ? await _CatalogDbContext.BillerInvoices
                .Include(i => i.CustomerWallet)
+               .Include(i => i.CustomerWallet.Agency)
                .Where(i => i.CustomerWallet.Profile == "AGENT")
                .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
                .Where(i => i.FkIdCustomerWallet == idAgent)
@@ -329,11 +330,13 @@ namespace Lathiecoco.services
                    Phone = g.Max(c => c.CustomerWallet.Phone),
                    TotalBillerAmount = g.Sum(e => e.AmountToPaid),
                    LastName = g.Max(c => c.CustomerWallet.LastName),
+                   Agency = g.Max(c => c.CustomerWallet.Agency.code),
                    FirstName = g.Max(c => c.CustomerWallet.FirstName),
                    MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
                }).ToArrayAsync()
                : await _CatalogDbContext.BillerInvoices
                    .Include(i => i.CustomerWallet)
+                   .Include(i => i.CustomerWallet.Agency)
                    .Where(i => i.CustomerWallet.Profile == "AGENT")
                    .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
                    .GroupBy(e => new { e.FkIdCustomerWallet })
@@ -344,9 +347,11 @@ namespace Lathiecoco.services
                        Phone = g.Max(c => c.CustomerWallet.Phone),
                        TotalBillerAmount = g.Sum(e => e.AmountToPaid),
                        LastName = g.Max(c => c.CustomerWallet.LastName),
+                       Agency = g.Max(c => c.CustomerWallet.Agency.code),
                        FirstName = g.Max(c => c.CustomerWallet.FirstName),
                        MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
                    }).ToArrayAsync();
+
                 if (groupedData != null)
                 {
                     //rp.Body = groupedData;
@@ -361,6 +366,7 @@ namespace Lathiecoco.services
                         b.FirstName = i.FirstName;
                         b.MiddleName = i.MiddleName;
                         b.TotalBillerAmount= i.TotalBillerAmount;
+                        b.Agency = i.Agency;
                         list.Add(b);
                     }
                     rp.Body = list;
@@ -435,7 +441,7 @@ namespace Lathiecoco.services
                     var ps = phone!=null? await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
                         .Where(b => b.CustomerWallet.Phone == phone).ToListAsync()
                         :await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
-                        .ToListAsync();
+                        .Skip(skip).Take(limit).ToListAsync();
                     
                     
                     //string jjj = "kkkkk";

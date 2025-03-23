@@ -423,12 +423,12 @@ namespace  Lathiecoco.services
                         : 
                         _CatalogDbContext.CustomerWallets
                         .Include(i => i.Accounting)
+                        .Include(i => i.Agency)
                        .Where(i => i.Profile == "AGENT")
                        .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate);
-                    Console.WriteLine("Good");
-                    Console.WriteLine(req);
+                    
                     int pageCount = (int)Math.Ceiling((decimal)req.Count() / limit);
-                    var ps = await req.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();//string jjj = "kkkkk";
+                    var ps = await req.OrderByDescending(c => c.UpdatedDate).Skip(skip).Take(limit).ToListAsync();//string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
                         rp.Body = ps;

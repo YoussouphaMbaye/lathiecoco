@@ -641,10 +641,7 @@ namespace  Lathiecoco.services
                     string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
                     query += $"and  \"CreatedDate\" >'{beginDateTostring}' ";
                 }
-                //query += $";";
-
-                Console.WriteLine(dateNow);
-                Console.WriteLine(query);
+               
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
@@ -659,12 +656,12 @@ namespace  Lathiecoco.services
 
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
                     var ps = (agenceCode!=null && staffEmail !=null)?
-                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i=>(i.AgencyUser.Agency.code==agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode) && i.Staff.Email==staffEmail).ToListAsync():
+                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i=>(i.AgencyUser.Agency.code==agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode) && i.Staff.Email==staffEmail).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
                              (agenceCode != null && staffEmail == null) ?
-                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).ToListAsync():
+                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
                              (agenceCode == null && staffEmail != null) ?
-                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.Staff.Email == staffEmail).ToListAsync() :
-                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i=>i.AgencyUser).Include(i => i.AgencyUser.Agency).ToListAsync();
+                             await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Where(i => i.Staff.Email == staffEmail).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync() :
+                            await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i=>i.AgencyUser).Include(i => i.AgencyUser.Agency).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
@@ -744,10 +741,7 @@ namespace  Lathiecoco.services
                     string beginDateTostring = ((DateTime)beginDate).ToString("yyyy-MM-dd HH:mm:ss.fff");
                     query += $"and  \"CreatedDate\" >'{beginDateTostring}' ";
                 }
-                //query += $";";
-
-                Console.WriteLine(dateNow);
-                Console.WriteLine(query);
+                
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
@@ -758,8 +752,8 @@ namespace  Lathiecoco.services
 
                     int pageCount = (int)Math.Ceiling((decimal)totalItems / limit);
                     var ps = (agenceCode != null) ?
-                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Include(i=> i.Agent).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).ToListAsync() :
-                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).ToListAsync();
+                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Include(i=> i.Agent).Where(i => i.AgencyUser.Agency.code == agenceCode || i.Agent.AgencyUser.Agency.code == agenceCode).OrderByDescending(x=>x.UpdatedDate).Skip(skip).Take(limit).ToListAsync() :
+                       await _CatalogDbContext.InvoiceStartupMasters.FromSqlRaw(query).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
@@ -775,7 +769,7 @@ namespace  Lathiecoco.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                
                 rp.IsError = true;
                 rp.Code = 400;
                 rp.Msg = ex.Message;
