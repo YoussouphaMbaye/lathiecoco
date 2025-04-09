@@ -42,11 +42,11 @@ namespace Lathiecoco.Controllers
         }
         [HttpGet("/biller-invoice/searche")]
         [Authorize]
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, String? billerReference, int page = 1, int limit = 10)
 
         {
 
-            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate,phone, page, limit )
+            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate,phone, billerReference, page, limit )
 ;
 
         }
@@ -72,10 +72,10 @@ namespace Lathiecoco.Controllers
         }
         [Authorize(Roles = "ADMIN,COMPTABLE,SUPADMIN")]
         [HttpGet("/biller-invoice/biller-by-agent-Sum-biller-amount")]
-        public async Task<ActionResult> billerByAgentSumBiller(DateTime begenDate, DateTime endDate, Ulid? idAgent)
+        public async Task<ActionResult> billerByAgentSumBiller(DateTime begenDate, DateTime endDate, Ulid? idAgent, Ulid? fkIdAgency)
         {
 
-            return Ok(await _billerInvoiceServ.billerByAgentSumBiller(begenDate, endDate, idAgent));
+            return Ok(await _billerInvoiceServ.billerByAgentSumBiller(begenDate, endDate, idAgent, fkIdAgency));
 
         }
        
