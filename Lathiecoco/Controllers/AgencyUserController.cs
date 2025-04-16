@@ -114,6 +114,47 @@ namespace  Lathiecoco.Controllers
 
         }
 
+        [Authorize]
+        [HttpGet("/agency-user/logout")]
+        public async Task<ActionResult> logout()
+        {
+            ResponseBody<AgencyUser> rp = new ResponseBody<AgencyUser>();
+            try
+            {
+                var newDate = DateTime.UtcNow.AddMinutes(-1 * 60 * 24);
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = newDate,
+                };
+
+                string refreshToken = _contextAccessor.HttpContext.Request.Cookies["tokenRefresh"];
+
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    rp.Code = 400;
+                    rp.IsError = true;
+                    rp.Msg = "No refresh Token!";
+
+                    return BadRequest(rp);
+                }
+
+                AgencyUser user = await _catalogDbContext.AgencyUsers.FirstOrDefaultAsync(au => au.TokenRefresh == refreshToken);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append("tokenRefresh", refreshToken, cookieOptions);
+                _contextAccessor.HttpContext.Response.Cookies.Append("token", refreshToken, cookieOptions);
+                return Ok(rp);
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+                return BadRequest(rp);
+            }
+
+        }
+
+        [Authorize]
         [HttpPost("/agency-user/refresh-token")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult> refreshToken()

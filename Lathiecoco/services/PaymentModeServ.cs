@@ -68,7 +68,7 @@ namespace  Lathiecoco.services
                 if (_CatalogDbContext.PaymentModes != null)
                 {
                     int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.PaymentModes.Count() / limit);
-                    var ps = await _CatalogDbContext.PaymentModes.Skip(skip).Take(limit).OrderByDescending(c => c.CreatedDate).ToListAsync();
+                    var ps = await _CatalogDbContext.PaymentModes.OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {

@@ -114,6 +114,45 @@ namespace  Lathiecoco.Controllers
             return Ok(rep);
 
         }
+        [Authorize]
+        [HttpGet("/agent-owner/logout")]
+        public async Task<ActionResult> logout()
+        {
+            ResponseBody<OwnerAgent> rp = new ResponseBody<OwnerAgent>();
+            try
+            {
+                var newDate = DateTime.UtcNow.AddMinutes(-1*60 * 24);
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = newDate,
+                };
+
+                string refreshToken = _contextAccessor.HttpContext.Request.Cookies["tokenRefresh"];
+
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    rp.Code = 400;
+                    rp.IsError = true;
+                    rp.Msg = "No refresh Token!";
+
+                    return BadRequest(rp);
+                }
+
+                OwnerAgent user = await _catalogDbContext.OwnerAgents.FirstOrDefaultAsync(au => au.TokenRefresh == refreshToken);
+
+                _contextAccessor.HttpContext.Response.Cookies.Append("tokenRefresh", refreshToken, cookieOptions);
+                _contextAccessor.HttpContext.Response.Cookies.Append("token", refreshToken, cookieOptions);
+                return Ok(rp);
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+                return BadRequest(rp);
+            }
+
+        }
 
         [HttpPost("/agent-owner/refresh-token")]
         public async Task<ActionResult> refreshToken()

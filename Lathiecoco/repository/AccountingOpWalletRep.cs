@@ -6,6 +6,7 @@ namespace  Lathiecoco.repository
     {
         //Task<ResponseBody<Accounting>> addAccounting(Accounting ac);
         Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWallet(int page = 1, int limit = 10);
+        Task<ResponseBody<List<AccountingOpWallet>>> searcheInvoiceWalletAgent(Ulid idAccounting, string? PaymentMethod, DateTime? beginDate, DateTime? endDate, int page=1, int limit=10);
         Task<ResponseBody<List<AccountingOpWallet>>> findAllAccountingOpWalletWithAccounting(Ulid idAccounting, int page = 1, int limit = 10);
     }
 }

@@ -67,7 +67,7 @@ namespace  Lathiecoco.Controllers
         }
         [Authorize(Roles = "SUPADMIN")]
         [HttpPost("/customer-wallet/update-pin-by-staff")]
-        public async Task<ResponseBody<String>> updateCustomerPinNumberByStaff(UpdateCustomerByStaffDto cus)
+        public async Task<ResponseBody<String>> updateCustomerPinNumberByStaff([FromBody] UpdateCustomerByStaffDto cus)
         {
             return await _custonerWalletService.updateCustomerPinNumberByStaff(cus);
         }

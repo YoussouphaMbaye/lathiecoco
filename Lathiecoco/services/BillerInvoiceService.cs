@@ -311,32 +311,39 @@ namespace Lathiecoco.services
             return rp;
             
         }
-        public async Task<ResponseBody<List<BillerAmountByAgentDto>>> billerByAgentSumBiller(DateTime begenDate,DateTime endDate,Ulid? idAgent)
+        public async Task<ResponseBody<List<BillerAmountByAgentDto>>> billerByAgentSumBiller(DateTime begenDate,DateTime endDate,Ulid? idAgent,Ulid? fkIdAgency)
         {
             ResponseBody<List<BillerAmountByAgentDto>> rp = new ResponseBody<List<BillerAmountByAgentDto>>();
             try
             {
-                var groupedData = idAgent != null ? await _CatalogDbContext.BillerInvoices
+                var grouped = (idAgent != null && fkIdAgency != null) ? _CatalogDbContext.BillerInvoices
                .Include(i => i.CustomerWallet)
+               .Include(i => i.CustomerWallet.Agency)
+               .Where(i => i.CustomerWallet.Profile == "AGENT")
+               .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+               .Where(i => i.FkIdCustomerWallet == idAgent && i.CustomerWallet.FkIdAgency == fkIdAgency)
+               : (idAgent != null && fkIdAgency == null) ?
+               _CatalogDbContext.BillerInvoices
+               .Include(i => i.CustomerWallet)
+               .Include(i => i.CustomerWallet.Agency)
                .Where(i => i.CustomerWallet.Profile == "AGENT")
                .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
                .Where(i => i.FkIdCustomerWallet == idAgent)
-               .GroupBy(e => new { e.FkIdCustomerWallet })
-               .Select(g => new
-               {
-                   count = g.Count(),
-                   code = g.Max(c => c.CustomerWallet.Code),
-                   Phone = g.Max(c => c.CustomerWallet.Phone),
-                   TotalBillerAmount = g.Sum(e => e.AmountToPaid),
-                   LastName = g.Max(c => c.CustomerWallet.LastName),
-                   FirstName = g.Max(c => c.CustomerWallet.FirstName),
-                   MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
-               }).ToArrayAsync()
-               : await _CatalogDbContext.BillerInvoices
+               : (idAgent == null && fkIdAgency != null) ? _CatalogDbContext.BillerInvoices
                    .Include(i => i.CustomerWallet)
+                   .Include(i => i.CustomerWallet.Agency)
                    .Where(i => i.CustomerWallet.Profile == "AGENT")
                    .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
-                   .GroupBy(e => new { e.FkIdCustomerWallet })
+                   .Where(i => i.CustomerWallet.FkIdAgency == fkIdAgency)
+                   : _CatalogDbContext.BillerInvoices
+                   .Include(i => i.CustomerWallet)
+                   .Include(i => i.CustomerWallet.Agency)
+                   .Where(i => i.CustomerWallet.Profile == "AGENT")
+                   .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate);
+                   
+                   
+
+                var groupedData=await  grouped.GroupBy(e => new { e.FkIdCustomerWallet })
                    .Select(g => new
                    {
                        count = g.Count(),
@@ -344,9 +351,11 @@ namespace Lathiecoco.services
                        Phone = g.Max(c => c.CustomerWallet.Phone),
                        TotalBillerAmount = g.Sum(e => e.AmountToPaid),
                        LastName = g.Max(c => c.CustomerWallet.LastName),
+                       Agency = g.Max(c => c.CustomerWallet.Agency.code),
                        FirstName = g.Max(c => c.CustomerWallet.FirstName),
                        MiddleName = g.Max(c => c.CustomerWallet.MiddleName),
                    }).ToArrayAsync();
+
                 if (groupedData != null)
                 {
                     //rp.Body = groupedData;
@@ -361,6 +370,7 @@ namespace Lathiecoco.services
                         b.FirstName = i.FirstName;
                         b.MiddleName = i.MiddleName;
                         b.TotalBillerAmount= i.TotalBillerAmount;
+                        b.Agency = i.Agency;
                         list.Add(b);
                     }
                     rp.Body = list;
@@ -386,7 +396,7 @@ namespace Lathiecoco.services
             
 
         }
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, int page, int limit)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference, int page, int limit)
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
             try {
@@ -406,6 +416,16 @@ namespace Lathiecoco.services
                     query += $"and \"FkIdPaymentMode\" = '{idPaymentMode}' ";
                 }
                 if(code != null)
+                {
+                    query += $"and  \"InvoiceCode\" = '{code}' ";
+                }
+
+                if (billerReference != null)
+                {
+                    query += $"and  \"BillerReference\" = '{billerReference}' ";
+                }
+
+                if (code != null)
                 {
                     query += $"and  \"InvoiceCode\" = '{code}' ";
                 }
@@ -435,7 +455,7 @@ namespace Lathiecoco.services
                     var ps = phone!=null? await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
                         .Where(b => b.CustomerWallet.Phone == phone).ToListAsync()
                         :await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
-                        .ToListAsync();
+                        .Skip(skip).Take(limit).ToListAsync();
                     
                     
                     //string jjj = "kkkkk";
