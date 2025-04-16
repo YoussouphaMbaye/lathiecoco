@@ -154,10 +154,6 @@ namespace Lathiecoco.services.Conlog
 
             return rp;
 
-
-
-
-
         }
 
         public async Task<ResponseBody<AccountPaymentServicesEdg>> payCustomer(EdgPayment pay)
