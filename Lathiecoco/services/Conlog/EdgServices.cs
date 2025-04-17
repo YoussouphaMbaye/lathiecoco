@@ -85,17 +85,18 @@ namespace Lathiecoco.services.Conlog
             Console.WriteLine("request.ContentLength ");
             Console.WriteLine(byt.Length);
 
-            using (var streams = request.GetRequestStream())
-            {
-                using (StreamWriter sw = new StreamWriter(streams))
-                {
-                    sw.Write(postadatat);
-                }
-            }
+            
 
 
             try
             {
+                using (var streams = request.GetRequestStream())
+                {
+                    using (StreamWriter sw = new StreamWriter(streams))
+                    {
+                        sw.Write(postadatat);
+                    }
+                }
                 HttpWebResponse reponse = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine("request.GetResponse()");
                 Console.WriteLine(reponse);
@@ -218,12 +219,14 @@ namespace Lathiecoco.services.Conlog
             byte[] byt = Encoding.UTF8.GetBytes(postadatat);
             request.ContentLength = byt.Length;
             Console.WriteLine(postadatat);
-            using (var streams = request.GetRequestStream())
-            {
-                streams.Write(byt, 0, byt.Length);
-            }
+            
             try
             {
+                using (var streams = request.GetRequestStream())
+                {
+                    streams.Write(byt, 0, byt.Length);
+                }
+
                 HttpWebResponse reponse = (HttpWebResponse)request.GetResponse();
                 Console.WriteLine("HttpWebResponse reponse");
                 Console.WriteLine(reponse);
