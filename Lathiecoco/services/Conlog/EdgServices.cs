@@ -39,7 +39,7 @@ namespace Lathiecoco.services.Conlog
 
         public async Task<ResponseBody<_customer>> confirmCustomer(string numCompteur)
         {
-            Console.WriteLine("confirmCustomer");
+           
             ResponseBody<_customer> rp = new ResponseBody<_customer>();
             _customer cust = new _customer();
 
@@ -82,8 +82,7 @@ namespace Lathiecoco.services.Conlog
 
             byte[] byt = Encoding.UTF8.GetBytes(postadatat);
             request.ContentLength = byt.Length;
-            Console.WriteLine("request.ContentLength ");
-            Console.WriteLine(byt.Length);
+           
 
             
 
@@ -228,8 +227,7 @@ namespace Lathiecoco.services.Conlog
                 }
 
                 HttpWebResponse reponse = (HttpWebResponse)request.GetResponse();
-                Console.WriteLine("HttpWebResponse reponse");
-                Console.WriteLine(reponse);
+               
                 if (reponse.StatusCode == HttpStatusCode.OK)
                 {
                     StreamReader wr = new StreamReader(reponse.GetResponseStream());
@@ -239,8 +237,7 @@ namespace Lathiecoco.services.Conlog
                     XmlNode root = doc.DocumentElement;
                     XmlNodeList body = root.ChildNodes;
                     XmlNode isExist = body.Item(0).ChildNodes.Item(0);
-                    Console.WriteLine("isExist");
-                    Console.WriteLine(isExist);
+                    
                     if (isExist.Name.Equals("creditVendResp"))
                     {
                         rp.IsError = false;
