@@ -206,9 +206,9 @@ namespace Lathiecoco.services
                     invoice.UpdatedDate = DateTime.UtcNow;
 
                     //calculer fee amountToSend amountToPaid
-                    float aa = 0.01f;
-                    Console.WriteLine(aa + " " + 0.01 * 100);
-                    Console.WriteLine(0.01f * 100);
+                    //float aa = 0.01f;
+                    //Console.WriteLine(aa + " " + 0.01 * 100);
+                    //Console.WriteLine(0.01f * 100);
                     double amountTopaid = 0;
                     double amountToSend = biller.AmountToPaid;
                     if (feeSend.MinAmount < amountToSend && feeSend.MaxAmount > amountToSend)

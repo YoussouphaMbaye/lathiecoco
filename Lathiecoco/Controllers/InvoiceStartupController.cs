@@ -144,6 +144,15 @@ namespace  Lathiecoco.Controllers
             var res = await _invoiceStartupMasterServ.findInvoiceStartupByMaster(fkIdMaster, page, limit);
             return Ok(res);
         }
+        //[Authorize]
+        [HttpGet("/invoice-startup-master/deposit-per-agency")]
+        //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ActionResult<List<ResponseBody<InvoiceStartupMaster>>>> depositStatisticDepositStatisticByAgency(DateTime begenDate, DateTime endDate, string status, Ulid? idAgency)
+        {
+            var res = await _invoiceStartupMasterServ.depositStatisticDepositStatisticByAgency(begenDate, endDate, status,idAgency);
+            return Ok(res);
+        }
+        
 
         [Authorize]
         [HttpGet("/invoice-startup-master/search")]

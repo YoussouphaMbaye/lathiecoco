@@ -1161,5 +1161,77 @@ namespace  Lathiecoco.services
             }
             return rp;
         }
+        public async Task<ResponseBody<List<DepositStatisticByAgencyDto>>> depositStatisticDepositStatisticByAgency(DateTime begenDate, DateTime endDate, string status, Ulid? idAgency)
+        {
+            ResponseBody<List<DepositStatisticByAgencyDto>> rp = new ResponseBody<List<DepositStatisticByAgencyDto>>();
+            try
+            {
+                var groupedData = idAgency != null ? await _CatalogDbContext.InvoiceStartupMasters
+               .Include(i => i.AgencyUser)
+               .Include(i => i.AgencyUser.Agency)
+               .Where(i => i.AgencyUser.FkIdAgency== idAgency)
+               .Where(i => i.InvoiceStatus == status)
+               .Where(i => i.PaymentMode == "SM")
+               .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+               .GroupBy(e => new { e.AgencyUser.FkIdAgency })
+               .Select(g => new
+               {
+                   count = g.Count(),
+                   code = g.Max(c => c.AgencyUser.Agency.code),
+                   name = g.Max(c => c.AgencyUser.Agency.name),
+                   TotalAmount = g.Sum(e => e.AmountToPaid),
+                  
+               }).ToArrayAsync()
+               : await _CatalogDbContext.InvoiceStartupMasters
+                    .Include(i => i.AgencyUser)
+                    .Include(i => i.AgencyUser.Agency)
+                    .Where(i => i.InvoiceStatus == status)
+                    .Where(i => i.PaymentMode == "SM")
+                   .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate)
+                   .GroupBy(e => new { e.AgencyUser.FkIdAgency })
+                   .Select(g => new
+                   {
+                       count = g.Count(),
+                       code = g.Max(c => c.AgencyUser.Agency.code),
+                       name = g.Max(c => c.AgencyUser.Agency.name),
+                       TotalAmount = g.Sum(e => e.AmountToPaid),
+                   }).ToArrayAsync();
+                if (groupedData != null)
+                {
+                    //rp.Body = groupedData;
+                    List<DepositStatisticByAgencyDto> list = new List<DepositStatisticByAgencyDto>();
+                    foreach (var i in groupedData)
+                    {
+                        DepositStatisticByAgencyDto b = new DepositStatisticByAgencyDto();
+                        b.Count = i.count;
+                        b.Code = i.code;
+                        b.Name = i.name;
+                        b.TotalAmount = i.TotalAmount;
+                        
+                        list.Add(b);
+                    }
+                    rp.Body = list;
+                }
+                else
+                {
+                    rp.Body = new List<DepositStatisticByAgencyDto>();
+                }
+                foreach (var i in groupedData)
+                {
+                    Console.WriteLine(i);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Code = 400;
+            }
+
+            return rp;
+
+
+        }
+
     }
 }

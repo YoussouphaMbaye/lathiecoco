@@ -587,7 +587,7 @@ namespace  Lathiecoco.services
                 CustomerWallet cus= await _CatalogDbContext.CustomerWallets.Where(c=>c.phoneIdentity==bd.CountryIdentity && c.Phone==bd.Phone).FirstOrDefaultAsync();
                 if (cus != null)
                 {
-                    if (!BCrypt.Net.BCrypt.EnhancedVerify(cus.PinNumber,bd.pinNumber))
+                    if (!BCrypt.Net.BCrypt.EnhancedVerify( bd.pinNumber, cus.PinNumber))
                     {
                         rp.IsError = true;
                         rp.Msg = "Phone or pin not correct";
@@ -819,11 +819,12 @@ namespace  Lathiecoco.services
                     CustomerWallet cu = await _CatalogDbContext.CustomerWallets.Where(c => c.Phone == cus.Phone && c.phoneIdentity==cus.PhoneCountryIdentity).FirstOrDefaultAsync();
                     if (cu != null)
                     {
-                    if (cu.PinNumber != cus.OldPinNumber.Trim().Replace(" ",""))
+                    if (!BCrypt.Net.BCrypt.EnhancedVerify(cus.OldPinNumber, cu.PinNumber))
                     {
                         rp.IsError = true;
                         rp.Msg = "Phone or old pin not valide!";
                         rp.Body = null;
+                        rp.Code = 332; 
                         return rp;
                     }
                         
@@ -847,7 +848,7 @@ namespace  Lathiecoco.services
                 {
                     rp.IsError = true;
                     rp.Code = 400;
-                    rp.Msg = "error";
+                    rp.Msg = ex.Message;
                 }
                 return rp;
             }
