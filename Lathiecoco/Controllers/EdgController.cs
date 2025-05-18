@@ -3,6 +3,7 @@ using Lathiecoco.models.conlog;
 using Microsoft.AspNetCore.Mvc;
 using Lathiecoco.services.Conlog;
 using Lathiecoco.repository.Conlog;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lathiecoco.Controllers
 {
@@ -23,6 +24,7 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/customerCheck")]
+        [Authorize]
         public async Task<ResponseBody<_customer>> EdgCheckCustomer(string numCompteur)
         {
             
@@ -31,6 +33,7 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/payment")]
+        [Authorize]
         public async Task<ResponseBody<AccountPaymentServicesEdg>> EdgPayment(EdgPayment pay)
         {
 

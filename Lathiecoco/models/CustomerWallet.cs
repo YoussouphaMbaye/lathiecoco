@@ -30,6 +30,7 @@ namespace Lathiecoco.models
         public Ulid FkIdAccounting { get; set; }
         public Accounting? Accounting   { get; set; }
         public float? PercentagePurchase { get; set; }
+        public int? LoginCount { get; set; } = 0;
         public Ulid? FkIdAgency { get; set; }
         public Agency? Agency { get; set; }
 
