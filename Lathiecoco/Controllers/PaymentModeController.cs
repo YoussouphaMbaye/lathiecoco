@@ -1,4 +1,5 @@
-﻿using Lathiecoco.models;
+﻿using Lathiecoco.dto;
+using Lathiecoco.models;
 using Lathiecoco.repository;
 using Lathiecoco.services;
 using Microsoft.AspNetCore.Authorization;
@@ -59,8 +60,33 @@ namespace  Lathiecoco.Controllers
             
 
              var res=await _paymentModeServ.findAllPaymentMode(page, limit);
-            return Ok(res);
+             return Ok(res);
 
+        }
+
+        [Authorize(Roles = "SUPADMIN")]
+        [HttpPut("/paymentMode/update")]
+        public async Task<ActionResult> updatePaymentMode(PaymentModeDto pm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var res = await _paymentModeServ.updatePaymentMode(pm);
+            return Ok(res);
+        }
+
+        [Authorize(Roles = "SUPADMIN")]
+        [HttpPut("/paymentMode/activate-or-deactivate")]
+        public async Task<ActionResult> activateOrDeactivatePaymentMode(ActiveDeactivePaymentModeDto acPm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var res = await _paymentModeServ.activateOrDeactivatePaymentMode(acPm);
+            return Ok(res);
         }
     }
 }

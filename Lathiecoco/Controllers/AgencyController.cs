@@ -33,7 +33,7 @@ namespace Lathiecoco.controller
             _agencyService = agencyService;
         }
 
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,SUPADMIN")]
         [HttpPost("/agency")]
         public async Task<ActionResult> postAgent(AgencyDto ag)
         {

@@ -1,7 +1,10 @@
 ﻿using apimoney.services;
 using Lathiecoco.dto;
 using Lathiecoco.models;
+using Lathiecoco.models.conlog;
 using Lathiecoco.repository;
+using Lathiecoco.repository.Conlog;
+using Lathiecoco.services.Conlog;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -11,22 +14,28 @@ using System.Reflection;
 
 namespace Lathiecoco.services
 {
+    //P paid transaction
+    //F Faild transaction
+    //W Pending transaction
     public class BillerInvoiceService : BilllerInvoiceRep
     {
         private readonly CatalogDbContext _CatalogDbContext;
         private readonly CustomerWalletRep _customerWalleServ;
         private readonly FeesSendRep _feesSendServ;
         private readonly PaymentModeRep _paymentModeServ;
+        private readonly EDGrep _EdgRep;
         public BillerInvoiceService(CatalogDbContext CatalogDbContext,
         CustomerWalletRep customerWalleServ,
-        
+
         FeesSendRep feesSendServ,
-        PaymentModeRep paymentModeServ)
+        PaymentModeRep paymentModeServ,
+        EDGrep edgServices)
         {
             _CatalogDbContext = CatalogDbContext;
             _customerWalleServ = customerWalleServ;
             _feesSendServ = feesSendServ;
             _paymentModeServ = paymentModeServ;
+            _EdgRep = edgServices;
         }
         public async Task<ResponseBody<List<BillerInvoice>>> findAllBillerInvoice(int page = 1, int limit = 10)
         {
@@ -92,6 +101,73 @@ namespace Lathiecoco.services
             return rp;
         }
 
+        public async Task<ResponseBody<BillerInvoice>> updateBillerInvoiceToPaid(String code)
+        {
+            ResponseBody<BillerInvoice> rp = new ResponseBody<BillerInvoice>();
+            try
+            {
+
+                BillerInvoice bl = await _CatalogDbContext.BillerInvoices.Include(c => c.PaymentModeObj).Include(c => c.CustomerWallet).Where(c => c.InvoiceCode == code).FirstOrDefaultAsync();
+                if (bl != null)
+                {
+                    bl.InvoiceStatus = "P";
+
+                    //paid from cg
+
+                    try
+                    {
+                        //cg paid
+                        //shoold change
+                        
+                        EdgPayment pay= new EdgPayment();
+                        pay.montant = bl.AmountToPaid;
+
+                        pay.numCompteur = bl.BillerReference;
+                        /*
+                        ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
+                       
+                        if (rpAsp.IsError) { 
+                            rp.IsError = true;
+                            rp.Msg= rpAsp.Msg;
+                            rp.Code = 003;
+                            return rp;
+                        }
+                        bl.ReloadBiller = rpAsp.Body.MeterNumber;
+                        //bl.NumberOfKw= (rpAsp.Body.EnergyCoast!=null)? (double) rpAsp.Body.EnergyCoast ?:0;
+                        */
+                        bl.ReloadBiller = "11111111111111";
+                    }
+                    catch (Exception ex)
+                    {
+                        rp.Code = 003;
+                        rp.IsError = true;
+                        bl.InvoiceStatus = "F";
+                        rp.Msg = "error of remote server (CG)!";
+                        
+                    }
+
+                    _CatalogDbContext.BillerInvoices.Update(bl);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    rp.Body = bl;
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Biller with code " + code + " not found";
+                    rp.Code = 460;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
         public async Task<ResponseBody<BillerInvoice>> insertBillerInvoice(BodyBillerDto biller)
         {
 
@@ -130,17 +206,17 @@ namespace Lathiecoco.services
                         }
                         else
                         {
+                            rp.Body = null;
                             rp.IsError= true;
                             rp.Msg = cusRep.Msg;
-                            rp.Body = null;
                             rp.Code = cusRep.Code;
-                        return rp;
+                            return rp;
                         }
                     }
                     else
                     {
-                        rp.IsError= true;
                         rp.Body = null;
+                        rp.IsError= true;
                         rp.Code = cusRep.Code;
                         return rp;
                     }
@@ -155,9 +231,9 @@ namespace Lathiecoco.services
                         }
                         else
                         {
+                            rp.Body = null;
                             rp.IsError = true;
                             rp.Msg = paymentModeRp.Msg;
-                            rp.Body = null;
                             rp.Code= paymentModeRp.Code;
                             return rp;
                         }
@@ -183,8 +259,11 @@ namespace Lathiecoco.services
                     }
                    
                     BillerInvoice invoice = new BillerInvoice();
+
+                    AccountingOpWallet acw = new AccountingOpWallet();
+
                     double ConvertToUnixTimestamp(DateTime date)
-                    {
+                        {
                         DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                         TimeSpan diff = date.ToUniversalTime() - origin;
                         return Math.Floor(diff.TotalSeconds);
@@ -195,8 +274,6 @@ namespace Lathiecoco.services
                     invoice.PaymentMode = paymentMode1.Name.ToString();
                     invoice.FkIdPaymentMode = paymentMode1.IdPaymentMode;
                     invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
-                    //shoold change
-                    invoice.ReloadBiller= dayToday + dayToday.Substring(1, 3);
                     invoice.BillerReference=biller.BillerReference;
                     invoice.InvoiceStatus = "P";
                     invoice.AmountToPaid = biller.AmountToPaid;
@@ -206,9 +283,9 @@ namespace Lathiecoco.services
                     invoice.UpdatedDate = DateTime.UtcNow;
 
                     //calculer fee amountToSend amountToPaid
-                    float aa = 0.01f;
-                    Console.WriteLine(aa + " " + 0.01 * 100);
-                    Console.WriteLine(0.01f * 100);
+                    //float aa = 0.01f;
+                    //Console.WriteLine(aa + " " + 0.01 * 100);
+                    //Console.WriteLine(0.01f * 100);
                     double amountTopaid = 0;
                     double amountToSend = biller.AmountToPaid;
                     if (feeSend.MinAmount < amountToSend && feeSend.MaxAmount > amountToSend)
@@ -244,38 +321,61 @@ namespace Lathiecoco.services
                     var transaction = _CatalogDbContext.Database.BeginTransaction();
                     try
                     {
-                        //inserer tansactions
-                        _CatalogDbContext.BillerInvoices.Add(invoice);
-                        await _CatalogDbContext.SaveChangesAsync();
 
                         //update accounting sender
 
                         if (customer.Accounting != null)
                         {
                             Accounting senderAccounting = customer.Accounting;
-                            if (senderAccounting.Balance < amountTopaid)
-                            {
-                                rp.Msg = "Your Balance is low";
-                                rp.IsError = true;
-                                rp.Body = null;
-                                rp.Code = 340;
-                                return rp;
+
+                            if (paymentMode1.Name == "WF")
+                                {
+                                if (senderAccounting.Balance < amountTopaid)
+                                {
+                                    rp.Msg = "Your Balance is low";
+                                    rp.IsError = true;
+                                    rp.Body = null;
+                                    rp.Code = 340;
+                                    return rp;
+                                }
+
+                                //paid from cg
+
+                                try
+                                {
+                                    //cg paid
+                                    //shoold change
+                                    invoice.ReloadBiller = dayToday + dayToday.Substring(1, 3);
+                                }
+                                catch (Exception ex)
+                                {
+                                    rp.IsError = true;
+                                    rp.Msg = "error of remote server (CG)!";
+                                    rp.Code = 003;
+                                    return rp;
+
+                                }
+
+                                senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
+                                _CatalogDbContext.Update(senderAccounting);
+                                await _CatalogDbContext.SaveChangesAsync();
+                                acw.DeBited = amountTopaid;
                             }
-                            senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
-                            _CatalogDbContext.Update(senderAccounting);
-                            await _CatalogDbContext.SaveChangesAsync();
-                            AccountingOpWallet acw = new AccountingOpWallet();
+                            else
+                            {
+                                acw.DeBited = 0;
+                            }
+                            
                             acw.IdAccountingOperation= Ulid.NewUlid();
                             acw.FkIdAccounting = senderAccounting.IdAccounting;
                             acw.Credited = 0;
-                            acw.DeBited = amountTopaid;
+                            
                             acw.CreatedDate = DateTime.UtcNow;
-                            acw.PaymentMode = paymentMode1.Name;
                             acw.UpdatedDate = DateTime.UtcNow;
+                            acw.PaymentMode = paymentMode1.Name;
                             acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
                             acw.NewBalance = senderAccounting.Balance;
-                            await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
-                            await _CatalogDbContext.SaveChangesAsync();
+                           
                         }
                         else
                         {
@@ -286,14 +386,57 @@ namespace Lathiecoco.services
                             return rp;
                         }
 
-                        transaction.Commit();
+                        var isRemotePay = false;
+
+                        if (paymentMode1.Name == "OM")
+                        {
+                            isRemotePay = true;
+                            try
+                            {
+                                //send to om
+                            }catch (Exception ex)
+                            {
+                                transaction.Rollback();
+                         
+                                rp.IsError = true;
+                                rp.Msg = "error of remote server (OM)!";
+                                rp.Code = 001;
+                                return rp;
+                            
+                            }
+                        } else if (paymentMode1.Name == "MTN")
+                        {
+                            isRemotePay = true;
+                            try
+                            {
+                                //send to MTN
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction.Rollback();
+
+                                rp.IsError = true;
+                                rp.Msg = "error of remote server (MTN)!";
+                                rp.Code = 002;
+                                return rp;
+                                
+                            }
+                        }
+                        
+                    //inserer tansactions
+                    _CatalogDbContext.BillerInvoices.Add(invoice);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    transaction.Commit();
 
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString());
                         rp.IsError = true;
-                        rp.Msg = "error";
+                        rp.Msg = ex.Message;
                         rp.Code = 400;
                         return rp;
                     }

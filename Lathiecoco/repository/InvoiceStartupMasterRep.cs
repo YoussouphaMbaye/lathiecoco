@@ -21,6 +21,7 @@ namespace Lathiecoco.repository
         Task<ResponseBody<InvoiceStartupMaster>> ValidateInvoiceStartupMasterByAgencyUser(ValidateInvoiceStartupMasterDto dto);
         Task<ResponseBody<List<InvoiceStartupMaster>>> findInvoiceStartupByAgency(Ulid idAgency, int page = 1, int limit = 10);
         Task<ResponseBody<string>> getFileUrl(string key);
+        Task<ResponseBody<List<DepositStatisticByAgencyDto>>> depositStatisticDepositStatisticByAgency(DateTime begenDate, DateTime endDate, string status, Ulid? idAgency);
 
         //Task<ResponseBody<List<InvoiceMasterAgency>>> findInvoiceMasterAgencyByMasterAgency(Ulid IdMasterAgency, int page = 1, int limit = 10);
     }

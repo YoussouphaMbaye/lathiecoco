@@ -192,7 +192,7 @@ namespace Lathiecoco.services
                 {
                     int pageCount = (int)Math.Ceiling((decimal)_CatalogDbContext.Agencies.FromSqlRaw(sql).Count() / limit);
 
-                    var ps = await _CatalogDbContext.Agencies.FromSqlRaw(sql).Include(e => e.Staff).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
+                    var ps = await _CatalogDbContext.Agencies.FromSqlRaw(sql).Include(e => e.Accounting).Include(e => e.Staff).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
 
                     if (ps != null && ps.Count() > 0)
                     {
