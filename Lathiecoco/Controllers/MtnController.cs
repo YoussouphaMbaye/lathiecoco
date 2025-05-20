@@ -9,33 +9,35 @@ using Lathiecoco.models.notifications;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Lathiecoco.repository.Mtn;
+using Lathiecoco.models.mtn;
 
 namespace Lathiecoco.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrangeController : ControllerBase
+    public class MtnController : ControllerBase
     {
-        private readonly OrangeRep _orangeRep;
+        private readonly MtnRep _mtnRep;
         private readonly paymentNotificationsRep _notifications;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environnement;
-        public OrangeController(OrangeRep orangeRep , paymentNotificationsRep notifications, IConfiguration configuration, IWebHostEnvironment environment ) {
-            _orangeRep = orangeRep;
+        public MtnController(MtnRep mtnRep , paymentNotificationsRep notifications, IConfiguration configuration, IWebHostEnvironment environment ) {
+            _mtnRep = mtnRep;
             _notifications =notifications;
             _configuration = configuration;
             _environnement = environment;
         }
 
-        [HttpPost("/transactions")]
-        public async Task<ResponseBody<string>> payTransaction([FromBody] TransactionsOrange transaction)
+        [HttpPost("/requestToPay")]
+        public async Task<ResponseBody<string>> payTransaction([FromBody] mtnPaymentRequest requestToPay)
         {
 
-            return await _orangeRep.transactionsProcess(transaction);
+            return await _mtnRep.MtnTransactionProcess(requestToPay);
 
         }
 
-        [HttpPost("/notifications")]
+        [HttpPost("/mtn-otifications")]
         public async Task<ResponseBody<string>> orangeNotification([FromBody] Notifications notification, [FromHeader] string? Authorization)
         {
             var builder = new ConfigurationBuilder().SetBasePath(System.IO.Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);

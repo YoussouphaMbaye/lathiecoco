@@ -1,16 +1,16 @@
 using Lathiecoco.models;
-using Lathiecoco.repository;
-using Lathiecoco.services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Lathiecoco.repository.Conlog;
+using Lathiecoco.services;
+using Lathiecoco.repository;
 using Lathiecoco.services.Conlog;
-using Lathiecoco.repository.Orange;
 using Lathiecoco.services.Orange;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Lathiecoco.repository.Orange;
+using Lathiecoco.repository.Conlog;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Lathiecoco.repository.Mtn;
+using Lathiecoco.services.Mtn;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +37,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<EDGrep,EdgServices>();
 builder.Services.AddScoped<paymentNotificationsRep, PaymentNotificationService>();
 builder.Services.AddScoped<OrangeRep, TransactionPerforms>();
+builder.Services.AddScoped<MtnRep, MtnTransactionPerforms>();
 builder.Services.AddScoped<BilllerInvoiceRep, BillerInvoiceService>();
 builder.Services.AddScoped<AccountingRep, AccountingService>();
 builder.Services.AddScoped<CustomerWalletRep, CustomerWalletService>();
@@ -114,5 +115,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

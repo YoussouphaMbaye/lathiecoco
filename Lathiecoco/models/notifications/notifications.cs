@@ -18,4 +18,9 @@
         public string? transactionId { get; set; }
     }
 
+   public class Test
+    {
+        public string ?action { get; set; } 
+    }
+
 }
