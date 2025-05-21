@@ -24,6 +24,7 @@ namespace Lathiecoco.services.Orange
             var token = await Orange.generateToken();
 
             var baseUrl = _configuration["SmsNotification:Url"];
+            var posId = _configuration["SmsNotification:PosId"];
             var peerIdType = _configuration["SmsNotification:peerIdType"];
 
             var client = new RestClient(baseUrl);
@@ -37,7 +38,7 @@ namespace Lathiecoco.services.Orange
                 { "peerIdType", peerIdType.Trim()},
                 { "amount",trans.amount } ,
                 { "currency", trans.currency.Trim() },
-                { "posId",trans.posId.Trim() },
+                { "posId", posId },
                 { "transactionId",trans.transactionId },
             };
 

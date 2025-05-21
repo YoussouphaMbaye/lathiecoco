@@ -1,4 +1,5 @@
-﻿namespace Lathiecoco.models.mtn
+﻿
+namespace Lathiecoco.models.mtn
 {
 
     public class Payer
@@ -8,13 +9,14 @@
     }
     public class requestToPay
     {
-            public string amount { get; set; }
-            public string currency { get; set; }
-            public string externalId { get; set; }
-            public Payer payer { get; set; }
-            public string payerMessage { get; set; }
-            public string payeeNote { get; set; }
-
+            public string? amount { get; set; }
+            public string? currency { get; set; }
+            public string? externalId { get; set; }
+            public Payer ? payer { get; set; }
+            public string? payerMessage { get; set; }
+            public string? payeeNote { get; set; }
+            public string? status { get; set; }
+            public string? reason { get; set; }
     }
 
     public class mtnPaymentRequest

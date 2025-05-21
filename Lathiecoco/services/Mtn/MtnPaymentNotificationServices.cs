@@ -14,19 +14,5 @@ namespace Lathiecoco.services.Mtn
 
           
 
-            public async Task<ResponseBody<string>> mtnNotificationsHandler(Notifications? om)
-            {
-                ResponseBody<string> rp = new ResponseBody<string>();
-                rp.IsError = false;
-                rp.Code = 200;
-                rp.Msg = " Bonjour tout le monde !!!!!";
-
-
-
-                return rp;
-            }
-
-
-
         }
     }

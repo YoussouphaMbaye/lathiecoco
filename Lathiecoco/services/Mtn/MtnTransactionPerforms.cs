@@ -31,7 +31,7 @@ namespace Lathiecoco.services.Mtn
             var auth = _configuration["Mtn:Authentication"];
             var options = new RestClientOptions(baseUrl)
             {
-               // Authenticator = new HttpBasicAuthenticator(username, password),
+       
                 MaxTimeout = -1,
             };
             var client = new RestClient(options);
@@ -40,9 +40,6 @@ namespace Lathiecoco.services.Mtn
             request.AddHeader("Accept", "application/json");
             request.AddHeader("Authorization", auth);
             request.AddHeader("Ocp-Apim-Subscription-Key", subscribToken);
-            
-          
-            
 
             try
             {
@@ -161,6 +158,19 @@ namespace Lathiecoco.services.Mtn
 
             return rp;
 
+        }
+
+        public async Task<ResponseBody<string>> mtnMoneyNotificationsHandler(requestToPay rp)
+        {
+            ResponseBody<string> rpr = new ResponseBody<string>();
+            rpr.IsError = false;
+            rpr.Code = 200;
+            rpr.Msg = " Bonjour tout le monde !!!!!";
+
+            Console.WriteLine(rp);
+
+
+            return rpr;
         }
     }
 }
