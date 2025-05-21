@@ -25,6 +25,10 @@ namespace Lathiecoco.services.Orange
             rp.Msg = " Bonjour tout le monde !!!!!";
          
             Console.WriteLine(om),
+            rp.Body = om.message;
+            Console.WriteLine(rp);
+            Console.WriteLine("==========================");
+            Console.WriteLine(om);
 
             return  rp;
         }

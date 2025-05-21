@@ -57,7 +57,9 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.updateCustomerInformations(cu);
 
         }
+
         [HttpPost("/customer-wallet/update-customer-pin")]
+        [Authorize]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> UpdateCustomerPin([FromBody] CustomerUpadatePinDto cu)
         {
@@ -94,6 +96,16 @@ namespace  Lathiecoco.Controllers
                 {
                     if (!BCrypt.Net.BCrypt.EnhancedVerify(cu.pinNumber,cus.PinNumber))
                     {
+                        cus.LoginCount = cus.LoginCount + 1;
+                        catalogDbContext.CustomerWallets.Update(cus);
+                        await catalogDbContext.SaveChangesAsync();
+                        if (cus.LoginCount > 5)
+                        {
+                            cus.IsBlocked = true;
+                            catalogDbContext.CustomerWallets.Update(cus);
+                            await catalogDbContext.SaveChangesAsync();
+                        }
+
                         rp.IsError = true;
                         rp.Msg = "Phone or pin not correct";
                         rp.Code = 332;
@@ -119,6 +131,13 @@ namespace  Lathiecoco.Controllers
                           new Claim("id",cus.IdCustomerWallet.ToString()),
                           new Claim(ClaimTypes.Role, cus.Profile)
                         };
+
+                    if (cus.LoginCount >= 1)
+                    {
+                        cus.LoginCount = 0;
+                        catalogDbContext.CustomerWallets.Update(cus);
+                        await catalogDbContext.SaveChangesAsync();
+                    }
 
                     string mtoken = getToken(claims);
 
