@@ -11,4 +11,13 @@
         public string? transactionId { get; set; }
     }
 
+    public class OrangePaymentMethod
+    {
+        public string phoneNumber { get; set; }
+        public double amount { get; set; }
+        public string transactionId { get; set; }
+    }
+
+
+
 }

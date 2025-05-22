@@ -1,11 +1,12 @@
 ﻿
 using Lathiecoco.models;
+using Lathiecoco.models.notifications;
 using Lathiecoco.models.orange;
 
 namespace Lathiecoco.repository.Orange
 {
     public interface OrangeRep
     {
-        Task<ResponseBody<string>> transactionsProcess(TransactionsOrange om);
+        Task<ResponseBody<Notifications>> transactionsProcess(OrangePaymentMethod om);
     }
 }

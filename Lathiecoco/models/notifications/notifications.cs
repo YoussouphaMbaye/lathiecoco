@@ -16,6 +16,7 @@
         public string? currency { get; set; }
         public string? posId { get; set; }
         public string? transactionId { get; set; }
+        public string? txnid { get; set;}
     }
 
    public class Test

@@ -28,7 +28,7 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/transactions")]
-        public async Task<ResponseBody<string>> payTransaction([FromBody] TransactionsOrange transaction)
+        public async Task<ResponseBody<Notifications>> payTransaction([FromBody] OrangePaymentMethod transaction)
         {
 
             return await _orangeRep.transactionsProcess(transaction);
