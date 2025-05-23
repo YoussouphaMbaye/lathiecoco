@@ -168,6 +168,73 @@ namespace Lathiecoco.services
             return rp;
         }
 
+        public async Task<ResponseBody<BillerInvoice>> updateBillerInvoiceToPaidByIdRef(Guid idRef)
+        {
+            ResponseBody<BillerInvoice> rp = new ResponseBody<BillerInvoice>();
+            try
+            {
+
+                BillerInvoice bl = await _CatalogDbContext.BillerInvoices.Include(c => c.PaymentModeObj).Include(c => c.CustomerWallet).Where(c => c.IdReference == idRef).FirstOrDefaultAsync();
+                if (bl != null)
+                {
+                    bl.InvoiceStatus = "P";
+
+                    //paid from cg
+
+                    try
+                    {
+                        //cg paid
+                        //shoold change
+
+                        EdgPayment pay = new EdgPayment();
+                        pay.montant = bl.AmountToPaid;
+
+                        pay.numCompteur = bl.BillerReference;
+                        /*
+                        ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
+                       
+                        if (rpAsp.IsError) { 
+                            rp.IsError = true;
+                            rp.Msg= rpAsp.Msg;
+                            rp.Code = 003;
+                            return rp;
+                        }
+                        bl.ReloadBiller = rpAsp.Body.MeterNumber;
+                        //bl.NumberOfKw= (rpAsp.Body.EnergyCoast!=null)? (double) rpAsp.Body.EnergyCoast ?:0;
+                        */
+                        bl.ReloadBiller = "11111111111111";
+                    }
+                    catch (Exception ex)
+                    {
+                        rp.Code = 003;
+                        rp.IsError = true;
+                        bl.InvoiceStatus = "F";
+                        rp.Msg = "error of remote server (CG)!";
+
+                    }
+
+                    _CatalogDbContext.BillerInvoices.Update(bl);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    rp.Body = bl;
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Biller with idReference " + idRef + " not found";
+                    rp.Code = 460;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
         public async Task<ResponseBody<BillerInvoice>> insertBillerInvoice(BodyBillerDto biller)
         {
 
@@ -259,6 +326,7 @@ namespace Lathiecoco.services
                     }
                    
                     BillerInvoice invoice = new BillerInvoice();
+                    invoice.IdReference=Guid.NewGuid();
 
                     AccountingOpWallet acw = new AccountingOpWallet();
 
@@ -275,7 +343,7 @@ namespace Lathiecoco.services
                     invoice.FkIdPaymentMode = paymentMode1.IdPaymentMode;
                     invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
                     invoice.BillerReference=biller.BillerReference;
-                    invoice.InvoiceStatus = "P";
+                    invoice.InvoiceStatus = "P"; 
                     invoice.AmountToPaid = biller.AmountToPaid;
                     invoice.CustomerWallet = null;
                     invoice.FkIdFeeSend = feeSend.IdFeeSend;

@@ -22,6 +22,7 @@ namespace Lathiecoco.models
         public Ulid? FkIdPaymentMode { get; set; }
         public PaymentMode? PaymentModeObj { get; set; }
         public Ulid? FkIdFeeSend { get; set; }
+        public Guid? IdReference { get; set; }
         public FeeSend? FeeSend { get; set; }
         [JsonIgnore]
         public ICollection<AccountingOpWallet>? AccountingOp { get; set; }
