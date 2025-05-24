@@ -174,7 +174,7 @@ namespace Lathiecoco.services.Conlog
             string url = _configuration["EdgParams:url"];
             XmlDocument doc = new XmlDocument();
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
-            string Currency = "ZAR";
+            string Currency = "GNF";
             request.Method = "POST";
             request.ContentType = "text/xml";
             request.Accept = "application/soap+xml";
