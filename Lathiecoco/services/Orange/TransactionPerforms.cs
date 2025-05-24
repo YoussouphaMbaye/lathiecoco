@@ -62,26 +62,28 @@ namespace Lathiecoco.services.Orange
             ResponseBody<Notifications> rp = new ResponseBody<Notifications>();
             Notifications transactionsOrange =  new Notifications();
             SmsService Orange = new SmsService(_configuration);
-           
-            var token = await generateToken();
-
-            if (token != null)
+            try
             {
-                if (!token.IsError) {
+                ResponseBody<tokenResponse>? token = await generateToken();
 
-                    var baseUrl = "https://api.orange.com/orange-money-b2b/v1/sx/";
-                  // var baseUrl = _configuration["SmsNotification:Url"];
-                    var posId = _configuration["SmsNotification:PosId"];
-                    var peerIdType = _configuration["SmsNotification:peerIdType"];
-                    var currency = _configuration["SmsNotification:currency"];
+                if (token != null)
+                {
+                    if (!token.IsError)
+                    {
 
-                    var client = new RestClient(baseUrl);
-                    var request = new RestRequest("transactions/cashout", Method.Post);
-                    request.AddHeader("Authorization", "Bearer " + token.Body.access_token);
-                    request.AddHeader("Content-Type", "application/json");
-                    request.AddHeader("Accept", "application/json");
+                        var baseUrl = "https://api.orange.com/orange-money-b2b/v1/sx/";
+                        // var baseUrl = _configuration["SmsNotification:Url"];
+                        var posId = _configuration["SmsNotification:PosId"];
+                        var peerIdType = _configuration["SmsNotification:peerIdType"];
+                        var currency = _configuration["SmsNotification:currency"];
 
-                    Dictionary<string, object> reqBody = new Dictionary<string, object> {
+                        var client = new RestClient(baseUrl);
+                        var request = new RestRequest("transactions/cashout", Method.Post);
+                        request.AddHeader("Authorization", "Bearer " + token.Body.access_token);
+                        request.AddHeader("Content-Type", "application/json");
+                        request.AddHeader("Accept", "application/json");
+
+                        Dictionary<string, object> reqBody = new Dictionary<string, object> {
                 { "peerId",trans.phoneNumber.Trim() } ,
                 { "peerIdType", peerIdType},
                 { "amount",trans.amount } ,
@@ -92,47 +94,55 @@ namespace Lathiecoco.services.Orange
 
 
 
-                    string reqBodyJson = JsonConvert.SerializeObject(reqBody);
-                    request.AddStringBody(reqBodyJson, DataFormat.Json);
+                        string reqBodyJson = JsonConvert.SerializeObject(reqBody);
+                        request.AddStringBody(reqBodyJson, DataFormat.Json);
 
-                    try
-                    {
-                        RestResponse response = await client.ExecuteAsync(request);
-                        var content = response.Content;
-                        if (response.StatusCode == HttpStatusCode.Accepted)
+                        try
                         {
-                            transactionsOrange = JsonConvert.DeserializeObject<Notifications>(content);
-                            rp.IsError = false;
-                            rp.Code = 201;
-                            rp.Msg = "Sent";
-                            rp.Body = transactionsOrange;
+                            RestResponse response = await client.ExecuteAsync(request);
+                            var content = response.Content;
+                            if (response.StatusCode == HttpStatusCode.Accepted)
+                            {
+                                transactionsOrange = JsonConvert.DeserializeObject<Notifications>(content);
+                                rp.IsError = false;
+                                rp.Code = 201;
+                                rp.Msg = "Sent";
+                                rp.Body = transactionsOrange;
 
+                            }
+                            else
+                            {
+                                rp.IsError = true;
+                                rp.Code = 403;
+                                rp.Msg = content.ToString();
+
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
                             rp.IsError = true;
-                            rp.Code = 403;
-                            rp.Msg = content.ToString();
+                            rp.Code = 500;
+                            rp.Msg = ex.Message;
 
                         }
+
                     }
-                    catch (Exception ex)
+                    else
                     {
                         rp.IsError = true;
                         rp.Code = 500;
-                        rp.Msg = ex.Message;
-
+                        rp.Msg = token.Msg;
                     }
 
                 }
-                else
-                {
-                    rp.IsError = true;
-                    rp.Code = 500;
-                    rp.Msg = token.Msg;
-                }
+            }
+            catch(Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
 
             }
+           
            
            
 

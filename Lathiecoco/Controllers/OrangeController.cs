@@ -28,15 +28,16 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/transactions")]
-        public async Task<ResponseBody<Notifications>> payTransaction([FromBody] OrangePaymentMethod transaction)
+        public async Task<IActionResult> payTransaction([FromBody] OrangePaymentMethod transaction)
         {
 
-            return await _orangeRep.transactionsProcess(transaction);
+            ResponseBody < Notifications > rp=await _orangeRep.transactionsProcess(transaction);
+            return Ok(rp);
 
         }
 
         [HttpPost("/notifications")]
-        public async Task<ResponseBody<string>> orangeNotification([FromBody] Notifications notification, [FromHeader] string? Authorization)
+        public async Task<IActionResult> orangeNotification([FromBody] Notifications notification, [FromHeader] string? Authorization)
         {
             var builder = new ConfigurationBuilder().SetBasePath(System.IO.Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             var AuthenticationToken = builder.Build().GetSection("Authentication").GetSection("BasicAuth").Value;
@@ -48,7 +49,7 @@ namespace Lathiecoco.Controllers
                 rp.IsError = true;
                 rp.Msg = "Wrong credentials";
              
-                return rp;
+                return Ok(rp);
             }
             
 
