@@ -51,10 +51,11 @@ namespace Lathiecoco.Controllers
              
                 return Ok(rp);
             }
-            
 
 
-            return await _notifications.orangeMoneyNotificationsHandler(notification);
+
+            ResponseBody<string>   r=await _notifications.orangeMoneyNotificationsHandler(notification);
+            return Ok(r);
 
         }
     }
