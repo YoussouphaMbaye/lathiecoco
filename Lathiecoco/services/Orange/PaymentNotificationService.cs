@@ -26,9 +26,9 @@ namespace Lathiecoco.services.Orange
 
             Console.WriteLine(om);
             rp.Body = om.message;
-            Console.WriteLine(rp);
+            Console.WriteLine(rp.Body);
             Console.WriteLine("==========================");
-            Console.WriteLine(om);
+            Console.WriteLine(om.message);
 
             return  rp;
         }
