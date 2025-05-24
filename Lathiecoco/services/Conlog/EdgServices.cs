@@ -315,7 +315,7 @@ namespace Lathiecoco.services.Conlog
                                 {
                                     creditTokenIssue = amt.ChildNodes.Item(2);
 
-                                    token += creditTokenIssue.InnerText + Constants.vbCrLf;
+                                    token += creditTokenIssue.InnerText + "|";
                                     Console.WriteLine("creditTokenIssue");
                                     Console.WriteLine(token);
                                     rp.Msg = token;
