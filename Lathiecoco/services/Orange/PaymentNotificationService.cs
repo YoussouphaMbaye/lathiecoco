@@ -28,7 +28,8 @@ namespace Lathiecoco.services.Orange
             rp.Body = om.message;
             Console.WriteLine(rp.Body);
             Console.WriteLine("==========================");
-            Console.WriteLine(om.message);
+            Console.WriteLine(om.transactionData.transactionId);
+            Console.WriteLine(om.status);
 
             return  rp;
         }
