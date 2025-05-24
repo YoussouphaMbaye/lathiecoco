@@ -2,8 +2,13 @@
 using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.models.conlog;
+using Lathiecoco.models.mtn;
+using Lathiecoco.models.notifications;
+using Lathiecoco.models.orange;
 using Lathiecoco.repository;
 using Lathiecoco.repository.Conlog;
+using Lathiecoco.repository.Mtn;
+using Lathiecoco.repository.Orange;
 using Lathiecoco.services.Conlog;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +29,15 @@ namespace Lathiecoco.services
         private readonly FeesSendRep _feesSendServ;
         private readonly PaymentModeRep _paymentModeServ;
         private readonly EDGrep _EdgRep;
+        private readonly MtnRep _mtnRep;
+        private readonly OrangeRep _orangeRep;
         public BillerInvoiceService(CatalogDbContext CatalogDbContext,
         CustomerWalletRep customerWalleServ,
 
         FeesSendRep feesSendServ,
         PaymentModeRep paymentModeServ,
+        MtnRep mtnRep,
+        OrangeRep orangeRep,
         EDGrep edgServices)
         {
             _CatalogDbContext = CatalogDbContext;
@@ -36,6 +45,8 @@ namespace Lathiecoco.services
             _feesSendServ = feesSendServ;
             _paymentModeServ = paymentModeServ;
             _EdgRep = edgServices;
+            _mtnRep = mtnRep;
+            _orangeRep = orangeRep;
         }
         public async Task<ResponseBody<List<BillerInvoice>>> findAllBillerInvoice(int page = 1, int limit = 10)
         {
@@ -123,7 +134,7 @@ namespace Lathiecoco.services
                         pay.montant = bl.AmountToPaid;
 
                         pay.numCompteur = bl.BillerReference;
-                        /*
+                        
                         ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
                        
                         if (rpAsp.IsError) { 
@@ -132,10 +143,10 @@ namespace Lathiecoco.services
                             rp.Code = 003;
                             return rp;
                         }
-                        bl.ReloadBiller = rpAsp.Body.MeterNumber;
-                        //bl.NumberOfKw= (rpAsp.Body.EnergyCoast!=null)? (double) rpAsp.Body.EnergyCoast ?:0;
-                        */
-                        bl.ReloadBiller = "11111111111111";
+                        bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                        bl.NumberOfKw= Convert.ToDouble(rpAsp.Body.EnergyCoast);
+                        
+                       
                     }
                     catch (Exception ex)
                     {
@@ -190,7 +201,7 @@ namespace Lathiecoco.services
                         pay.montant = bl.AmountToPaid;
 
                         pay.numCompteur = bl.BillerReference;
-                        /*
+                        
                         ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
                        
                         if (rpAsp.IsError) { 
@@ -199,10 +210,9 @@ namespace Lathiecoco.services
                             rp.Code = 003;
                             return rp;
                         }
-                        bl.ReloadBiller = rpAsp.Body.MeterNumber;
-                        //bl.NumberOfKw= (rpAsp.Body.EnergyCoast!=null)? (double) rpAsp.Body.EnergyCoast ?:0;
-                        */
-                        bl.ReloadBiller = "11111111111111";
+                        bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                        bl.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+                       
                     }
                     catch (Exception ex)
                     {
@@ -411,10 +421,23 @@ namespace Lathiecoco.services
 
                                 try
                                 {
+                               
                                     //cg paid
                                     //shoold change
-                                    invoice.ReloadBiller = dayToday + dayToday.Substring(1, 3);
-                                }
+
+                                    EdgPayment pay = new EdgPayment();
+                                    pay.montant = invoice.AmountToPaid;
+
+                                    pay.numCompteur = invoice.BillerReference;
+
+                                    ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
+
+                                    invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                                    invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+
+                                
+                               
+                            }
                                 catch (Exception ex)
                                 {
                                     rp.IsError = true;
@@ -461,8 +484,21 @@ namespace Lathiecoco.services
                             isRemotePay = true;
                             try
                             {
-                                //send to om
-                            }catch (Exception ex)
+                            OrangePaymentMethod rq = new OrangePaymentMethod();
+                            rq.transactionId = invoice.IdReference.ToString();
+                            rq.amount = invoice.AmountToPaid;
+                            rq.phoneNumber = invoice.CustomerWallet.Phone;
+
+                            ResponseBody<Notifications> r = await _orangeRep.transactionsProcess(rq);
+                            if (r.IsError)
+                            {
+                                rp.IsError = true;
+                                rp.Msg = "error of remote server (OM)!";
+                                rp.Code = 001;
+                                return rp;
+                            }
+                        }
+                        catch (Exception ex)
                             {
                                 transaction.Rollback();
                          
@@ -477,7 +513,19 @@ namespace Lathiecoco.services
                             isRemotePay = true;
                             try
                             {
-                                //send to MTN
+                                mtnPaymentRequest rq=new mtnPaymentRequest();
+                                rq.partnerId = invoice.IdReference.ToString();
+                                rq.amount = invoice.AmountToPaid.ToString();
+                                rq.phoneNumber = invoice.CustomerWallet.Phone;
+
+                                ResponseBody<string> r = await _mtnRep.MtnTransactionProcess(rq);
+                                if(r.IsError)
+                                {
+                                    rp.IsError = true;
+                                    rp.Msg = "error of remote server (MTN)!";
+                                    rp.Code = 002;
+                                    return rp;
+                                }
                             }
                             catch (Exception ex)
                             {

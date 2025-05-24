@@ -97,8 +97,7 @@ namespace Lathiecoco.services.Conlog
                     }
                 }
                 HttpWebResponse reponse = (HttpWebResponse)request.GetResponse();
-                Console.WriteLine("request.GetResponse()");
-                Console.WriteLine(reponse);
+                
                 if (reponse.StatusCode == HttpStatusCode.OK)
                 {
                     StreamReader wr = new StreamReader(reponse.GetResponseStream());
@@ -108,9 +107,6 @@ namespace Lathiecoco.services.Conlog
                     XmlNode root = doc.DocumentElement;
                     XmlNodeList body = root.ChildNodes;
                     XmlNode isExist = body.Item(0).ChildNodes.Item(0);
-
-                    Console.WriteLine("XmlNode isExist");
-                    Console.WriteLine(isExist);
 
                     if (isExist.Name.Equals("confirmCustomerResp"))
                     {
@@ -167,7 +163,6 @@ namespace Lathiecoco.services.Conlog
 
         public async Task<ResponseBody<AccountPaymentServicesEdg>> payCustomer(EdgPayment pay)
         {
-            Console.WriteLine("payCustomer");
             ResponseBody<AccountPaymentServicesEdg> rp = new ResponseBody<AccountPaymentServicesEdg>();
 
             AccountPaymentServicesEdg accP = new AccountPaymentServicesEdg();
@@ -217,7 +212,6 @@ namespace Lathiecoco.services.Conlog
 
             byte[] byt = Encoding.UTF8.GetBytes(postadatat);
             request.ContentLength = byt.Length;
-            Console.WriteLine(postadatat);
             
             try
             {
@@ -272,8 +266,7 @@ namespace Lathiecoco.services.Conlog
                         string units;
                         bool moreThan2 = false;
                         XmlNode amt;
-                        Console.WriteLine("XmlNodeList");
-                        Console.WriteLine(tx.ToString());
+                       
                         foreach (XmlNode t in tx)
                         {
                             if (t.Attributes.GetNamedItem("xsi:type").Value == "CreditVendTx")
@@ -316,8 +309,7 @@ namespace Lathiecoco.services.Conlog
                                     creditTokenIssue = amt.ChildNodes.Item(2);
 
                                     token += creditTokenIssue.InnerText + "|";
-                                    Console.WriteLine("creditTokenIssue");
-                                    Console.WriteLine(token);
+                                 
                                     rp.Msg = token;
                                 }
                             }

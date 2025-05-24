@@ -1,8 +1,12 @@
 ﻿using Lathiecoco.models;
+using Lathiecoco.models.conlog;
 using Lathiecoco.models.mtn;
 using Lathiecoco.models.orange;
+using Lathiecoco.repository;
+using Lathiecoco.repository.Conlog;
 using Lathiecoco.repository.Mtn;
 using Lathiecoco.services.Sms;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -14,10 +18,16 @@ namespace Lathiecoco.services.Mtn
     public class MtnTransactionPerforms : MtnRep
     {
         private readonly IConfiguration _configuration;
+        private readonly CatalogDbContext _CatalogDbContext;
+        private readonly EDGrep _edgrep;
 
-        public MtnTransactionPerforms(IConfiguration configuration)
+        public MtnTransactionPerforms(IConfiguration configuration, 
+            CatalogDbContext CatalogDbContext,
+            EDGrep edgrep)
         {
             _configuration = configuration;
+            _CatalogDbContext = CatalogDbContext;
+            _edgrep = edgrep;
         }
 
         async Task<ResponseBody<mtnTokenGenerate>> generateMtnToken()
@@ -77,6 +87,7 @@ namespace Lathiecoco.services.Mtn
         public async Task<ResponseBody<string>> MtnTransactionProcess(mtnPaymentRequest mtn)
         {
             ResponseBody<string> rp = new ResponseBody<string>();
+
 
             var token = await generateMtnToken();
 
@@ -166,11 +177,81 @@ namespace Lathiecoco.services.Mtn
             rpr.IsError = false;
             rpr.Code = 200;
             rpr.Msg = " Bonjour tout le monde !!!!!";
-
-            Console.WriteLine(rp);
-
-
+            Console.WriteLine(rp.externalId);
+            Console.WriteLine(rp.status);
+            Console.WriteLine(rp.ToString());
+            if (rp.status == "SUCCESS")
+            {
+                await updateBillerInvoiceToPaidByIdRef(new Guid(rp.externalId));
+            }
+            
             return rpr;
         }
+        public async Task<ResponseBody<BillerInvoice>> updateBillerInvoiceToPaidByIdRef(Guid idRef)
+        {
+            ResponseBody<BillerInvoice> rp = new ResponseBody<BillerInvoice>();
+            try
+            {
+
+                BillerInvoice bl = await _CatalogDbContext.BillerInvoices.Include(c => c.PaymentModeObj).Include(c => c.CustomerWallet).Where(c => c.IdReference == idRef).FirstOrDefaultAsync();
+                if (bl != null)
+                {
+                    bl.InvoiceStatus = "P";
+
+                    //paid from cg
+
+                    try
+                    {
+                        //cg paid
+                        //shoold change
+
+                        EdgPayment pay = new EdgPayment();
+                        pay.montant = bl.AmountToPaid;
+                        pay.numCompteur = bl.BillerReference;
+
+                        ResponseBody<AccountPaymentServicesEdg> rpAsp = await _edgrep.payCustomer(pay);
+
+                        if (rpAsp.IsError)
+                        {
+                            rp.IsError = true;
+                            rp.Msg = rpAsp.Msg;
+                            rp.Code = 003;
+                            return rp;
+                        }
+                        bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                        bl.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        rp.Code = 003;
+                        rp.IsError = true;
+                        bl.InvoiceStatus = "F";
+                        rp.Msg = "error of remote server (CG)!";
+
+                    }
+
+                    _CatalogDbContext.BillerInvoices.Update(bl);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    rp.Body = bl;
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Biller with idReference " + idRef + " not found";
+                    rp.Code = 460;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
     }
 }
