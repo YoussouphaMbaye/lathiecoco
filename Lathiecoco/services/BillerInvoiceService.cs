@@ -432,6 +432,12 @@ namespace Lathiecoco.services
 
                                     ResponseBody<AccountPaymentServicesEdg> rpAsp = await _EdgRep.payCustomer(pay);
 
+                                    if(rpAsp.IsError) {
+                                        rp.IsError = true;
+                                        rp.Msg = "error of remote server (CG)!";
+                                        rp.Code = 003;
+                                        return rp;
+                                    }
                                     invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
 

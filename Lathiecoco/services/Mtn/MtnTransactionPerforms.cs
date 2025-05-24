@@ -180,7 +180,7 @@ namespace Lathiecoco.services.Mtn
             Console.WriteLine(rp.externalId);
             Console.WriteLine(rp.status);
             Console.WriteLine(rp.ToString());
-            if (rp.status == "SUCCESS")
+            if (rp.status == "SUCCESSFUL")
             {
                 await updateBillerInvoiceToPaidByIdRef(new Guid(rp.externalId));
             }
