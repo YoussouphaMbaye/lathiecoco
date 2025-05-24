@@ -516,7 +516,7 @@ namespace Lathiecoco.services
                                 mtnPaymentRequest rq=new mtnPaymentRequest();
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
-                                rq.phoneNumber = invoice.CustomerWallet.Phone;
+                                rq.phoneNumber = "224"+invoice.CustomerWallet.Phone;
 
                                 ResponseBody<string> r = await _mtnRep.MtnTransactionProcess(rq);
                                 if(r.IsError)
