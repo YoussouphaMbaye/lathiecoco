@@ -289,7 +289,7 @@ namespace Lathiecoco.services.Conlog
                                         unitOfMeasurement = meterDetails.Attributes.GetNamedItem("unitOfMeasurement").Value;
                                         msno = meterDetails.Attributes.GetNamedItem("msno").Value;
                                         tokenNode = creditTokenIssue.ChildNodes.Item(2);
-                                        token += tokenNode.InnerText + Constants.vbCrLf;
+                                        token += tokenNode.InnerText + "|";
                                         unitNode = creditTokenIssue.ChildNodes.Item(3);
                                         units = unitNode.Attributes.GetNamedItem("value").Value;
 
