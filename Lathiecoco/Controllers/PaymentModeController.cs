@@ -52,7 +52,7 @@ namespace  Lathiecoco.Controllers
             return new List<String>() { "1", "2", "3" };
         }
 
-        [Authorize(Roles = "SUPADMIN")]
+        [Authorize]
         [HttpGet("/paymentMode/find-all")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ActionResult<ResponseBody<List<PaymentMode>>>> findAllAccounting(int page = 1, int limit = 10)
