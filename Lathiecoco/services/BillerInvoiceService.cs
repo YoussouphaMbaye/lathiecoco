@@ -523,7 +523,8 @@ namespace Lathiecoco.services
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
                                 rq.phoneNumber = "224"+invoice.CustomerWallet.Phone;
-                                Console.WriteLine(rq.partnerId);
+                            Console.WriteLine("==============================================");
+                            Console.WriteLine(rq.partnerId);
                                 ResponseBody<string> r = await _mtnRep.MtnTransactionProcess(rq);
                                 if(r.IsError)
                                 {

@@ -163,7 +163,7 @@ namespace Lathiecoco.services.Mtn
                 rp.Code = 500;
                 rp.Msg = token.Msg;
             }
-
+            Console.WriteLine("----------------------------------------");
 
             Console.WriteLine(rp.Msg);
             Console.WriteLine(rp.Body);
