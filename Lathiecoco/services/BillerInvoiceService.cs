@@ -526,12 +526,11 @@ namespace Lathiecoco.services
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
                                 rq.phoneNumber = "224"+cusRep.Body.Phone;
-                            Console.WriteLine("==============================================");
-                            Console.WriteLine(rq.partnerId);
+                           
                                 ResponseBody<string> r = await _mtnRep.MtnTransactionProcess(rq);
                                 if(r.IsError)
                                 {
-                                    Console.WriteLine("mrn");
+                                   
                                     rp.IsError = true;
                                     rp.Msg = "error of remote server (MTN)!";
                                     rp.Code = 002;
@@ -649,10 +648,7 @@ namespace Lathiecoco.services
                 {
                     rp.Body = new List<BillerAmountByAgentDto>();
                 }
-                foreach(var i in groupedData)
-                {
-                    Console.WriteLine(i);
-                }
+                
 
             }
             catch (Exception ex)
@@ -706,9 +702,6 @@ namespace Lathiecoco.services
                 }
                 //query += $";";
 
-                Console.WriteLine(dateNow);
-                Console.WriteLine("----------------------------------------->");
-                Console.WriteLine(query);
                 int skip = (page - 1) * (int)limit;
                 if (_CatalogDbContext.BillerInvoices != null)
                 {
@@ -742,7 +735,6 @@ namespace Lathiecoco.services
             }
             }
             catch (Exception ex) {
-             Console.WriteLine(ex.ToString());
                 rp.IsError = true;
                 rp.Code = 400;
                 rp.Msg = ex.Message;
