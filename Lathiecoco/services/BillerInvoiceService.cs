@@ -491,6 +491,7 @@ namespace Lathiecoco.services
                             isRemotePay = true;
                             try
                             {
+                            invoice.InvoiceStatus = "W";
                             OrangePaymentMethod rq = new OrangePaymentMethod();
                             rq.transactionId = invoice.IdReference.ToString();
                             rq.amount = invoice.AmountToPaid;
@@ -520,6 +521,7 @@ namespace Lathiecoco.services
                             isRemotePay = true;
                             try
                             {
+                                invoice.InvoiceStatus = "W";
                                 mtnPaymentRequest rq=new mtnPaymentRequest();
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
