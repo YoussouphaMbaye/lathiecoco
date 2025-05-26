@@ -166,6 +166,7 @@ namespace Lathiecoco.services.Mtn
 
 
             Console.WriteLine(rp.Msg);
+            Console.WriteLine(rp.Body);
 
             return rp;
 
