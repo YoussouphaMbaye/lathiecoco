@@ -493,7 +493,7 @@ namespace Lathiecoco.services
                             OrangePaymentMethod rq = new OrangePaymentMethod();
                             rq.transactionId = invoice.IdReference.ToString();
                             rq.amount = invoice.AmountToPaid;
-                            rq.phoneNumber = invoice.CustomerWallet.Phone;
+                            rq.phoneNumber = cusRep.Body.Phone;
 
                             ResponseBody<Notifications> r = await _orangeRep.transactionsProcess(rq);
                             if (r.IsError)
@@ -522,7 +522,7 @@ namespace Lathiecoco.services
                                 mtnPaymentRequest rq=new mtnPaymentRequest();
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
-                                rq.phoneNumber = "224"+invoice.CustomerWallet.Phone;
+                                rq.phoneNumber = "224"+cusRep.Body.Phone;
                             Console.WriteLine("==============================================");
                             Console.WriteLine(rq.partnerId);
                                 ResponseBody<string> r = await _mtnRep.MtnTransactionProcess(rq);
