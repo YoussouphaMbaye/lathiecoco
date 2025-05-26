@@ -359,6 +359,7 @@ namespace Lathiecoco.services
                     invoice.FkIdFeeSend = feeSend.IdFeeSend;
                     invoice.CreatedDate = DateTime.UtcNow;
                     invoice.UpdatedDate = DateTime.UtcNow;
+                    invoice.ReloadBiller = "";
 
                     //calculer fee amountToSend amountToPaid
                     //float aa = 0.01f;
