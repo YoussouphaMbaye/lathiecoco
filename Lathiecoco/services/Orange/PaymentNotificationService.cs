@@ -44,7 +44,7 @@ namespace Lathiecoco.services.Orange
             if (om.status == "FAILED")
             {
                 Console.WriteLine(om.status);
-                //await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+                await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
             }
 
             return  rp;

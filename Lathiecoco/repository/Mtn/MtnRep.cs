@@ -7,7 +7,7 @@ namespace Lathiecoco.repository.Mtn
     public interface MtnRep
     {
         Task<ResponseBody<string>> MtnTransactionProcess(mtnPaymentRequest mtn);
-        Task<ResponseBody<string>> mtnMoneyNotificationsHandler(requestToPay rp);
+        Task<ResponseBody<string>> mtnMoneyNotificationsHandler(mtnNotifications rp);
 
     }
 }

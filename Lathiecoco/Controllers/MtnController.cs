@@ -37,7 +37,7 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/mtn-notifications")]
-        public async Task<ResponseBody<string>> MtnNotification([FromBody] requestToPay? rp)
+        public async Task<ResponseBody<string>> MtnNotification([FromBody] mtnNotifications? rp)
         {
             return await _mtnRep.mtnMoneyNotificationsHandler(rp);
 

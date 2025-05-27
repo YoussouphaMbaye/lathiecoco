@@ -168,7 +168,7 @@ namespace Lathiecoco.services.Mtn
 
         }
 
-        public async Task<ResponseBody<string>> mtnMoneyNotificationsHandler(requestToPay rp)
+        public async Task<ResponseBody<string>> mtnMoneyNotificationsHandler(mtnNotifications rp)
         {
             ResponseBody<string> rpr = new ResponseBody<string>();
             rpr.IsError = false;
