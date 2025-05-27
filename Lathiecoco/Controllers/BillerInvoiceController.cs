@@ -42,11 +42,11 @@ namespace Lathiecoco.Controllers
         }
         [HttpGet("/biller-invoice/searche")]
         [Authorize]
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, String? billerReference, int page = 1, int limit = 10)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone, String? billerReference, string? invoiceStatus, int page = 1, int limit = 10)
 
         {
 
-            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate,phone, billerReference, page, limit )
+            return await _billerInvoiceServ.searcheBillerInvoice(idPaymentMode, code, beginDate, endDate,phone, billerReference, invoiceStatus, page, limit )
 ;
 
         }

@@ -38,12 +38,13 @@ namespace Lathiecoco.services.Orange
             Console.WriteLine(om);
             rp.Body = om.message;
             
-            //Console.WriteLine(om.transactionData.transactionId);
-            //Console.WriteLine(om.status);
+            Console.WriteLine(om.transactionData.transactionId);
+            Console.WriteLine(om.status);
             //a changer
             if (om.status == "FAILED")
             {
-                await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+                Console.WriteLine(om.status);
+                //await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
             }
 
             return  rp;

@@ -662,7 +662,7 @@ namespace Lathiecoco.services
             
 
         }
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference, int page, int limit)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference,string? invoiceStatus, int page, int limit)
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
             try {
@@ -681,7 +681,11 @@ namespace Lathiecoco.services
                 {
                     query += $"and \"FkIdPaymentMode\" = '{idPaymentMode}' ";
                 }
-                if(code != null)
+                if (invoiceStatus != null)
+                {
+                    query += $"and \"InvoiceStatus\" = '{invoiceStatus}' ";
+                }
+                if (code != null) 
                 {
                     query += $"and  \"InvoiceCode\" = '{code}' ";
                 }
@@ -716,8 +720,8 @@ namespace Lathiecoco.services
                         ;
                     }
                     var ps = phone!=null? await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
-                        .Where(b => b.CustomerWallet.Phone == phone).ToListAsync()
-                        :await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet)
+                        .Where(b => b.CustomerWallet.Phone == phone).OrderByDescending(x=>x.UpdatedDate).ToListAsync()
+                        :await _CatalogDbContext.BillerInvoices.FromSqlRaw(query).Include(b => b.CustomerWallet).OrderByDescending(x => x.UpdatedDate)
                         .Skip(skip).Take(limit).ToListAsync();
                     
                     
