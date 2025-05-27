@@ -174,7 +174,10 @@ namespace Lathiecoco.services.Mtn
             rpr.IsError = false;
             rpr.Code = 200;
             rpr.Msg = " Bonjour tout le monde !!!!!";
-           
+            Console.WriteLine(rp.ToString());
+            Console.WriteLine(rp.financialTransactionId);
+            Console.WriteLine(rp.externalId);
+
             if (rp.status == "SUCCESSFUL")
             {
                 await updateBillerInvoiceToPaidByIdRef(new Guid(rp.externalId));
