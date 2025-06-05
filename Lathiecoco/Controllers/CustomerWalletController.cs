@@ -94,12 +94,28 @@ namespace  Lathiecoco.Controllers
                 CustomerWallet cus = await catalogDbContext.CustomerWallets.Where(c => c.phoneIdentity == cu.CountryIdentity && c.Phone == cu.Phone).FirstOrDefaultAsync();
                 if (cus != null)
                 {
+                    if (!cus.IsActive)
+                    {
+                        rp.IsError = true;
+                        rp.Body = null;
+                        rp.Msg = "You account is not active";
+                        return rp;
+                    }
+
+                    if (cus.IsBlocked)
+                    {
+                        rp.IsError = true;
+                        rp.Body = null;
+                        rp.Msg = "Your account is blocked";
+                        return rp;
+                    }
+
                     if (!BCrypt.Net.BCrypt.EnhancedVerify(cu.pinNumber,cus.PinNumber))
                     {
                         cus.LoginCount = cus.LoginCount + 1;
                         catalogDbContext.CustomerWallets.Update(cus);
                         await catalogDbContext.SaveChangesAsync();
-                        if (cus.LoginCount > 5)
+                        if (cus.LoginCount > 4)
                         {
                             cus.IsBlocked = true;
                             catalogDbContext.CustomerWallets.Update(cus);

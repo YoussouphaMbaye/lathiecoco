@@ -275,12 +275,12 @@ namespace  Lathiecoco.services
                 c.IsActive = false;
                 
                 Random rdn = new Random();
-                var a = rdn.Next(1000, 9999);
+                var a = rdn.Next(10000, 99999);
                 //SMS c.PinTemp = a.ToString();
                 c.PinTemp = "1234";
                 string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 //c.Code = "C" + dayToday;
-                c.Code = RandomString(5) + a.ToString();
+                c.Code = RandomString(6) + a.ToString();
                 c.CreatedDate = DateTime.UtcNow;
                 c.UpdatedDate = DateTime.UtcNow;
 

@@ -43,13 +43,13 @@ namespace Lathiecoco.Controllers
             var AuthenticationToken = builder.Build().GetSection("Authentication").GetSection("BasicAuth").Value;
             if ((AuthenticationToken != Authorization) || ( Authorization == null ))
             {
-                HttpContext.Response.StatusCode = 401;
+                //HttpContext.Response.StatusCode = 401;
                 ResponseBody<string> rp = new ResponseBody<string>();
                 rp.Code = 401;
                 rp.IsError = true;
                 rp.Msg = "Wrong credentials";
              
-                return Ok(rp);
+                return Unauthorized(rp);
             }
 
 
