@@ -147,7 +147,7 @@ namespace Lathiecoco.services.Conlog
                     }
                 }
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
                 rp.Code = 500;
                 rp.IsError = true;
