@@ -36,7 +36,7 @@ namespace Lathiecoco.Controllers
 
         }
 
-        [HttpPost("/om-notifications")]
+        [HttpPost("/notifications")]
         public async Task<IActionResult> orangeNotification([FromBody] Notifications notification, [FromHeader] string? Authorization)
         {
             var builder = new ConfigurationBuilder().SetBasePath(System.IO.Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
