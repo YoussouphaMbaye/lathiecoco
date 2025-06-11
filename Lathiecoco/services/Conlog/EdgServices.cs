@@ -80,15 +80,13 @@ namespace Lathiecoco.services.Conlog
                     </soap:Envelope>
                     ";
 
-            byte[] byt = Encoding.UTF8.GetBytes(postadatat);
-            request.ContentLength = byt.Length;
            
-
-            
-
 
             try
             {
+                byte[] byt = Encoding.UTF8.GetBytes(postadatat);
+                request.ContentLength = byt.Length;
+
                 using (var streams = request.GetRequestStream())
                 {
                     using (StreamWriter sw = new StreamWriter(streams))
@@ -209,12 +207,11 @@ namespace Lathiecoco.services.Conlog
                   </creditVendReq>
                  </s:Body>
                 </s:Envelope>";
-
-            byte[] byt = Encoding.UTF8.GetBytes(postadatat);
-            request.ContentLength = byt.Length;
             
             try
             {
+                byte[] byt = Encoding.UTF8.GetBytes(postadatat);
+                request.ContentLength = byt.Length;
                 using (var streams = request.GetRequestStream())
                 {
                     streams.Write(byt, 0, byt.Length);
