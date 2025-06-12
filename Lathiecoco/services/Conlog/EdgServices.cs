@@ -130,7 +130,7 @@ namespace Lathiecoco.services.Conlog
                         {
                             phoneNumber = Strings.Split(customerPhoneNumber, ":");
                             Console.WriteLine("phoneNumber");
-                            Console.WriteLine(phoneNumber);
+                            Console.WriteLine(phoneNumber.Length);
                             cust.customerPhoneNumber = phoneNumber[1];
 
                         }
