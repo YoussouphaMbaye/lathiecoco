@@ -4,6 +4,7 @@
     {
         public string? status { get; set; }
         public string? message { get; set; }
+        public string? action { get; set; }
         public TransactionData? transactionData { get; set; }
     }
 
