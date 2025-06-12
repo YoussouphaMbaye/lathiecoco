@@ -37,7 +37,7 @@ namespace Lathiecoco.Controllers
         }
 
         [HttpPost("/notifications")]
-        public async Task<IActionResult> orangeNotification([FromBody] Test notification, [FromHeader] string? Authorization)
+        public async Task<IActionResult> orangeNotification([FromBody] Notifications notification, [FromHeader] string? Authorization)
         {
             var builder = new ConfigurationBuilder().SetBasePath(System.IO.Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             var AuthenticationToken = builder.Build().GetSection("Authentication").GetSection("BasicAuth").Value;
@@ -52,9 +52,9 @@ namespace Lathiecoco.Controllers
                 return Unauthorized(rp);
             }
 
-            ResponseBody<string> r = new ResponseBody<string>();
 
-            //ResponseBody<string>   r=await _notifications.orangeMoneyNotificationsHandler(notification);
+
+            ResponseBody<string>   r=await _notifications.orangeMoneyNotificationsHandler(notification);
             return Ok(r);
 
         }
