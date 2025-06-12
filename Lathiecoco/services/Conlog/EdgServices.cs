@@ -95,6 +95,7 @@ namespace Lathiecoco.services.Conlog
                     }
                 }
                 HttpWebResponse reponse = (HttpWebResponse)request.GetResponse();
+                Console.WriteLine(reponse);
                 
                 if (reponse.StatusCode == HttpStatusCode.OK)
                 {
