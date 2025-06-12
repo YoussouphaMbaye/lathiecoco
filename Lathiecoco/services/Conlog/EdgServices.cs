@@ -114,6 +114,7 @@ namespace Lathiecoco.services.Conlog
 
                         // check customer details
                         XmlNode confirmCustResult = isExist.LastChild.ChildNodes.Item(0);
+                        Console.WriteLine(isExist);
 
                         string customerName = confirmCustResult.Attributes.GetNamedItem("name").Value; 
                         string customerAdress = confirmCustResult.Attributes.GetNamedItem("address").Value;
@@ -126,6 +127,8 @@ namespace Lathiecoco.services.Conlog
                         if (customerPhoneNumber != null)
                         {
                             phoneNumber = Strings.Split(customerPhoneNumber, ":");
+                            Console.WriteLine("phoneNumber");
+                            Console.WriteLine(phoneNumber);
                             cust.customerPhoneNumber = phoneNumber[1];
 
                         }
@@ -139,6 +142,7 @@ namespace Lathiecoco.services.Conlog
                     {
                         rp.IsError = true;
                         rp.Code = 400;
+                        Console.WriteLine(body);
                         XmlNode XMLVendFaultResp = body.Item(0).ChildNodes.Item(0).ChildNodes.Item(3).ChildNodes.Item(0);
                         string Msgerreur = XMLVendFaultResp.LastChild.InnerText;
                         rp.Msg = Msgerreur;
