@@ -101,6 +101,7 @@ namespace Lathiecoco.services.Conlog
                 {
                     StreamReader wr = new StreamReader(reponse.GetResponseStream());
                     string responseInString = wr.ReadToEnd();
+                    Console.WriteLine(responseInString);
                     doc.LoadXml(responseInString);
 
                     XmlNode root = doc.DocumentElement;
