@@ -131,7 +131,14 @@ namespace Lathiecoco.services.Conlog
                             phoneNumber = Strings.Split(customerPhoneNumber, ":");
                             Console.WriteLine("phoneNumber");
                             Console.WriteLine(phoneNumber.Length);
-                            cust.customerPhoneNumber = phoneNumber[1];
+                            if(phoneNumber.Length >    1 ) {
+                                cust.customerPhoneNumber = phoneNumber[1];
+                            }
+                            else
+                            {
+                                Console.WriteLine(cust.customerPhoneNumber = phoneNumber[0]);
+                            }
+                            
 
                         }
 
