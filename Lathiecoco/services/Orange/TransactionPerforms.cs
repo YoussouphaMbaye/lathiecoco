@@ -71,7 +71,7 @@ namespace Lathiecoco.services.Orange
                     if (!token.IsError)
                     {
 
-                        var baseUrl = "https://api.orange.com/orange-money-b2b/v1/sx/";
+                        var baseUrl = _configuration["SmsNotification:ProdUrl"];
                         // var baseUrl = _configuration["SmsNotification:Url"];
                         var posId = _configuration["SmsNotification:PosId"];
                         var peerIdType = _configuration["SmsNotification:peerIdType"];
