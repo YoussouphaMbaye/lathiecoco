@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Lathiecoco.repository.Mtn;
 using Lathiecoco.services.Mtn;
+using Lathiecoco.repository.SMS;
+using Lathiecoco.services.Sms;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +57,7 @@ builder.Services.AddScoped<InvoiceStartupMasterRep, InvoiceStartupMasterServ>();
 builder.Services.AddScoped<UserLogRep, UserLogServ>();
 builder.Services.AddScoped<AgencyRep, AgencyServ>();
 builder.Services.AddScoped<AgencyUserRep, AgencyUserService>();
+builder.Services.AddScoped<SmsSendRep, SmsService>();
 
 
 

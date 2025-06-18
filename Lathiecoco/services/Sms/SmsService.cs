@@ -5,10 +5,11 @@ using Lathiecoco.models.notifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using Lathiecoco.repository.SMS;
 
 namespace Lathiecoco.services.Sms
 {
-    public class SmsService
+    public class SmsService: SmsSendRep
     {
         private readonly IConfiguration _configuration;
         public SmsService(IConfiguration configuration) {

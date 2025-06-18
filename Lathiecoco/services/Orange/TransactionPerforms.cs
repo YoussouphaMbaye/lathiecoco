@@ -84,13 +84,13 @@ namespace Lathiecoco.services.Orange
                         request.AddHeader("Accept", "application/json");
 
                         Dictionary<string, object> reqBody = new Dictionary<string, object> {
-                { "peerId",trans.phoneNumber.Trim() } ,
-                { "peerIdType", peerIdType},
-                { "amount",trans.amount } ,
-                { "currency", currency },
-                { "posId", posId },
-                { "transactionId",trans.transactionId },
-                   };
+                        { "peerId",trans.phoneNumber.Trim() } ,
+                        { "peerIdType", peerIdType},
+                        { "amount",trans.amount } ,
+                        { "currency", currency },
+                        { "posId", posId },
+                        { "transactionId",trans.transactionId },
+                           };
 
 
 
