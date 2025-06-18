@@ -149,7 +149,7 @@ namespace Lathiecoco.services.Conlog
                     else if (isExist.Name.Equals("soap:Fault"))
                     {
                         rp.IsError = true;
-                        rp.Code = 400;
+                        rp.Code = 004;
                         
                         XmlNode XMLVendFaultResp = body.Item(0).ChildNodes.Item(0).ChildNodes.Item(3).ChildNodes.Item(0);
                         string Msgerreur = XMLVendFaultResp.LastChild.InnerText;
