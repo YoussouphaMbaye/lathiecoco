@@ -3,6 +3,7 @@ using apimoney.services;
 using Lathiecoco.dto;
 using Lathiecoco.models;
 using Lathiecoco.repository;
+using Lathiecoco.repository.SMS;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,11 @@ namespace  Lathiecoco.services
     public class CustomerWalletService : CustomerWalletRep
     {
         private readonly CatalogDbContext _CatalogDbContext;
-        public CustomerWalletService(CatalogDbContext CatalogDbContext)
+        private readonly SmsSendRep _smsSendRep;
+        public CustomerWalletService(CatalogDbContext CatalogDbContext, SmsSendRep smsSendRep)
         {
             _CatalogDbContext = CatalogDbContext;
+            _smsSendRep = smsSendRep;
         }
 
         public async Task<ResponseBody<CustomerWallet>> definePercentagePurchase(DefinePercentagePurchaseMasterDto dto)
@@ -277,7 +280,9 @@ namespace  Lathiecoco.services
                 Random rdn = new Random();
                 var a = rdn.Next(10000, 99999);
                 //SMS c.PinTemp = a.ToString();
-                c.PinTemp = "1234";
+                c.PinTemp = a.ToString();
+                string msg = a.ToString() + " est votre code de validation.";
+                _smsSendRep.sendSms(msg, cus.Phone);
                 string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 //c.Code = "C" + dayToday;
                 c.Code = RandomString(6) + a.ToString();

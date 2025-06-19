@@ -9,6 +9,7 @@ using Lathiecoco.repository;
 using Lathiecoco.repository.Conlog;
 using Lathiecoco.repository.Mtn;
 using Lathiecoco.repository.Orange;
+using Lathiecoco.repository.SMS;
 using Lathiecoco.services.Conlog;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ namespace Lathiecoco.services
         private readonly EDGrep _EdgRep;
         private readonly MtnRep _mtnRep;
         private readonly OrangeRep _orangeRep;
+        private readonly SmsSendRep _smsSendRep;
         public BillerInvoiceService(CatalogDbContext CatalogDbContext,
         CustomerWalletRep customerWalleServ,
 
@@ -39,7 +41,8 @@ namespace Lathiecoco.services
         PaymentModeRep paymentModeServ,
         MtnRep mtnRep,
         OrangeRep orangeRep,
-        EDGrep edgServices)
+        EDGrep edgServices,
+        SmsSendRep smsSendRep)
         {
             _CatalogDbContext = CatalogDbContext;
             _customerWalleServ = customerWalleServ;
@@ -48,6 +51,7 @@ namespace Lathiecoco.services
             _EdgRep = edgServices;
             _mtnRep = mtnRep;
             _orangeRep = orangeRep;
+            _smsSendRep = smsSendRep;
         }
         public async Task<ResponseBody<List<BillerInvoice>>> findAllBillerInvoice(int page = 1, int limit = 10)
         {
@@ -442,12 +446,16 @@ namespace Lathiecoco.services
                                     }
                                     invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
                                     string tokenFormat = AddSpaceEvery4Chars(rpAsp.Body.token.Split("|")[0]);
-
-                                    invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
-
+                                    string sms = "Reacharge effectuée avec succès.\n";
+                                    sms += "Montant: " + rpAsp.Body.amount + " GNF\n";
+                                    sms += "Numéro de compteur: " + rpAsp.Body.MeterNumber + "\n";
+                                    sms +="Token: "+ tokenFormat+"\n";
                                 
-                               
-                            }
+                                    invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+                                    _smsSendRep.sendSms(sms, customer.Phone);
+
+
+                                }
                                 catch (Exception ex)
                                 {
                                     rp.IsError = true;

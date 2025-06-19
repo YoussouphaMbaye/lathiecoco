@@ -1,5 +1,6 @@
 ﻿using Lathiecoco.models;
 using Lathiecoco.repository.SMS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +15,7 @@ namespace Lathiecoco.Controllers
         {
             _smsSendRep= smsSendRep;
         }
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> SendSms(string phoneNumber, string message)
         {
