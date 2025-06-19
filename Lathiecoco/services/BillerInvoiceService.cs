@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Numerics;
 using System.Reflection;
+using System.Text;
 
 namespace Lathiecoco.services
 {
@@ -440,6 +441,8 @@ namespace Lathiecoco.services
                                         return rp;
                                     }
                                     invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                                    string tokenFormat = AddSpaceEvery4Chars(rpAsp.Body.token.Split("|")[0]);
+
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
 
                                 
@@ -748,6 +751,17 @@ namespace Lathiecoco.services
 
         }
 
-        
+        static string AddSpaceEvery4Chars(string input)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                sb.Append(input[i]);
+                if ((i + 1) % 4 == 0 && i != input.Length - 1)
+                    sb.Append(' ');
+            }
+            return sb.ToString();
+        }
+
     }
 }
