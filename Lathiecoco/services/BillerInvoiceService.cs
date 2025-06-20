@@ -452,7 +452,7 @@ namespace Lathiecoco.services
                                     sms +="Token: "+ tokenFormat+"\n";
                                 
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
-                                    _smsSendRep.sendSms(sms, customer.Phone);
+                                    _smsSendRep.sendSms(customer.Phone, sms);
 
 
                                 }
