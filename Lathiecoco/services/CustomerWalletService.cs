@@ -713,6 +713,9 @@ namespace  Lathiecoco.services
                     cu.PinNumber= BCrypt.Net.BCrypt.EnhancedHashPassword(cus.PinNumber.Trim().Replace(" ", ""));
                     cu.Address=cus.Address.Trim().Replace(" ", "");
                     cu.PhoneBrand=cus.PhoneBrand.Trim().Replace(" ", "");
+                    Random rdn = new Random();
+                    var a = rdn.Next(1000, 9999);
+                    cu.PinNumber=a.ToString();
                   if (cus.Profile =="AGENT")
                     {
                         cu.IsActive = false;
