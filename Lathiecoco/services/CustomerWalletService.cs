@@ -278,7 +278,7 @@ namespace  Lathiecoco.services
                 c.IsActive = false;
                 
                 Random rdn = new Random();
-                var a = rdn.Next(10000, 99999);
+                var a = rdn.Next(1000, 9999);
                 //SMS c.PinTemp = a.ToString();
                 c.PinTemp = a.ToString();
                 string msg = a.ToString() + " est votre code de validation.";
