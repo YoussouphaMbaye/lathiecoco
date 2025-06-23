@@ -50,7 +50,6 @@ namespace  Lathiecoco.Controllers
 
         }
         [HttpPut("/customer-wallet/update-customer-pin-temp")]
-        [Authorize]
         public async Task<ResponseBody<String>> updateCustomerPinTemp([FromBody] CustomerPhoneDto dto)
         {
             return await _custonerWalletService.updateCustomerPinTemp(dto.Phone);
