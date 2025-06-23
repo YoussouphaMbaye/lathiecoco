@@ -49,6 +49,12 @@ namespace  Lathiecoco.Controllers
             return await _custonerWalletService.addCustomerWithAccountingPhoneOnly(cu);
 
         }
+        [HttpPut("/customer-wallet/update-customer-pin-temp")]
+        [Authorize]
+        public async Task<ResponseBody<String>> updateCustomerPinTemp([FromBody] CustomerPhoneDto dto)
+        {
+            return await _custonerWalletService.updateCustomerPinTemp(dto.Phone);
+        }
         [HttpPost("/customer-wallet/update-customer-infos")]
         //[Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public async Task<ResponseBody<CustomerWallet>> UpdateCustomerInfos([FromBody] CustomerUpdateInfosDto cu)

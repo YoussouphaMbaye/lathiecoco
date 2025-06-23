@@ -282,7 +282,7 @@ namespace  Lathiecoco.services
                 //SMS c.PinTemp = a.ToString();
                 c.PinTemp = a.ToString();
                 string msg = a.ToString() + " est votre code de validation.";
-                _smsSendRep.sendSms(msg, cus.Phone);
+                await _smsSendRep.sendSms(cus.Phone, msg);
                 string dayToday = GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                 //c.Code = "C" + dayToday;
                 c.Code = RandomString(6) + a.ToString();
@@ -793,6 +793,45 @@ namespace  Lathiecoco.services
             return rp;
         }
 
+        public async Task<ResponseBody<String>> updateCustomerPinTemp(string phone)
+        {
+            ResponseBody<String> rp = new ResponseBody<String>();
+            try
+            {
+                CustomerWallet cu = await _CatalogDbContext.CustomerWallets.Where(c =>  c.Phone == phone).FirstOrDefaultAsync();
+
+                if (cu != null)
+                {
+                    Random rdn = new Random();
+                    var a = rdn.Next(1000, 9999);
+                    cu.PinTemp = a.ToString();
+                    string msg = a.ToString() + " est votre code de validation.";
+                    await _smsSendRep.sendSms(cu.Phone, msg);
+                   
+                    cu.UpdatedDate = DateTime.UtcNow;
+
+                    _CatalogDbContext.CustomerWallets.Update(cu);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = BCrypt.Net.BCrypt.EnhancedHashPassword(a.ToString());
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Code = 332;
+                    rp.Msg = "Customer with phone " +phone + " not found";
+                    return rp;
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.Code = 400;
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
         public async Task<ResponseBody<CustomerWallet>> updateCustomerInformationsWithoutPinNumber(CustomerUpdateDto cus)
         {
             ResponseBody<CustomerWallet> rp = new ResponseBody<CustomerWallet>();

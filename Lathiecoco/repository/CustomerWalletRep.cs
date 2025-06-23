@@ -7,6 +7,7 @@ namespace  Lathiecoco.repository
     {
         Task<ResponseBody<CustomerWallet>> addCustomer(CustomerWallet cus);
         Task<ResponseBody<CustomerWallet>> CustomerToAgencyDto(CustomerToAgencyDto dto);
+        Task<ResponseBody<String>> updateCustomerPinTemp(string phone);
         Task<ResponseBody<CustomerWallet>> addCustomerWithAccounting(BodyCustomerWalletDto cus);
         Task<ResponseBody<CustomerWallet>> definePercentagePurchase(DefinePercentagePurchaseMasterDto dto);
         Task<ResponseBody<CustomerWallet>> updateCustomerInformations(CustomerUpdateInfosDto cus);

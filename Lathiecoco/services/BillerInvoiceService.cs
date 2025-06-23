@@ -33,7 +33,6 @@ namespace Lathiecoco.services
         private readonly EDGrep _EdgRep;
         private readonly MtnRep _mtnRep;
         private readonly OrangeRep _orangeRep;
-        private readonly SmsSendRep _smsSendRep;
         public BillerInvoiceService(CatalogDbContext CatalogDbContext,
         CustomerWalletRep customerWalleServ,
 
@@ -41,8 +40,8 @@ namespace Lathiecoco.services
         PaymentModeRep paymentModeServ,
         MtnRep mtnRep,
         OrangeRep orangeRep,
-        EDGrep edgServices,
-        SmsSendRep smsSendRep)
+        EDGrep edgServices
+        )
         {
             _CatalogDbContext = CatalogDbContext;
             _customerWalleServ = customerWalleServ;
@@ -51,7 +50,7 @@ namespace Lathiecoco.services
             _EdgRep = edgServices;
             _mtnRep = mtnRep;
             _orangeRep = orangeRep;
-            _smsSendRep = smsSendRep;
+
         }
         public async Task<ResponseBody<List<BillerInvoice>>> findAllBillerInvoice(int page = 1, int limit = 10)
         {
@@ -452,8 +451,7 @@ namespace Lathiecoco.services
                                     sms +="Token: "+ tokenFormat+"\n";
                                 
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
-                                    _smsSendRep.sendSms(customer.Phone, sms);
-
+                                    
 
                                 }
                                 catch (Exception ex)
