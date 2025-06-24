@@ -35,16 +35,16 @@ namespace Lathiecoco.services.Orange
             rp.Code = 200;
             rp.Msg = " Bonjour tout le monde !!!!!";
 
-            Console.WriteLine(om);
             rp.Body = om.message;
             
-            Console.WriteLine(om.transactionData.transactionId);
-            Console.WriteLine(om.status);
             //a changer
             if (om.status == "SUCCESS")
             {
                 Console.WriteLine(om.status);
                 await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+            }else if(om.status == "FAILED")
+            {
+                await updateBillerInvoiceToFailedByIdRef(new Guid(om.transactionData.transactionId));
             }
 
             return  rp;
@@ -93,6 +93,39 @@ namespace Lathiecoco.services.Orange
                         rp.Msg = "error of remote server (CG)!";
 
                     }
+
+                    _CatalogDbContext.BillerInvoices.Update(bl);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    rp.Body = bl;
+                }
+                else
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Biller with idReference " + idRef + " not found";
+                    rp.Code = 460;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+            }
+            return rp;
+        }
+
+        public async Task<ResponseBody<BillerInvoice>> updateBillerInvoiceToFailedByIdRef(Guid idRef)
+        {
+            ResponseBody<BillerInvoice> rp = new ResponseBody<BillerInvoice>();
+            try
+            {
+
+                BillerInvoice bl = await _CatalogDbContext.BillerInvoices.Include(c => c.PaymentModeObj).Include(c => c.CustomerWallet).Where(c => c.IdReference == idRef).FirstOrDefaultAsync();
+                if (bl != null)
+                {
+                    bl.InvoiceStatus = "F";
 
                     _CatalogDbContext.BillerInvoices.Update(bl);
                     await _CatalogDbContext.SaveChangesAsync();

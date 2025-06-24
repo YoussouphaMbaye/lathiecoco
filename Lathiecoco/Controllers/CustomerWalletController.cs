@@ -176,6 +176,7 @@ namespace  Lathiecoco.Controllers
             catch (Exception ex)
             {
                 rp.IsError = true;
+                rp.Code = 500;
                 rp.Msg = ex.Message;
             }
             return rp;
