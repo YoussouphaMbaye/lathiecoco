@@ -103,6 +103,7 @@ namespace  Lathiecoco.Controllers
                     {
                         rp.IsError = true;
                         rp.Body = null;
+                        rp.Code = 320;
                         rp.Msg = "You account is not active";
                         return rp;
                     }
@@ -111,6 +112,7 @@ namespace  Lathiecoco.Controllers
                     {
                         rp.IsError = true;
                         rp.Body = null;
+                        rp.Code = 322;
                         rp.Msg = "Your account is blocked";
                         return rp;
                     }
@@ -133,20 +135,7 @@ namespace  Lathiecoco.Controllers
                         return rp;
                     }
 
-                    if (cus.IsBlocked)
-                    {
-                        rp.IsError = true;
-                        rp.Code = 320;
-                        rp.Msg = "Your account is blocked!";
-                        return rp;
-                    }
-                    if (!cus.IsActive)
-                    {
-                        rp.IsError = true;
-                        rp.Code = 322;
-                        rp.Msg = "Your account is not active!";
-                        return rp;
-                    }
+                    
 
                     var claims = new List<Claim>() {
                           new Claim("id",cus.IdCustomerWallet.ToString()),
