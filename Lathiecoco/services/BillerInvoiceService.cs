@@ -148,6 +148,7 @@ namespace Lathiecoco.services
                             return rp;
                         }
                         bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                        bl.BillerUserName = rpAsp.Body.CustomerName;
                         bl.NumberOfKw= Convert.ToDouble(rpAsp.Body.EnergyCoast);
                         
                        
@@ -215,6 +216,7 @@ namespace Lathiecoco.services
                             return rp;
                         }
                         bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
+                        bl.BillerUserName = rpAsp.Body.CustomerName;
                         bl.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
                        
                     }
@@ -444,12 +446,8 @@ namespace Lathiecoco.services
                                         return rp;
                                     }
                                     invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
-                                    string tokenFormat = AddSpaceEvery4Chars(rpAsp.Body.token.Split("|")[0]);
-                                    string sms = "Reacharge effectuée avec succès.\n";
-                                    sms += "Montant: " + rpAsp.Body.amount + " GNF\n";
-                                    sms += "Numéro de compteur: " + rpAsp.Body.MeterNumber + "\n";
-                                    sms +="Token: "+ tokenFormat+"\n";
-                                
+                                    invoice.BillerUserName = rpAsp.Body.CustomerName;
+
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
                                     
 

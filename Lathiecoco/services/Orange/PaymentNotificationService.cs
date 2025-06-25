@@ -83,6 +83,7 @@ namespace Lathiecoco.services.Orange
                         }
                         bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
                         bl.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+                        bl.BillerUserName= rpAsp.Body.CustomerName;
 
                     }
                     catch (Exception ex)
