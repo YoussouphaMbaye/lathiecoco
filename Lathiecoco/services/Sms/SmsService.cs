@@ -79,7 +79,7 @@ namespace Lathiecoco.services.Sms
             str += "\"outboundSMSMessageRequest\":{";
             str += "\"address\": \"tel:+224" + phoneNumber + "\",";
             str += "\"senderAddress\": \"tel:+" + senderPhone + "\",";
-            //str += "\"senderName\": \"" + sendername + "\",";
+            str += "\"senderName\": \"" + sendername + "\",";
             str += "\"outboundSMSTextMessage\":{";
             str += "\"message\": \"" + message + "\"";
             str += "}}}";

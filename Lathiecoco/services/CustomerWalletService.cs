@@ -716,7 +716,7 @@ namespace  Lathiecoco.services
                     Random rdn = new Random();
                     //var a = rdn.Next(1000, 9999);
                     //cu.PinNumber=a.ToString();
-                  if (cus.Profile =="AGENT")
+                  if (cus.Profile == "AGENT")
                     {
                         cu.IsActive = false;
                     }else if(cus.Profile == "CUSTOMER")
