@@ -669,6 +669,63 @@ namespace Lathiecoco.services
             
 
         }
+
+        public async Task<ResponseBody<List<BillerAmountByPaymentModeDto>>> billerByPaymentMethodSumBiller(DateTime begenDate, DateTime endDate)
+        {
+            ResponseBody<List<BillerAmountByPaymentModeDto>> rp = new ResponseBody<List<BillerAmountByPaymentModeDto>>();
+            try
+            {
+                var grouped =  _CatalogDbContext.BillerInvoices
+                
+                   .Include(i => i.PaymentModeObj)
+                   .Where(i => i.InvoiceStatus == "P")
+                   .Where(i => i.CreatedDate > begenDate && i.CreatedDate < endDate);
+
+
+
+                var groupedData = await grouped.GroupBy(e => new { e.FkIdPaymentMode })
+                   .Select(g => new
+                   {
+                       Count = g.Count(),
+                       PaymentMode = g.Max(c => c.PaymentModeObj.Name),
+                       TotalBillerAmount = g.Sum(e => e.AmountToPaid),
+                      
+                   }).ToArrayAsync();
+
+                if (groupedData != null)
+                {
+                    //rp.Body = groupedData;
+                    List<BillerAmountByPaymentModeDto> list = new List<BillerAmountByPaymentModeDto>();
+                    foreach (var i in groupedData)
+                    {
+                        BillerAmountByPaymentModeDto b = new BillerAmountByPaymentModeDto();
+                        b.Count = i.Count;
+                        b.PaymentMode = i.PaymentMode;
+                        b.TotalBillerAmount = i.TotalBillerAmount;
+                       
+                        list.Add(b);
+                    }
+                    rp.Body = list;
+                }
+                else
+                {
+                    rp.Body = new List<BillerAmountByPaymentModeDto>();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                rp.IsError = true;
+                rp.Msg = ex.Message;
+                rp.Code = 400;
+            }
+
+            return rp;
+
+
+        }
+
         public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference,string? invoiceStatus, int page, int limit)
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();

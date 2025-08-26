@@ -78,7 +78,18 @@ namespace Lathiecoco.Controllers
             return Ok(await _billerInvoiceServ.billerByAgentSumBiller(begenDate, endDate, idAgent, fkIdAgency));
 
         }
-       
+
+        [Authorize(Roles = "ADMIN,COMPTABLE,SUPADMIN")]
+        [HttpGet("/biller-invoice/biller-by-payment-mode-Sum-biller-amount")]
+        public async Task<ActionResult> billerByPaymentMethodSumBiller(DateTime begenDate, DateTime endDate)
+        {
+
+            return Ok(await _billerInvoiceServ.billerByPaymentMethodSumBiller(begenDate, endDate));
+
+        }
+
+        
+
 
     }
 }
