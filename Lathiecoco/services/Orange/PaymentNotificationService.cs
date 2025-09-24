@@ -41,28 +41,40 @@ namespace Lathiecoco.services.Orange
             rp.Msg = " Bonjour tout le monde !!!!!";
 
             rp.Body = om.message;
+
+            try
+            {
+                if (om.status == "SUCCESS")
+                {
+
+                    var updateBillerInvoice = await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+                    if (updateBillerInvoice != null && !updateBillerInvoice.IsError)
+                    {
+                        var username = string.IsNullOrEmpty(updateBillerInvoice.Body.BillerUserName) ? "edg_pay" : updateBillerInvoice.Body.BillerUserName;
+                        username = username.Trim();
+                        string message = $"{username} le code a taper  sur votre compteur est: " +
+                                         $"{updateBillerInvoice.Body.ReloadBiller} ({updateBillerInvoice.Body.NumberOfKw} kwh). " +
+                                         $"Montant : {updateBillerInvoice.Body.AmountToPaid} GNF";
+
+                        string phoneNumber = updateBillerInvoice.Body.CustomerWallet.Phone;
+
+                        await _smsService.sendSms(phoneNumber, message);
+
+                    }
+                }
+                else if (om.status == "FAILED")
+                {
+                    await updateBillerInvoiceToFailedByIdRef(new Guid(om.transactionData.transactionId));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                rp.Msg +="/"+ ex.ToString();
+            }
             
             //a changer
-            if (om.status == "SUCCESS")
-            {
-                var updateBillerInvoice = await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
-                if (updateBillerInvoice != null && !updateBillerInvoice.IsError)
-                {
-                    var username = string.IsNullOrEmpty(updateBillerInvoice.Body.BillerUserName) ? "edg_pay" : updateBillerInvoice.Body.BillerUserName;
-                    username = username.Trim();
-                    string message = $"{username} le code a taper  sur votre compteur est: " +
-                                     $"{updateBillerInvoice.Body.ReloadBiller} ({updateBillerInvoice.Body.NumberOfKw} -kwh). " +
-                                     $"Montant : {updateBillerInvoice.Body.AmountToPaid} Fr";
-                    
-                    string phoneNumber = updateBillerInvoice.Body.CustomerWallet.Phone;
-                   
-                    await _smsService.sendSms(phoneNumber,message);
-                    
-                }
-            }else if(om.status == "FAILED")
-            {
-                await updateBillerInvoiceToFailedByIdRef(new Guid(om.transactionData.transactionId));
-            }
+            
 
             return  rp;
         }
