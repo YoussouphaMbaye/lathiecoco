@@ -4,6 +4,7 @@ using Lathiecoco.models.notifications;
 using Lathiecoco.repository;
 using Lathiecoco.repository.Conlog;
 using Lathiecoco.repository.Orange;
+using Lathiecoco.repository.SMS;
 using Lathiecoco.services.Sms;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,12 +16,16 @@ namespace Lathiecoco.services.Orange
     
         private readonly CatalogDbContext _CatalogDbContext;
         private readonly EDGrep _edgrep;
+        private readonly SmsSendRep _smsService;
         public PaymentNotificationService(IConfiguration configuration,
             CatalogDbContext CatalogDbContext,
-            EDGrep eDGrep) {
-          _configuration = configuration;
+            EDGrep eDGrep,
+            SmsSendRep smsService)
+        {
+            _configuration = configuration;
             _edgrep = eDGrep;
             _CatalogDbContext = CatalogDbContext;
+            _smsService = smsService;
         }
 
         public Task<ResponseBody<string>> mtnMoneyNotificationsHandler(string pm)
@@ -40,8 +45,20 @@ namespace Lathiecoco.services.Orange
             //a changer
             if (om.status == "SUCCESS")
             {
-                Console.WriteLine(om.status);
-                await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+                var updateBillerInvoice = await updateBillerInvoiceToPaidByIdRef(new Guid(om.transactionData.transactionId));
+                if (updateBillerInvoice != null && !updateBillerInvoice.IsError)
+                {
+                    var username = string.IsNullOrEmpty(updateBillerInvoice.Body.BillerUserName) ? "edg_pay" : updateBillerInvoice.Body.BillerUserName;
+                    username = username.Trim();
+                    string message = $"{username} le code a taper  sur votre compteur est: " +
+                                     $"{updateBillerInvoice.Body.ReloadBiller} ({updateBillerInvoice.Body.NumberOfKw} -kwh). " +
+                                     $"Montant : {updateBillerInvoice.Body.AmountToPaid} Fr";
+                    
+                    string phoneNumber = updateBillerInvoice.Body.CustomerWallet.Phone;
+                   
+                    await _smsService.sendSms(phoneNumber,message);
+                    
+                }
             }else if(om.status == "FAILED")
             {
                 await updateBillerInvoiceToFailedByIdRef(new Guid(om.transactionData.transactionId));
@@ -61,12 +78,9 @@ namespace Lathiecoco.services.Orange
                 {
                     bl.InvoiceStatus = "P";
 
-                    //paid from cg
 
                     try
                     {
-                        //cg paid
-                        //shoold change
 
                         EdgPayment pay = new EdgPayment();
                         pay.montant = bl.AmountToPaid;
@@ -83,8 +97,9 @@ namespace Lathiecoco.services.Orange
                         }
                         bl.ReloadBiller = rpAsp.Body.token.Split("|")[0];
                         bl.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
+                        
                         bl.BillerUserName= rpAsp.Body.CustomerName;
-
+                       
                     }
                     catch (Exception ex)
                     {
