@@ -262,47 +262,6 @@ namespace Lathiecoco.services
                     FeeSend feeSend = null;
                     PaymentMode paymentMode1 = null;
                     //rechercher customer avec id
-                    ResponseBody<CustomerWallet> cusRep = await _customerWalleServ.findCustomerWalletById(biller.IdCustomerWallet);
-                    if (cusRep != null)
-                    {
-                        
-                        if (!cusRep.IsError)
-                        {
-                            customer = cusRep.Body;
-                        if (!customer.IsActive)
-                        {
-                            rp.IsError = true;
-                            rp.Body = null;
-                            rp.Msg = "You account is not active";
-                            rp.Code = 320;
-                            return rp;
-                        }
-                        if (customer.IsBlocked)
-                        {
-                            rp.IsError= true;
-                            rp.Body = null;
-                            rp.Code = 322;
-                            rp.Msg = "Your account is blocked";
-                            return rp;
-                        }
-
-                        }
-                        else
-                        {
-                            rp.Body = null;
-                            rp.IsError= true;
-                            rp.Msg = cusRep.Msg;
-                            rp.Code = cusRep.Code;
-                            return rp;
-                        }
-                    }
-                    else
-                    {
-                        rp.Body = null;
-                        rp.IsError= true;
-                        rp.Code = cusRep.Code;
-                        return rp;
-                    }
                     
                     //rechercher le mode de payement
                     ResponseBody<PaymentMode> paymentModeRp = await _paymentModeServ.findByPaymentMode(biller.PayementType);
@@ -322,6 +281,70 @@ namespace Lathiecoco.services
                         }
                     }
                    
+                   
+                    BillerInvoice invoice = new BillerInvoice();
+                    
+                    
+                    //Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
+                    //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
+                    
+              
+                    var transaction =  await _CatalogDbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+
+                    ResponseBody<CustomerWallet> cusRep = await _customerWalleServ.findCustomerWalletById(biller.IdCustomerWallet);
+                    if (cusRep != null)
+                    {
+
+                        if (!cusRep.IsError)
+                        {
+                            customer = cusRep.Body;
+                            if (!customer.IsActive)
+                            {
+                                rp.IsError = true;
+                                rp.Body = null;
+                                rp.Msg = "You account is not active";
+                                rp.Code = 320;
+
+                                await transaction.RollbackAsync();
+                                return rp;
+                            }
+                            if (customer.IsBlocked)
+                            {
+                                rp.IsError = true;
+                                rp.Body = null;
+                                rp.Code = 322;
+                                rp.Msg = "Your account is blocked";
+
+                                await transaction.RollbackAsync();
+                                return rp;
+                            }
+
+                        }
+                        else
+                        {
+                            rp.Body = null;
+                            rp.IsError = true;
+                            rp.Msg = cusRep.Msg;
+                            rp.Code = cusRep.Code;
+
+                            await transaction.RollbackAsync();
+                            return rp;
+                        }
+                    }
+                    else
+                    {
+                        rp.Body = null;
+                        rp.IsError = true;
+                        rp.Code = cusRep.Code;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
+
+
                     //rechercher fee_send idCorridor & paymentMode
                     ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
                     if (feeSendBody != null)
@@ -335,31 +358,33 @@ namespace Lathiecoco.services
                             rp.IsError = true;
                             rp.Msg = feeSendBody.Msg;
                             rp.Body = null;
-                            rp.Code= feeSendBody.Code;  
+                            rp.Code = feeSendBody.Code;
+
+                            await transaction.RollbackAsync();
                             return rp;
-                            
+
                         }
                     }
-                   
-                    BillerInvoice invoice = new BillerInvoice();
-                    invoice.IdReference=Guid.NewGuid();
+
+
+                    invoice.IdReference = Guid.NewGuid();
 
                     AccountingOpWallet acw = new AccountingOpWallet();
 
                     double ConvertToUnixTimestamp(DateTime date)
-                        {
+                    {
                         DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                         TimeSpan diff = date.ToUniversalTime() - origin;
                         return Math.Floor(diff.TotalSeconds);
                     }
                     string dayToday = ConvertToUnixTimestamp(DateTime.UtcNow).ToString();
-                    invoice.IdBillerInvoice= Ulid.NewUlid();
+                    invoice.IdBillerInvoice = Ulid.NewUlid();
                     invoice.InvoiceCode = "F" + GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
                     invoice.PaymentMode = paymentMode1.Name.ToString();
                     invoice.FkIdPaymentMode = paymentMode1.IdPaymentMode;
                     invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
-                    invoice.BillerReference=biller.BillerReference;
-                    invoice.InvoiceStatus = "P"; 
+                    invoice.BillerReference = biller.BillerReference;
+                    invoice.InvoiceStatus = "P";
                     invoice.AmountToPaid = biller.AmountToPaid;
                     invoice.CustomerWallet = null;
                     invoice.FkIdFeeSend = feeSend.IdFeeSend;
@@ -375,41 +400,37 @@ namespace Lathiecoco.services
                     double amountToSend = biller.AmountToPaid;
                     if (feeSend.MinAmount < amountToSend && feeSend.MaxAmount > amountToSend)
                     {
-                        
-                            if (feeSend.FixeCsFee > 0)
-                            {
-                                amountTopaid = ((double)feeSend.FixeCsFee) + amountToSend;
-                                invoice.FeesAmount = (double)feeSend.FixeCsFee;
-                            }
-                            else
-                            {
-                                decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
-                                amountToSend = (double)biller.AmountToPaid;
 
-                                amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
-                                invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
-                            }
-                    
-                    
-                    }else
-                    {
-                      rp.IsError = true;
-                      rp.Code = 305;
-                      return rp;
+                        if (feeSend.FixeCsFee > 0)
+                        {
+                            amountTopaid = ((double)feeSend.FixeCsFee) + amountToSend;
+                            invoice.FeesAmount = (double)feeSend.FixeCsFee;
+                        }
+                        else
+                        {
+                            decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                            amountToSend = (double)biller.AmountToPaid;
+
+                            amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
+                            invoice.FeesAmount = (double)feeForSendPercent * amountToSend;
+                        }
+
+
                     }
-                    
-                    
-                    //Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
-                    //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
-                    invoice.AmountToPaid = amountTopaid;
-              
-                    var transaction = _CatalogDbContext.Database.BeginTransaction();
-                    try
+                    else
                     {
+                        rp.IsError = true;
+                        rp.Code = 305;
 
-                        //update accounting sender
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
 
-                        if (customer.Accounting != null)
+                    invoice.AmountToPaid = amountTopaid;
+
+                    //update accounting sender
+
+                    if (customer.Accounting != null)
                         {
                             Accounting senderAccounting = customer.Accounting;
 
@@ -421,6 +442,8 @@ namespace Lathiecoco.services
                                     rp.IsError = true;
                                     rp.Body = null;
                                     rp.Code = 340;
+
+                                    await transaction.RollbackAsync();
                                     return rp;
                                 }
 
@@ -443,6 +466,8 @@ namespace Lathiecoco.services
                                         rp.IsError = true;
                                         rp.Msg = "error of remote server (CG)!";
                                         rp.Code = 003;
+
+                                        await transaction.RollbackAsync();
                                         return rp;
                                     }
                                     invoice.ReloadBiller = rpAsp.Body.token.Split("|")[0];
@@ -457,6 +482,8 @@ namespace Lathiecoco.services
                                     rp.IsError = true;
                                     rp.Msg = "error of remote server (CG)!";
                                     rp.Code = 003;
+
+                                    await transaction.RollbackAsync();
                                     return rp;
 
                                 }
@@ -487,7 +514,8 @@ namespace Lathiecoco.services
                             rp.IsError = true; 
                             rp.Msg = "No Sender BALANCE";
                             rp.Code = 400;
-                            transaction.Rollback();
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
 
@@ -510,16 +538,20 @@ namespace Lathiecoco.services
                                 rp.IsError = true;
                                 rp.Msg = "error of remote server (OM)!";
                                 rp.Code = 001;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             }
                         }
                         catch (Exception ex)
                             {
-                                transaction.Rollback();
+                                
                          
                                 rp.IsError = true;
                                 rp.Msg = "error of remote server (OM)!";
                                 rp.Code = 001;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             
                             }
@@ -541,12 +573,14 @@ namespace Lathiecoco.services
                                     rp.IsError = true;
                                     rp.Msg = "error of remote server (MTN)!";
                                     rp.Code = 002;
+
+                                    await transaction.RollbackAsync();
                                     return rp;
                                 }
                             }
                             catch (Exception ex)
                             {
-                                transaction.Rollback();
+                                await transaction.RollbackAsync();
 
                                 rp.IsError = true;
                                 rp.Msg = "error of remote server (MTN)!";
@@ -563,7 +597,7 @@ namespace Lathiecoco.services
                     await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
                     await _CatalogDbContext.SaveChangesAsync();
 
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                     }
                     catch (Exception ex)
@@ -571,6 +605,8 @@ namespace Lathiecoco.services
                         rp.IsError = true;
                         rp.Msg = ex.Message;
                         rp.Code = 400;
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
 

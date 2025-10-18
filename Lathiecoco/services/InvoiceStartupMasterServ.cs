@@ -290,7 +290,8 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
             InvoiceStartupMaster invoice = new InvoiceStartupMaster();
-            var transaction = _CatalogDbContext.Database.BeginTransaction();
+
+            var transaction = await  _CatalogDbContext.Database.BeginTransactionAsync();
 
             try
             {
@@ -311,6 +312,8 @@ namespace  Lathiecoco.services
                             rp.IsError = true;
                             rp.Body = null;
                             rp.Msg = "You account is not active";
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
 
@@ -319,6 +322,8 @@ namespace  Lathiecoco.services
                             rp.IsError = true;
                             rp.Body = null;
                             rp.Msg = "Your account is blocked";
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
                     if (master1.PercentagePurchase == null)
@@ -327,6 +332,8 @@ namespace  Lathiecoco.services
                         rp.Body = null;
                         rp.Code = 450;
                         rp.Msg = "Percentage Purchase not defined!!";
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
                     else
@@ -364,6 +371,8 @@ namespace  Lathiecoco.services
                                 rp.Msg = "Amount is not in defined interval!!";
                                 rp.IsError = true;
                                 rp.Code = 305;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             }
                         }
@@ -372,9 +381,10 @@ namespace  Lathiecoco.services
                             rp.Msg = "fees not configured: " + pm.Name + "!"; ;
                             rp.IsError = true;
                             rp.Code = 602;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
-                            
                             
                         
                         invoice.FkIdPaymentMode = pm.IdPaymentMode;
@@ -401,6 +411,8 @@ namespace  Lathiecoco.services
                             rp.Msg = "Payment mode MA not found!";
                             rp.IsError = true;
                             rp.Code = 600;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         
                         }
@@ -410,6 +422,8 @@ namespace  Lathiecoco.services
                         rp.Msg = "Master not found!";
                         rp.IsError = true;
                         rp.Code = 601;
+
+                        await transaction.RollbackAsync();
                         return rp;
                         
                     }
@@ -419,7 +433,8 @@ namespace  Lathiecoco.services
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
+
                 rp.IsError = true;
                 rp.Msg = ex.Message;
             }
@@ -430,7 +445,7 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
             InvoiceStartupMaster invoice = new InvoiceStartupMaster();
-            var transaction = _CatalogDbContext.Database.BeginTransaction();
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
 
             try
             {
@@ -446,6 +461,8 @@ namespace  Lathiecoco.services
                         rp.IsError = true;
                         rp.Body = null;
                         rp.Msg = "You account is not active";
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
 
@@ -454,6 +471,8 @@ namespace  Lathiecoco.services
                         rp.IsError = true;
                         rp.Body = null;
                         rp.Msg = "Your account is blocked!";
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
 
@@ -465,6 +484,8 @@ namespace  Lathiecoco.services
                         rp.Body = null;
                         rp.Code = 450;
                         rp.Msg = "Percentage Purchase not defined!!";
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
                     else
@@ -502,6 +523,8 @@ namespace  Lathiecoco.services
                                 rp.Msg = "Amount is not in defined interval!!";
                                 rp.IsError = true;
                                 rp.Code = 305;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             }
                         }
@@ -510,6 +533,8 @@ namespace  Lathiecoco.services
                             rp.Msg = "fees not configured: " + pm.Name +"!";
                             rp.IsError = true;
                             rp.Code = 602;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
                         invoice.FkIdPaymentMode = pm.IdPaymentMode;
@@ -531,15 +556,18 @@ namespace  Lathiecoco.services
                         aOpCsh.NewBalance = 0;
                         aOpCsh.CreatedDate = DateTime.UtcNow;
                         aOpCsh.UpdatedDate = DateTime.UtcNow;
+
                         _CatalogDbContext.AccountingOpWallets.Add(aOpCsh);
                         await _CatalogDbContext.SaveChangesAsync();
-                        transaction.Commit();
+                        await transaction.CommitAsync();
                     }
                     else
                     {
                         rp.Msg = "Payment mode SM not found!";
                         rp.IsError = true;
                         rp.Code = 600;
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
                 }
@@ -548,6 +576,8 @@ namespace  Lathiecoco.services
                     rp.Msg = "Master not found!";
                     rp.IsError = true;
                     rp.Code = 601;
+
+                    await transaction.RollbackAsync();
                     return rp;
                   
                 }
@@ -557,7 +587,7 @@ namespace  Lathiecoco.services
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 rp.IsError = true;
                 rp.Msg = ex.Message;
             }
@@ -783,12 +813,14 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+
             try
             {
                 InvoiceStartupMaster invoice = await _CatalogDbContext.InvoiceStartupMasters.Include(i => i.PaymentModeObj).Include(i => i.Staff).Include(i => i.Agent).Include(i => i.Agent.Accounting).Where(i => i.IdInvoiceStartupMaster == bodyValidInvoiceStartupMaster.IdInvoiceStartupMaster).FirstOrDefaultAsync();
                 if (invoice != null)
                 {
-                    var transaction = _CatalogDbContext.Database.BeginTransaction();
+                    
                     Accounting MasterAccounting = null;
                     if (invoice.InvoiceStatus != "A")
                     {
@@ -796,10 +828,11 @@ namespace  Lathiecoco.services
                         rp.Msg = "Transaction already  validated";
                         rp.Code = 505;
                         rp.Body = null;
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
-                    try
-                    {
+                   
 
                         //get Master 
                         CustomerWallet Master = invoice.Agent;
@@ -819,16 +852,15 @@ namespace  Lathiecoco.services
                             else
                             {
                                 throw new Exception("Invoice Have not Master Agency Accounting");
-                                transaction.Rollback();
+                               
                             }
 
                         }
                         else
                         {
                             throw new Exception("Invoice Have not master");
-                            transaction.Rollback();
+                           
                         }
-
 
                         //Add opAccounting Cashier
                         AccountingOpWallet aOpCsh = await _CatalogDbContext.AccountingOpWallets.Where(i => i.FkIdInvoiceStartupMaster == bodyValidInvoiceStartupMaster.IdInvoiceStartupMaster && i.FkIdAccounting== MasterAccounting.IdAccounting).FirstOrDefaultAsync();
@@ -851,16 +883,8 @@ namespace  Lathiecoco.services
                         _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
                         await _CatalogDbContext.SaveChangesAsync();
                         rp.Body = invoice;
-                        transaction.Commit();
-
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        rp.IsError = true;
-                        rp.Msg = ex.Message;
-                        rp.Body = null;
-                    }
+                        await transaction.CommitAsync();
+                   
 
                 }
                 else
@@ -873,6 +897,9 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.Message;
+
+                await transaction.RollbackAsync();
+                rp.Body = null;
 
             }
             return rp;
@@ -882,84 +909,80 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+
             try
             {
                 InvoiceStartupMaster invoice = await _CatalogDbContext.InvoiceStartupMasters.Include(i => i.PaymentModeObj).Include(i => i.Staff).Include(i => i.AgencyUser).Include(i => i.AgencyUser.Agency).Include(i => i.AgencyUser.Agency.Accounting).Where(i => i.IdInvoiceStartupMaster == bodyValidInvoiceStartupMaster.IdInvoiceStartupMaster).FirstOrDefaultAsync();
                 if (invoice != null)
                 {
-                    var transaction = _CatalogDbContext.Database.BeginTransaction();
+                    
                     Accounting MasterAccounting = null;
+
                     if (invoice.InvoiceStatus != "A")
                     {
                         rp.IsError = true;
                         rp.Msg = "Transaction already  validated";
                         rp.Code = 505;
                         rp.Body = null;
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
-                    try
+
+                    //get Master 
+                    AgencyUser  agencyUser= invoice.AgencyUser;
+                    if (agencyUser != null)
                     {
 
-                        //get Master 
-                        AgencyUser  agencyUser= invoice.AgencyUser;
-                        if (agencyUser != null)
+
+                        MasterAccounting = agencyUser.Agency.Accounting;
+                        if (MasterAccounting != null)
                         {
 
-
-                            MasterAccounting = agencyUser.Agency.Accounting;
-                            if (MasterAccounting != null)
-                            {
-
-                                MasterAccounting.Balance = MasterAccounting.Balance + invoice.AmountToPaid;
-                                _CatalogDbContext.Accountings.Update(MasterAccounting);
-                                await _CatalogDbContext.SaveChangesAsync();
-
-                            }
-                            else
-                            {
-                                throw new Exception("Invoice Have not Master Agency Accounting");
-                                transaction.Rollback();
-                            }
+                            MasterAccounting.Balance = MasterAccounting.Balance + invoice.AmountToPaid;
+                            _CatalogDbContext.Accountings.Update(MasterAccounting);
+                            await _CatalogDbContext.SaveChangesAsync();
 
                         }
                         else
                         {
-                            throw new Exception("Agency user not found");
-                            transaction.Rollback();
+                            throw new Exception("Invoice Have not Master Agency Accounting");
+                               
                         }
 
-
-                        //Add opAccounting Cashier
-                        AccountingOpWallet aOpCsh = await _CatalogDbContext.AccountingOpWallets.Where(i => i.FkIdInvoiceStartupMaster == bodyValidInvoiceStartupMaster.IdInvoiceStartupMaster && i.FkIdAccounting == MasterAccounting.IdAccounting).FirstOrDefaultAsync();
-
-                        //aOpCsh.FkIdAccounting = MasterAccounting.IdAccounting;
-                        aOpCsh.FkIdInvoiceStartupMaster = invoice.IdInvoiceStartupMaster;
-                        aOpCsh.Credited = invoice.AmountToPaid;
-                        aOpCsh.DeBited = 0;
-                        aOpCsh.NewBalance = MasterAccounting.Balance;
-
-                        aOpCsh.UpdatedDate = DateTime.UtcNow;
-                        _CatalogDbContext.AccountingOpWallets.Update(aOpCsh);
-                        await _CatalogDbContext.SaveChangesAsync();
-
-                        //Change status of transactions
-                        invoice.InvoiceStatus = "P";
-                        invoice.ValidateAt = DateTime.UtcNow;
-                        invoice.UpdatedDate = DateTime.UtcNow;
-                        invoice.FkIdStaff = bodyValidInvoiceStartupMaster.FkIdStaff;
-                        _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
-                        await _CatalogDbContext.SaveChangesAsync();
-                        rp.Body = invoice;
-                        transaction.Commit();
-
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        transaction.Rollback();
-                        rp.IsError = true;
-                        rp.Msg = ex.Message;
-                        rp.Body = null;
+                        throw new Exception("Agency user not found");
+                           
                     }
+
+
+                    //Add opAccounting Cashier
+                    AccountingOpWallet aOpCsh = await _CatalogDbContext.AccountingOpWallets.Where(i => i.FkIdInvoiceStartupMaster == bodyValidInvoiceStartupMaster.IdInvoiceStartupMaster && i.FkIdAccounting == MasterAccounting.IdAccounting).FirstOrDefaultAsync();
+
+                    //aOpCsh.FkIdAccounting = MasterAccounting.IdAccounting;
+                    aOpCsh.FkIdInvoiceStartupMaster = invoice.IdInvoiceStartupMaster;
+                    aOpCsh.Credited = invoice.AmountToPaid;
+                    aOpCsh.DeBited = 0;
+                    aOpCsh.NewBalance = MasterAccounting.Balance;
+
+                    aOpCsh.UpdatedDate = DateTime.UtcNow;
+                    _CatalogDbContext.AccountingOpWallets.Update(aOpCsh);
+                    await _CatalogDbContext.SaveChangesAsync();
+
+                    //Change status of transactions
+                    invoice.InvoiceStatus = "P";
+                    invoice.ValidateAt = DateTime.UtcNow;
+                    invoice.UpdatedDate = DateTime.UtcNow;
+                    invoice.FkIdStaff = bodyValidInvoiceStartupMaster.FkIdStaff;
+                    _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
+                    await _CatalogDbContext.SaveChangesAsync();
+                    rp.Body = invoice;
+                    await transaction.CommitAsync();
+
+                   
 
                 }
                 else
@@ -973,6 +996,8 @@ namespace  Lathiecoco.services
                 rp.IsError = true;
                 rp.Msg = ex.Message;
 
+                await transaction.RollbackAsync();
+
             }
             return rp;
         }
@@ -981,12 +1006,14 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+
             try
             {
                 InvoiceStartupMaster invoice = await _CatalogDbContext.InvoiceStartupMasters.Include(i => i.PaymentModeObj).Include(i => i.Staff).Include(i => i.Agent).Include(i => i.Agent.Accounting).Where(i => i.IdInvoiceStartupMaster == dto.IdInvoiceStartupMaster).FirstOrDefaultAsync();
                 if (invoice != null)
                 {
-                    var transaction = _CatalogDbContext.Database.BeginTransaction();
+                    
                     Accounting AgentAccounting = null;
                     Accounting MasterAccounting = null;
                     AgencyUser AgencyUser = null;
@@ -997,11 +1024,11 @@ namespace  Lathiecoco.services
                         rp.Msg = "Transaction already validated";
                         rp.Code = 505;
                         rp.Body = null;
+
+                        await transaction.RollbackAsync();
                         return rp;
                     }
 
-                    try
-                    {
                         AgencyUser = await _CatalogDbContext.AgencyUsers.Include(a=>a.Agency).Include(a => a.Agency.Accounting).Where(a=>a.IdAgencyUser==dto.IdAgencyUser).FirstOrDefaultAsync();
                         if( AgencyUser != null )
                         {
@@ -1018,6 +1045,8 @@ namespace  Lathiecoco.services
                                         rp.Msg = "The amount in your account is insufficient";
                                         rp.Code = 340;
                                         rp.Body = null;
+
+                                        await transaction.RollbackAsync();
                                         return rp;
                                     }
 
@@ -1029,7 +1058,7 @@ namespace  Lathiecoco.services
                                 else
                                 {
                                     throw new Exception("Invoice Have not Master Agency Accounting");
-                                    transaction.Rollback();
+                                    
                                 }
                             }
                             else
@@ -1039,6 +1068,8 @@ namespace  Lathiecoco.services
                                 rp.Msg = "agency of user not found";
                                 rp.Code = 421;
                                 rp.Body = null;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             }
                         }else
@@ -1048,6 +1079,8 @@ namespace  Lathiecoco.services
                             rp.Msg = "User of agency not found";
                             rp.Code = 420;
                             rp.Body = null;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
 
@@ -1065,6 +1098,8 @@ namespace  Lathiecoco.services
                                     rp.Msg = "You cannot validate a transaction from another company!!";
                                     rp.Code = 506;
                                     rp.Body = null;
+
+                                    await transaction.RollbackAsync();
                                     return rp;
                                 }
                             }
@@ -1074,6 +1109,8 @@ namespace  Lathiecoco.services
                                 rp.Msg = "Agent not have a company!!";
                                 rp.Code = 507;
                                 rp.Body = null;
+
+                                await transaction.RollbackAsync();
                                 return rp;
                             }
 
@@ -1089,14 +1126,12 @@ namespace  Lathiecoco.services
                             else
                             {
                                 throw new Exception("Invoice Have not Master Agency Accounting");
-                                transaction.Rollback();
                             }
 
                         }
                         else
                         {
                             throw new Exception("Invoice Have not master");
-                            transaction.Rollback();
                         }
 
                         
@@ -1134,17 +1169,10 @@ namespace  Lathiecoco.services
                         _CatalogDbContext.InvoiceStartupMasters.Update(invoice);
                         await _CatalogDbContext.SaveChangesAsync();
                         rp.Body = invoice;
-                        transaction.Commit();
 
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        rp.IsError = true;
-                        rp.Msg = ex.ToString();
-                        rp.Body = null;
-                    }
+                        await transaction.CommitAsync();
 
+                   
                 }
                 else
                 {
@@ -1156,8 +1184,9 @@ namespace  Lathiecoco.services
             {
                 rp.IsError = true;
                 rp.Msg = ex.ToString();
-                
 
+                await transaction.RollbackAsync();
+                
             }
             return rp;
         }

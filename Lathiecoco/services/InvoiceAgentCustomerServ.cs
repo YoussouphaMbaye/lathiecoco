@@ -80,9 +80,7 @@ namespace  Lathiecoco.services
 
         public async Task<ResponseBody<InvoiceWalletAgent>> deposit(BodyInvoiceWalletCashier ac)
         {
-            CustomerWallet customer = null;
-            
-            CustomerWallet agent = null;
+           
             
             FeeSend feeSend = null;
             ResponseBody<InvoiceWalletAgent> rp = new ResponseBody<InvoiceWalletAgent>();
@@ -95,78 +93,6 @@ namespace  Lathiecoco.services
                 bp.CountryIdentity = ac.PhoneIdentityCustomerWallet;
                 bp.Phone = ac.PhoneCustomerWallet;
 
-                //rechercher Agent 
-
-                ResponseBody<CustomerWallet> caReps = await _customerWalleServ.findCustomerWalletById(ac.IdAgent);
-                if (caReps != null)
-                {
-                    if (!caReps.IsError)
-                    {
-                        agent = caReps.Body;
-                        if (!agent.IsActive)
-                        {
-                            rp.IsError = true;
-                            rp.Body = null;
-                            rp.Msg = "You account is not active";
-                            rp.Code = 320;
-                            return rp;
-                        }
-                        if (agent.IsBlocked)
-                        {
-                            rp.IsError = true;
-                            rp.Body = null;
-                            rp.Msg = "Your account is blocked";
-                            rp.Code = 320;
-                            return rp;
-                        }
-
-                        //bcc.idCashier = cashier.FkIdAgency;
-                        if (agent.Profile != "AGENT")
-                        {
-                            rp.IsError = true;
-                            rp.Msg = "This operation is not allowed";
-                            rp.Code = 370;
-                            return rp;
-                            //throw new Exception("This operation is not allowed");
-                        }
-
-                        if (agent.Accounting.Balance <= ac.AmountToSend)
-                        {
-
-                            rp.IsError = true;
-                            rp.Msg = "Agent Low balance for this transaction";
-                            rp.Code = 340;
-                            return rp;
-                        }
-                    }
-                    else
-                    {
-                        rp.IsError = true;
-                        rp.Msg = caReps.Msg;
-                        rp.Code = 400;
-                        return rp;
-
-                    }
-                }
-
-                ResponseBody<CustomerWallet> customerRp = await _customerWalleServ.findCustomerWalletContryidentityAndPhone(bp);
-                if (customerRp != null)
-                {
-                    if (!customerRp.IsError)
-                    {
-                        customer = customerRp.Body;
-
-                    }
-                    else
-                    {
-                        rp.IsError = true;
-                        rp.Msg = customerRp.Msg;
-                        rp.Code = customerRp.Code;
-                        return rp;
-                        
-                    }
-                }
-                
                 //rechercher le mode de payement
                 ResponseBody<PaymentMode> paymentMode = await _paymentModeServ.findByPaymentMode("DP");
                 if (paymentMode != null)
@@ -184,85 +110,168 @@ namespace  Lathiecoco.services
                         return rp;
                     }
                 }
-                //rechercher fee_send idCorridor & idCahier
-                double amountTopaid = 0;
-                double amountToSend = 0;
+
                 InvoiceWalletAgent invoice = new InvoiceWalletAgent();
 
-                ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
-                if (feeSendBody != null)
+                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    if (!feeSendBody.IsError)
-                    {
-                        feeSend = feeSendBody.Body;
-                        if (feeSend.MinAmount < ac.AmountToSend && feeSend.MaxAmount > ac.AmountToSend)
-                        {
+                    //rechercher Agent 
+                    CustomerWallet agent = await _CatalogDbContext.CustomerWallets.Include(c => c.Accounting).Where(c => c.IdCustomerWallet == ac.IdAgent).FirstOrDefaultAsync();
 
-                            if (feeSend.FixeCsFee > 0)
+                    if (agent == null)
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "Agent not found";
+                        rp.Code = 350;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+
+                    }
+
+                    if (!agent.IsActive)
+                    {
+                        rp.IsError = true;
+                        rp.Body = null;
+                        rp.Msg = "You account is not active";
+                        rp.Code = 320;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
+                    if (agent.IsBlocked)
+                    {
+                        rp.IsError = true;
+                        rp.Body = null;
+                        rp.Msg = "Your account is blocked";
+                        rp.Code = 320;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
+
+                    //bcc.idCashier = cashier.FkIdAgency;
+                    if (agent.Profile != "AGENT")
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "This operation is not allowed";
+                        rp.Code = 370;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                        //throw new Exception("This operation is not allowed");
+                    }
+
+                    if (agent.Accounting.Balance <= ac.AmountToSend)
+                    {
+
+                        rp.IsError = true;
+                        rp.Msg = "Agent Low balance for this transaction";
+                        rp.Code = 340;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
+
+                    CustomerWallet customer = await _CatalogDbContext.CustomerWallets.Where(c => c.phoneIdentity == bp.CountryIdentity && c.Phone == bp.Phone).Include(c => c.Accounting).FirstOrDefaultAsync();
+                    if (customer == null)
+                    {
+                        rp.IsError = true;
+                        rp.Msg = "Customer not found";
+                        rp.Code = 350;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+
+
+                    }
+
+                    if (!customer.IsActive)
+                    {
+                        rp.IsError = true;
+                        rp.Body = null;
+                        rp.Msg = "You account is not active";
+                        rp.Code = 320;
+
+                        await transaction.RollbackAsync();
+                        return rp;
+                    }
+
+                    //rechercher fee_send idCorridor & idCahier
+                    double amountTopaid = 0;
+                    double amountToSend = 0;
+
+                    ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
+                    if (feeSendBody != null)
+                    {
+                        if (!feeSendBody.IsError)
+                        {
+                            feeSend = feeSendBody.Body;
+                            if (feeSend.MinAmount < ac.AmountToSend && feeSend.MaxAmount > ac.AmountToSend)
                             {
-                                amountTopaid = ((double)feeSend.FixeCsFee) + ac.AmountToSend;
-                                invoice.FeesAmount = (double)feeSend.FixeCsFee;
+
+                                if (feeSend.FixeCsFee > 0)
+                                {
+                                    amountTopaid = ((double)feeSend.FixeCsFee) + ac.AmountToSend;
+                                    invoice.FeesAmount = (double)feeSend.FixeCsFee;
+                                }
+                                else
+                                {
+                                    decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                                    amountToSend = (double)ac.AmountToSend;
+
+                                    amountTopaid = ((double)Math.Ceiling(feeForSendPercent * (decimal)amountToSend)) + amountToSend;
+                                    invoice.FeesAmount = (double)Math.Ceiling((feeForSendPercent * (decimal)amountToSend));
+                                }
+
+
                             }
                             else
                             {
-                                decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
-                                amountToSend = (double)ac.AmountToSend;
+                                rp.Msg = "Amount in not in defined interval!!";
+                                rp.IsError = true;
+                                rp.Code = 305;
 
-                                amountTopaid = ((double)Math.Ceiling(feeForSendPercent * (decimal)amountToSend)) + amountToSend;
-                                invoice.FeesAmount = (double)Math.Ceiling((feeForSendPercent * (decimal)amountToSend));
+                                await transaction.RollbackAsync();
+                                return rp;
                             }
-
 
                         }
                         else
                         {
-                            rp.Msg = "Amount in not in defined interval!!";
                             rp.IsError = true;
-                            rp.Code = 305;
+                            rp.Msg = feeSendBody.Msg;
+                            rp.Code = feeSendBody.Code;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
-
                     }
-                    else
-                    {
-                        rp.IsError = true;
-                        rp.Msg = feeSendBody.Msg;
-                        rp.Code=feeSendBody.Code;
-                        return rp;
-                    }
-                }
-               
 
-                //end
+                    invoice.IdInvoiceWalletCashier = Ulid.NewUlid();
+                    invoice.InvoiceCode = "D" + GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
+                    invoice.InvoiceCode2 = "";
+                    invoice.PaymentMode = paymentMode1.Name.ToString();
+                    invoice.FkIdPaymentMode = paymentMode1.IdPaymentMode;
+                    invoice.FkIdFeeSend = feeSend.IdFeeSend;
+                    invoice.InvoiceStatus = "P";
+                    invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
+                    invoice.FkIdAgent = agent.IdCustomerWallet;
+                    invoice.AmountToSend = ac.AmountToSend;
+                    invoice.CreatedDate = DateTime.UtcNow;
+                    invoice.UpdatedDate = DateTime.UtcNow;
 
-               
-                invoice.IdInvoiceWalletCashier= Ulid.NewUlid();
-                invoice.InvoiceCode = "D"+ GlobalFunction.ConvertToUnixTimestamp(DateTime.UtcNow);
-                invoice.InvoiceCode2 = "";
-                invoice.PaymentMode = paymentMode1.Name.ToString();
-                invoice.FkIdPaymentMode=paymentMode1.IdPaymentMode;
-                invoice.FkIdFeeSend=feeSend.IdFeeSend;
-                invoice.InvoiceStatus = "P";
-                invoice.FkIdCustomerWallet = customer.IdCustomerWallet;
-                invoice.FkIdAgent = agent.IdCustomerWallet;
-                invoice.AmountToSend = ac.AmountToSend;
-                invoice.CreatedDate=DateTime.UtcNow;
-                invoice.UpdatedDate = DateTime.UtcNow;
+                    invoice.CustomerWallet = null;
+                    invoice.Agent = null;
 
-                invoice.CustomerWallet = null;
-                invoice.Agent = null;
-               
-                //decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
-                //double amountToSend = (double)ac.AmountToSend;
-                
-                //double amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
-                invoice.AmountToPaid = amountTopaid;
-                double amountToReceved = amountToSend;
-                
-                
-                var transaction = _CatalogDbContext.Database.BeginTransaction();
-                try
-                {
+                    //decimal feeForSendPercent = new decimal(feeSend.PercentAgFee);
+                    //double amountToSend = (double)ac.AmountToSend;
+
+                    //double amountTopaid = ((double)feeForSendPercent * amountToSend) + amountToSend;
+                    invoice.AmountToPaid = amountTopaid;
+                    double amountToReceved = amountToSend;
+
                     //inserer tansactions
                     _CatalogDbContext.InvoiceWalletAgents.Add(invoice);
                     await _CatalogDbContext.SaveChangesAsync();
@@ -296,7 +305,8 @@ namespace  Lathiecoco.services
                         rp.IsError = true;
                         rp.Msg = "No customer BALANCE";
                         rp.Code = 400;
-                        transaction.Rollback();
+
+                        await transaction.RollbackAsync();
                         return rp;
 
                        
@@ -314,6 +324,8 @@ namespace  Lathiecoco.services
                             rp.Code = 340;
                             rp.Body = null;
                             rp.IsError=true;
+
+                            await transaction.RollbackAsync();
                             return rp;
                         }
                             
@@ -338,19 +350,24 @@ namespace  Lathiecoco.services
                     {
                         rp.IsError = true;
                         rp.Msg = "No Sender BALANCE";
-                        transaction.Rollback();
+                        rp.IsError = true;
+
+                        await transaction.RollbackAsync();
                         return rp;
 
                     }
                     
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                   
                     rp.IsError = true;
-                    rp.Msg = "error";
+                    rp.Msg = ex.Message;
+                    rp.Code = 500;
+
+                    await transaction.RollbackAsync();
                     return rp;
                 }
 
