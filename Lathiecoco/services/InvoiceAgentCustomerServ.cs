@@ -113,7 +113,7 @@ namespace  Lathiecoco.services
 
                 InvoiceWalletAgent invoice = new InvoiceWalletAgent();
 
-                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
                 try
                 {
                     //rechercher Agent 

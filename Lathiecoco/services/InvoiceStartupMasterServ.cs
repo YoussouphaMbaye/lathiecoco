@@ -291,7 +291,7 @@ namespace  Lathiecoco.services
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
             InvoiceStartupMaster invoice = new InvoiceStartupMaster();
 
-            var transaction = await  _CatalogDbContext.Database.BeginTransactionAsync();
+            var transaction = await  _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
 
             try
             {
@@ -445,7 +445,7 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
             InvoiceStartupMaster invoice = new InvoiceStartupMaster();
-            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
 
             try
             {
@@ -813,7 +813,7 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
-            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
 
             try
             {
@@ -909,7 +909,7 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
-            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
 
             try
             {
@@ -1006,7 +1006,7 @@ namespace  Lathiecoco.services
         {
             ResponseBody<InvoiceStartupMaster> rp = new ResponseBody<InvoiceStartupMaster>();
 
-            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
+            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
 
             try
             {
