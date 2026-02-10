@@ -111,59 +111,87 @@ namespace  Lathiecoco.services
                     }
                 }
 
+                //rechercher Agent 
+                CustomerWallet agent = await _CatalogDbContext.CustomerWallets.Where(c => c.IdCustomerWallet == ac.IdAgent).FirstOrDefaultAsync();
+
+                if (agent == null)
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Agent not found";
+                    rp.Code = 350;
+                    return rp;
+
+                }
+
+                if (!agent.IsActive)
+                {
+                    rp.IsError = true;
+                    rp.Body = null;
+                    rp.Msg = "You account is not active";
+                    rp.Code = 320;
+                    return rp;
+                }
+                if (agent.IsBlocked)
+                {
+                    rp.IsError = true;
+                    rp.Body = null;
+                    rp.Msg = "Your account is blocked";
+                    rp.Code = 320;
+
+                    return rp;
+                }
+
+                //bcc.idCashier = cashier.FkIdAgency;
+                if (agent.Profile != "AGENT")
+                {
+                    rp.IsError = true;
+                    rp.Msg = "This operation is not allowed";
+                    rp.Code = 370;
+                    return rp;
+                    //throw new Exception("This operation is not allowed");
+                }
+
+                CustomerWallet customer = await _CatalogDbContext.CustomerWallets.Where(c => c.phoneIdentity == bp.CountryIdentity && c.Phone == bp.Phone).FirstOrDefaultAsync();
+                if (customer == null)
+                {
+                    rp.IsError = true;
+                    rp.Msg = "Customer not found";
+                    rp.Code = 350;
+                    return rp;
+
+                }
+
+                if (!customer.IsActive)
+                {
+                    rp.IsError = true;
+                    rp.Body = null;
+                    rp.Msg = "You account is not active";
+                    rp.Code = 320;
+
+                    return rp;
+                }
+
+                ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
+
                 InvoiceWalletAgent invoice = new InvoiceWalletAgent();
 
                 var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
                 try
                 {
-                    //rechercher Agent 
-                    CustomerWallet agent = await _CatalogDbContext.CustomerWallets.Include(c => c.Accounting).Where(c => c.IdCustomerWallet == ac.IdAgent).FirstOrDefaultAsync();
+                    Accounting agentAccounting = await _CatalogDbContext.Accountings.FindAsync(agent.FkIdAccounting);
 
-                    if (agent == null)
+                    if (agentAccounting == null)
                     {
                         rp.IsError = true;
-                        rp.Msg = "Agent not found";
+                        rp.Msg = "Agent accounting not found";
                         rp.Code = 350;
-
+                        
                         await transaction.RollbackAsync();
                         return rp;
 
                     }
 
-                    if (!agent.IsActive)
-                    {
-                        rp.IsError = true;
-                        rp.Body = null;
-                        rp.Msg = "You account is not active";
-                        rp.Code = 320;
-
-                        await transaction.RollbackAsync();
-                        return rp;
-                    }
-                    if (agent.IsBlocked)
-                    {
-                        rp.IsError = true;
-                        rp.Body = null;
-                        rp.Msg = "Your account is blocked";
-                        rp.Code = 320;
-
-                        await transaction.RollbackAsync();
-                        return rp;
-                    }
-
-                    //bcc.idCashier = cashier.FkIdAgency;
-                    if (agent.Profile != "AGENT")
-                    {
-                        rp.IsError = true;
-                        rp.Msg = "This operation is not allowed";
-                        rp.Code = 370;
-
-                        await transaction.RollbackAsync();
-                        return rp;
-                        //throw new Exception("This operation is not allowed");
-                    }
-
-                    if (agent.Accounting.Balance <= ac.AmountToSend)
+                    if (agentAccounting.Balance <= ac.AmountToSend)
                     {
 
                         rp.IsError = true;
@@ -174,35 +202,12 @@ namespace  Lathiecoco.services
                         return rp;
                     }
 
-                    CustomerWallet customer = await _CatalogDbContext.CustomerWallets.Where(c => c.phoneIdentity == bp.CountryIdentity && c.Phone == bp.Phone).Include(c => c.Accounting).FirstOrDefaultAsync();
-                    if (customer == null)
-                    {
-                        rp.IsError = true;
-                        rp.Msg = "Customer not found";
-                        rp.Code = 350;
-
-                        await transaction.RollbackAsync();
-                        return rp;
-
-
-                    }
-
-                    if (!customer.IsActive)
-                    {
-                        rp.IsError = true;
-                        rp.Body = null;
-                        rp.Msg = "You account is not active";
-                        rp.Code = 320;
-
-                        await transaction.RollbackAsync();
-                        return rp;
-                    }
+                    Accounting customerAccounting = await _CatalogDbContext.Accountings.FindAsync(customer.FkIdAccounting);
 
                     //rechercher fee_send idCorridor & idCahier
                     double amountTopaid = 0;
                     double amountToSend = 0;
 
-                    ResponseBody<FeeSend> feeSendBody = await _feesSendServ.findWithPaymentMode(paymentMode1.IdPaymentMode);
                     if (feeSendBody != null)
                     {
                         if (!feeSendBody.IsError)
@@ -278,9 +283,9 @@ namespace  Lathiecoco.services
 
                     //update accounting sender
 
-                    if (customer.Accounting != null)
+                    if (customerAccounting != null)
                     {
-                        Accounting senderAccounting = customer.Accounting;
+                        Accounting senderAccounting = customerAccounting;
                       
                         senderAccounting.Balance = senderAccounting.Balance + (amountToSend);
 
@@ -314,9 +319,9 @@ namespace  Lathiecoco.services
                     
                     //update accounting Agent
                    
-                    if (agent.Accounting != null)
+                    if (agentAccounting != null)
                     {
-                        Accounting recipientAccounting = agent.Accounting;
+                        Accounting recipientAccounting = agentAccounting;
                         if (recipientAccounting.Balance < amountTopaid)
                         {
                             transaction.Rollback();

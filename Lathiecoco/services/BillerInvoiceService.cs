@@ -288,8 +288,6 @@ namespace Lathiecoco.services
                     //Console.WriteLine(feeForSendPercent + "*" + amountToSend + "=" + amountTopaid);
                     //ac.AmountToSend = (amountToSend * (double)corridor.Rate ) + ((amountToSend * (double)corridor.Rate) * (double)feeSend.PercentAgFee);
                     
-              
-                    var transaction =  await _CatalogDbContext.Database.BeginTransactionAsync();
 
                     try
                     {
@@ -308,7 +306,6 @@ namespace Lathiecoco.services
                                 rp.Msg = "You account is not active";
                                 rp.Code = 320;
 
-                                await transaction.RollbackAsync();
                                 return rp;
                             }
                             if (customer.IsBlocked)
@@ -317,8 +314,6 @@ namespace Lathiecoco.services
                                 rp.Body = null;
                                 rp.Code = 322;
                                 rp.Msg = "Your account is blocked";
-
-                                await transaction.RollbackAsync();
                                 return rp;
                             }
 
@@ -329,8 +324,6 @@ namespace Lathiecoco.services
                             rp.IsError = true;
                             rp.Msg = cusRep.Msg;
                             rp.Code = cusRep.Code;
-
-                            await transaction.RollbackAsync();
                             return rp;
                         }
                     }
@@ -340,7 +333,6 @@ namespace Lathiecoco.services
                         rp.IsError = true;
                         rp.Code = cusRep.Code;
 
-                        await transaction.RollbackAsync();
                         return rp;
                     }
 
@@ -359,8 +351,6 @@ namespace Lathiecoco.services
                             rp.Msg = feeSendBody.Msg;
                             rp.Body = null;
                             rp.Code = feeSendBody.Code;
-
-                            await transaction.RollbackAsync();
                             return rp;
 
                         }
@@ -422,36 +412,35 @@ namespace Lathiecoco.services
                         rp.IsError = true;
                         rp.Code = 305;
 
-                        await transaction.RollbackAsync();
                         return rp;
                     }
 
                     invoice.AmountToPaid = amountTopaid;
 
-                    //update accounting sender
 
-                    if (customer.Accounting != null)
-                        {
-                            Accounting senderAccounting = customer.Accounting;
 
                             if (paymentMode1.Name == "WF")
                                 {
-                                if (senderAccounting.Balance < amountTopaid)
-                                {
-                                    rp.Msg = "Your Balance is low";
-                                    rp.IsError = true;
-                                    rp.Body = null;
-                                    rp.Code = 340;
-
-                                    await transaction.RollbackAsync();
-                                    return rp;
-                                }
 
                                 //paid from cg
 
-                                try
-                                {
-                               
+                                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+
+                                    try{
+
+                                    Accounting senderAccounting = await _CatalogDbContext.Accountings.FindAsync(customer.FkIdAccounting);
+
+                                    if (senderAccounting.Balance < amountTopaid)
+                                    {
+                                        rp.Msg = "Your Balance is low";
+                                        rp.IsError = true;
+                                        rp.Body = null;
+                                        rp.Code = 340;
+
+                                        await transaction.RollbackAsync();
+                                        return rp;
+                                    }
+
                                     //cg paid
                                     //shoold change
 
@@ -474,9 +463,34 @@ namespace Lathiecoco.services
                                     invoice.BillerUserName = rpAsp.Body.CustomerName;
 
                                     invoice.NumberOfKw = Convert.ToDouble(rpAsp.Body.EnergyCoast);
-                                    
 
-                                }
+                                    acw.IdAccountingOperation = Ulid.NewUlid();
+                                    acw.FkIdAccounting = senderAccounting.IdAccounting;
+                                    acw.Credited = 0;
+
+                                    acw.CreatedDate = DateTime.UtcNow;
+                                    acw.UpdatedDate = DateTime.UtcNow;
+                                    acw.PaymentMode = paymentMode1.Name;
+                                    acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
+                                    acw.NewBalance = senderAccounting.Balance;
+
+
+                                    senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
+                                    _CatalogDbContext.Update(senderAccounting);
+                                    await _CatalogDbContext.SaveChangesAsync();
+                                    acw.DeBited = amountTopaid;
+
+                                    //inserer tansactions
+                                    _CatalogDbContext.BillerInvoices.Add(invoice);
+                                    await _CatalogDbContext.SaveChangesAsync();
+
+                                    await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                                    await _CatalogDbContext.SaveChangesAsync();
+
+                                    await transaction.CommitAsync();
+
+
+                        }
                                 catch (Exception ex)
                                 {
                                     rp.IsError = true;
@@ -488,44 +502,26 @@ namespace Lathiecoco.services
 
                                 }
 
-                                senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
-                                _CatalogDbContext.Update(senderAccounting);
-                                await _CatalogDbContext.SaveChangesAsync();
-                                acw.DeBited = amountTopaid;
+                                
                             }
                             else
                             {
                                 acw.DeBited = 0;
                             }
                             
-                            acw.IdAccountingOperation= Ulid.NewUlid();
-                            acw.FkIdAccounting = senderAccounting.IdAccounting;
-                            acw.Credited = 0;
-                            
-                            acw.CreatedDate = DateTime.UtcNow;
-                            acw.UpdatedDate = DateTime.UtcNow;
-                            acw.PaymentMode = paymentMode1.Name;
-                            acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
-                            acw.NewBalance = senderAccounting.Balance;
                            
-                        }
-                        else
-                        {
-                            rp.IsError = true; 
-                            rp.Msg = "No Sender BALANCE";
-                            rp.Code = 400;
-
-                            await transaction.RollbackAsync();
-                            return rp;
-                        }
 
                         var isRemotePay = false;
 
-                        if (paymentMode1.Name == "OM")
+                     if (paymentMode1.Name == "OM")
                         {
                             isRemotePay = true;
-                            try
-                            {
+                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+                            
+                            try{
+
+                            Accounting senderAccounting = await _CatalogDbContext.Accountings.FindAsync(customer.FkIdAccounting);
+
                             invoice.InvoiceStatus = "W";
                             OrangePaymentMethod rq = new OrangePaymentMethod();
                             rq.transactionId = invoice.IdReference.ToString();
@@ -542,6 +538,26 @@ namespace Lathiecoco.services
                                 await transaction.RollbackAsync();
                                 return rp;
                             }
+
+                            acw.IdAccountingOperation = Ulid.NewUlid();
+                            acw.FkIdAccounting = senderAccounting.IdAccounting;
+                            acw.Credited = 0;
+
+                            acw.CreatedDate = DateTime.UtcNow;
+                            acw.UpdatedDate = DateTime.UtcNow;
+                            acw.PaymentMode = paymentMode1.Name;
+                            acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
+                            acw.NewBalance = senderAccounting.Balance;
+
+                            //inserer tansactions
+                            _CatalogDbContext.BillerInvoices.Add(invoice);
+                            await _CatalogDbContext.SaveChangesAsync();
+
+                            await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                            await _CatalogDbContext.SaveChangesAsync();
+
+                            await transaction.CommitAsync();
+
                         }
                         catch (Exception ex)
                             {
@@ -555,12 +571,19 @@ namespace Lathiecoco.services
                                 return rp;
                             
                             }
-                        } else if (paymentMode1.Name == "MTN")
+                        } 
+
+                     else if (paymentMode1.Name == "MTN")
                         {
                             isRemotePay = true;
+                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+
                             try
-                            {
-                                invoice.InvoiceStatus = "W";
+                                {
+
+                            Accounting senderAccounting = await _CatalogDbContext.Accountings.FindAsync(customer.FkIdAccounting);
+
+                            invoice.InvoiceStatus = "W";
                                 mtnPaymentRequest rq=new mtnPaymentRequest();
                                 rq.partnerId = invoice.IdReference.ToString();
                                 rq.amount = invoice.AmountToPaid.ToString();
@@ -577,7 +600,26 @@ namespace Lathiecoco.services
                                     await transaction.RollbackAsync();
                                     return rp;
                                 }
-                            }
+
+                            acw.IdAccountingOperation = Ulid.NewUlid();
+                            acw.FkIdAccounting = senderAccounting.IdAccounting;
+                            acw.Credited = 0;
+
+                            acw.CreatedDate = DateTime.UtcNow;
+                            acw.UpdatedDate = DateTime.UtcNow;
+                            acw.PaymentMode = paymentMode1.Name;
+                            acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
+                            acw.NewBalance = senderAccounting.Balance;
+
+                            //inserer tansactions
+                            _CatalogDbContext.BillerInvoices.Add(invoice);
+                            await _CatalogDbContext.SaveChangesAsync();
+
+                            await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
+                            await _CatalogDbContext.SaveChangesAsync();
+
+                            await transaction.CommitAsync();
+                        }
                             catch (Exception ex)
                             {
                                 await transaction.RollbackAsync();
@@ -590,14 +632,7 @@ namespace Lathiecoco.services
                             }
                         }
                         
-                    //inserer tansactions
-                    _CatalogDbContext.BillerInvoices.Add(invoice);
-                    await _CatalogDbContext.SaveChangesAsync();
-
-                    await _CatalogDbContext.AccountingOpWallets.AddAsync(acw);
-                    await _CatalogDbContext.SaveChangesAsync();
-
-                    await transaction.CommitAsync();
+                
 
                     }
                     catch (Exception ex)
@@ -605,8 +640,6 @@ namespace Lathiecoco.services
                         rp.IsError = true;
                         rp.Msg = ex.Message;
                         rp.Code = 400;
-
-                        await transaction.RollbackAsync();
                         return rp;
                     }
 
