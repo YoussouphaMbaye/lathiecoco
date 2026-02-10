@@ -472,13 +472,15 @@ namespace Lathiecoco.services
                                     acw.UpdatedDate = DateTime.UtcNow;
                                     acw.PaymentMode = paymentMode1.Name;
                                     acw.FkIdBillerInvoice = invoice.IdBillerInvoice;
-                                    acw.NewBalance = senderAccounting.Balance;
+                                   
 
 
                                     senderAccounting.Balance = senderAccounting.Balance - amountTopaid;
                                     _CatalogDbContext.Update(senderAccounting);
                                     await _CatalogDbContext.SaveChangesAsync();
                                     acw.DeBited = amountTopaid;
+
+                                    acw.NewBalance = senderAccounting.Balance;
 
                                     //inserer tansactions
                                     _CatalogDbContext.BillerInvoices.Add(invoice);
