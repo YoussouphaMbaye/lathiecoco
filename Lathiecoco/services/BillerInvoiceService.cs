@@ -424,7 +424,7 @@ namespace Lathiecoco.services
 
                                 //paid from cg
 
-                                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+                                var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
 
                                     try{
 
