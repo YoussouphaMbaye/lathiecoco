@@ -797,7 +797,7 @@ namespace Lathiecoco.services
 
         }
 
-        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference,string? invoiceStatus, int page, int limit)
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice1(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate,String? phone,String? billerReference,string? invoiceStatus, int page, int limit)
         {
             ResponseBody<List<BillerInvoice>> rp = new ResponseBody<List<BillerInvoice>>();
             try {
@@ -883,6 +883,89 @@ namespace Lathiecoco.services
 
         }
 
+        public async Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(Ulid? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, string? phone, string? billerReference, string? invoiceStatus, int page = 1, int limit = 10)
+            {
+            var response = new ResponseBody<List<BillerInvoice>>();
+
+            try
+            {
+                // Validate pagination parameters
+                page = Math.Max(1, page);
+                limit = Math.Clamp(limit, 1, 100); // Max 100 items per page
+
+                // Build query with proper parameterization (prevents SQL injection)
+                var query = _CatalogDbContext.BillerInvoices.AsQueryable();
+
+                // Apply date filters
+                DateTime effectiveEndDate = endDate ?? DateTime.UtcNow;
+                query = query.Where(invoice => invoice.CreatedDate <= effectiveEndDate);
+
+                if (beginDate.HasValue)
+                {
+                    query = query.Where(invoice => invoice.CreatedDate >= beginDate.Value);
+                }
+
+                // Apply other filters
+                if (idPaymentMode != null)
+                {
+                    query = query.Where(invoice => invoice.FkIdPaymentMode == idPaymentMode);
+                }
+
+                if (!string.IsNullOrWhiteSpace(invoiceStatus))
+                {
+                    query = query.Where(invoice => invoice.InvoiceStatus == invoiceStatus);
+                }
+
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    query = query.Where(invoice => invoice.InvoiceCode == code);
+                }
+
+                if (!string.IsNullOrWhiteSpace(billerReference))
+                {
+                    query = query.Where(invoice => invoice.BillerReference == billerReference);
+                }
+
+                // Apply phone filter with CustomerWallet join
+                if (!string.IsNullOrWhiteSpace(phone))
+                {
+                    string cleanedPhone = phone.Trim().Replace(" ", "");
+                    query = query.Where(invoice => invoice.CustomerWallet != null &&
+                                                  invoice.CustomerWallet.Phone == cleanedPhone);
+                }
+
+                // Include related entities
+                query = query.Include(invoice => invoice.CustomerWallet);
+
+                // Get total count for pagination
+                int totalItems = await query.CountAsync();
+                int totalPages = (int)Math.Ceiling((double)totalItems / limit);
+
+                // Apply sorting and pagination
+                var invoices = await query
+                    .OrderByDescending(invoice => invoice.UpdatedDate)
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToListAsync();
+
+                // Build response
+                response.Body = invoices;
+                response.CurrentPage = page;
+                response.TotalPage = totalPages;
+                response.Code = 200;
+            }
+            catch (Exception ex)
+            {
+                response.IsError = true;
+                response.Code = 400;
+                response.Msg = $"An error occurred while searching biller invoices: {ex.Message}";
+
+                // Consider logging the exception here
+                // _logger.LogError(ex, "Error in SearchBillerInvoiceAsync");
+            }
+
+            return response;
+        }
         static string AddSpaceEvery4Chars(string input)
         {
             StringBuilder sb = new StringBuilder();
@@ -895,5 +978,6 @@ namespace Lathiecoco.services
             return sb.ToString();
         }
 
+       
     }
 }

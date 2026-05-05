@@ -13,7 +13,7 @@ namespace Lathiecoco.repository
         Task<ResponseBody<List<BillerAmountByPaymentModeDto>>> billerByPaymentMethodSumBiller(DateTime begenDate, DateTime endDate);
 
         
-        Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(string? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, String? phone, String? billerReference, string? invoiceStatus, int page = 1, int limit = 10);
+        Task<ResponseBody<List<BillerInvoice>>> searcheBillerInvoice(Ulid? idPaymentMode, string? code, DateTime? beginDate, DateTime? endDate, String? phone, String? billerReference, string? invoiceStatus, int page = 1, int limit = 10);
 
     }
 }
