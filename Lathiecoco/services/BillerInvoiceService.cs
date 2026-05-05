@@ -518,7 +518,7 @@ namespace Lathiecoco.services
                      if (paymentMode1.Name == "OM")
                         {
                             isRemotePay = true;
-                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
                             
                             try{
 
@@ -578,7 +578,7 @@ namespace Lathiecoco.services
                      else if (paymentMode1.Name == "MTN")
                         {
                             isRemotePay = true;
-                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+                            var transaction = await _CatalogDbContext.Database.BeginTransactionAsync();
 
                             try
                                 {
