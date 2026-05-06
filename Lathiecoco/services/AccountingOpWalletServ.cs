@@ -134,12 +134,12 @@ namespace  Lathiecoco.services
                 {
                     var req = _CatalogDbContext.AccountingOpWallets.Where(a => a.FkIdAccounting == idAccounting);
                     var totalCount = req.Count();
-                    int pageCount = (int)Math.Ceiling((decimal)totalCount / limit);
+                    int pageCount = (int)Math.Ceiling((decimal) totalCount / limit);
                     var ps = await req.
                         Include(i=>i.BillerInvoice.CustomerWallet).
                         Include(i => i.InvoiceStartupMaster).
                         Include(i => i.InvoiceWalletAgent.CustomerWallet).
-                        Include(i => i.InvoiceWalletAgent).Where(a=>a.FkIdAccounting==idAccounting).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
+                        Include(i => i.InvoiceWalletAgent).OrderByDescending(c => c.CreatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
