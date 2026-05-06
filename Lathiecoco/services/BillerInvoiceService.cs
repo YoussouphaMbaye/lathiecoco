@@ -894,7 +894,7 @@ namespace Lathiecoco.services
                 limit = Math.Clamp(limit, 1, 100); // Max 100 items per page
 
                 // Build query with proper parameterization (prevents SQL injection)
-                var query = _CatalogDbContext.BillerInvoices.AsQueryable();
+                var query = _CatalogDbContext.BillerInvoices.AsNoTracking().AsQueryable();
 
                 // Apply date filters
                 DateTime effectiveEndDate = endDate ?? DateTime.UtcNow;
@@ -958,7 +958,7 @@ namespace Lathiecoco.services
             {
                 response.IsError = true;
                 response.Code = 400;
-                response.Msg = $"An error occurred while searching biller invoices: {ex.Message}";
+                response.Msg = $"An error occurred while searching biller invoices: {ex.ToString()}";
 
                 // Consider logging the exception here
                 // _logger.LogError(ex, "Error in SearchBillerInvoiceAsync");
