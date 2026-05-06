@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using static Amazon.S3.Util.S3EventNotification;
 
 namespace Lathiecoco.models
 {
@@ -124,6 +125,13 @@ namespace Lathiecoco.models
             modelBuilder.Entity<Partener>().HasIndex(a => new { a.Code }).IsUnique(true);
             modelBuilder.Entity<Agency>().HasIndex(a => new { a.phone }).IsUnique(true);
             modelBuilder.Entity<BillerInvoice>().HasIndex(b => new { b.InvoiceCode }).IsUnique(true);
+            // Single column indexes
+            modelBuilder.Entity<BillerInvoice>().HasIndex(e => e.CreatedDate)
+                .HasDatabaseName("IX_BillerInvoice_CreatedDate");
+
+            modelBuilder.Entity<BillerInvoice>().HasIndex(e => e.UpdatedDate)
+                .HasDatabaseName("IX_BillerInvoice_UpdatedDate");
+
             modelBuilder.Entity<FeeSend>().HasIndex(c => new { c.FkIdPaymentMode }).IsUnique(true);
             //modelBuilder.Entity<FeePayee>().HasIndex(c => new { c.FkIdPaymentMode, c.FkIdCorridor }).IsUnique(true);
 
