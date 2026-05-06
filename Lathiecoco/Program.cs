@@ -32,7 +32,6 @@ builder.Services.AddCors(opt => opt.AddPolicy("CorsPolicy", c =>
 
 builder.Services.AddDbContext<CatalogDbContext>(Options => Options.UseNpgsql(builder.Configuration.GetConnectionString("apic"), npgsqlOptions => {
     npgsqlOptions.CommandTimeout(60); // Augmente à 60 secondes
-    npgsqlOptions.EnableRetryOnFailure(); // Important pour les "transient failures"
 }));
 
 builder.Services.AddControllers();
