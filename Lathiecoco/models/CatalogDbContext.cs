@@ -125,12 +125,30 @@ namespace Lathiecoco.models
             modelBuilder.Entity<Partener>().HasIndex(a => new { a.Code }).IsUnique(true);
             modelBuilder.Entity<Agency>().HasIndex(a => new { a.phone }).IsUnique(true);
             modelBuilder.Entity<BillerInvoice>().HasIndex(b => new { b.InvoiceCode }).IsUnique(true);
-            // Single column indexes
+           
+
             modelBuilder.Entity<BillerInvoice>().HasIndex(e => e.CreatedDate)
                 .HasDatabaseName("IX_BillerInvoice_CreatedDate");
-
             modelBuilder.Entity<BillerInvoice>().HasIndex(e => e.UpdatedDate)
                 .HasDatabaseName("IX_BillerInvoice_UpdatedDate");
+            
+
+            modelBuilder.Entity<InvoiceWalletAgent>().HasIndex(e => e.CreatedDate)
+                .HasDatabaseName("IX_InvoiceWalletAgent_CreatedDate");
+            modelBuilder.Entity<InvoiceWalletAgent>().HasIndex(e => e.UpdatedDate)
+                .HasDatabaseName("IX_InvoiceWalletAgent_UpdatedDate");
+
+
+            modelBuilder.Entity<InvoiceStartupMaster>().HasIndex(e => e.CreatedDate)
+                .HasDatabaseName("IX_InvoiceStartupMaster_CreatedDate");
+            modelBuilder.Entity<InvoiceStartupMaster>().HasIndex(e => e.UpdatedDate)
+                .HasDatabaseName("IX_InvoiceStartupMaster_UpdatedDate"); 
+
+            modelBuilder.Entity<AccountingOpWallet>().HasIndex(e => e.CreatedDate)
+                .HasDatabaseName("IX_AccountingOpWallet_CreatedDate");
+            modelBuilder.Entity<AccountingOpWallet>().HasIndex(e => e.UpdatedDate)
+                .HasDatabaseName("IX_AccountingOpWallet_UpdatedDate");
+
 
             modelBuilder.Entity<FeeSend>().HasIndex(c => new { c.FkIdPaymentMode }).IsUnique(true);
             //modelBuilder.Entity<FeePayee>().HasIndex(c => new { c.FkIdPaymentMode, c.FkIdCorridor }).IsUnique(true);

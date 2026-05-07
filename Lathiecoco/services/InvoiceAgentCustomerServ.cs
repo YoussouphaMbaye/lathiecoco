@@ -455,7 +455,7 @@ namespace  Lathiecoco.services
                     var ps = (phoneAgent != null && phoneCustomer==null)?await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i=>i.Agent.Phone==phoneAgent).OrderByDescending(x=>x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
                         (phoneAgent != null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.Agent.Phone == phoneAgent && i.CustomerWallet.Phone==phoneCustomer).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
                         (phoneAgent == null && phoneCustomer != null) ? await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Where(i => i.CustomerWallet.Phone == phoneCustomer).OrderByDescending(x => x.UpdatedDate).Skip(skip).Take(limit).ToListAsync():
-                        await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).Skip(skip).Take(limit).ToListAsync();
+                        await _CatalogDbContext.InvoiceWalletAgents.FromSqlRaw(query).Include(i => i.Agent).Include(i => i.CustomerWallet).OrderByDescending(i=>i.UpdatedDate).Skip(skip).Take(limit).ToListAsync();
                     //string jjj = "kkkkk";
                     if (ps != null && ps.Count() > 0)
                     {
