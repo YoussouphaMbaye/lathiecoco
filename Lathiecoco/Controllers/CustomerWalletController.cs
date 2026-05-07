@@ -192,7 +192,7 @@ namespace  Lathiecoco.Controllers
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var expiration = DateTime.UtcNow.AddMinutes(60*24*360*1000);
+            var expiration = DateTime.UtcNow.AddYears(2);
             JwtSecurityToken token = new JwtSecurityToken(
                issuer: null,
                audience: null,
